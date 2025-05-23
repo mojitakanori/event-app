@@ -32,10 +32,16 @@
                 <label for="eventLocation">場所:</label>
                 <input type="text" id="eventLocation" name="eventLocation">
             </div>
-            <div>
-                <label for="maxParticipants">最大参加人数 (0または空欄で無制限):</label>
-                <input type="number" id="maxParticipants" name="maxParticipants" min="0">
-            </div>
+
+            <fieldset id="formSchemaBuilder">
+                <legend>追加の参加登録フォーム項目設定</legend>
+                <p>「氏名」と「利用規約への同意」は常に必須です。以下で自由に追加項目を設定できます。</p>
+                <div id="formFieldsContainer">
+                    <!-- フォーム項目設定はJSでここに挿入されます -->
+                </div>
+                <button type="button" id="addFormField">追加フォーム項目を追加</button>
+            </fieldset>
+
             <button type="submit">イベントを作成</button>
         </form>
     </div>

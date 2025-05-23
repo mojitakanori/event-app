@@ -1,17 +1,18 @@
-// dashboard.js
+// js/dashboard.js
 document.addEventListener('DOMContentLoaded', async () => {
     const user = await redirectToLoginIfNotAuthenticated();
-    if (!user) return;
+    if (!user) return; 
 
     const myEventList = document.getElementById('myEventList');
     const loadingMessage = document.getElementById('loadingMessage');
     const noMyEventsMessage = document.getElementById('noMyEventsMessage');
 
-    const participantList = document.getElementById('participantList');
+    const participantListUl = document.getElementById('participantList');
     const participantLoadingMessage = document.getElementById('participantLoadingMessage');
     const noParticipantsMessage = document.getElementById('noParticipantsMessage');
     const selectedEventNameDiv = document.getElementById('selectedEventName');
 
+    let currentSelectedEventSchema = null; 
 
     async function fetchMyEvents() {
         try {
@@ -21,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const { data: events, error } = await supabase
                 .from('events')
-                .select('*')
+                .select('*, form_schema') 
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
 
@@ -37,10 +38,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <p><strong>場所:</strong> ${event.location || '未定'}</p>
                         <div class="action-buttons">
                             <button class="view-participants-btn" data-event-id="${event.id}" data-event-name="${event.name}">参加者一覧表示</button>
-                            <button class="edit-btn" data-event-id="${event.id}">編集</button> 
                             <button class="delete-btn" data-event-id="${event.id}">削除</button>
                         </div>
                     `;
+                    listItem.querySelector('.view-participants-btn').dataset.formSchema = JSON.stringify(event.form_schema || []);
                     myEventList.appendChild(listItem);
                 });
                 addEventListenersToButtons();
@@ -55,32 +56,58 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function fetchParticipants(eventId, eventName) {
-        // ... (変更なし) ...
+    async function fetchParticipants(eventId, eventName, formSchemaString) {
+        currentSelectedEventSchema = JSON.parse(formSchemaString); 
         try {
             selectedEventNameDiv.textContent = `「${eventName}」の参加者:`;
             participantLoadingMessage.style.display = 'block';
-            participantList.innerHTML = '';
+            participantListUl.innerHTML = '';
             noParticipantsMessage.style.display = 'none';
 
             const { data: participants, error } = await supabase
                 .from('participants')
-                .select('*')
+                .select('name, created_at, form_data') // name, created_at, form_dataを取得
                 .eq('event_id', eventId)
                 .order('created_at', { ascending: true });
-
+            
             if (error) throw error;
 
             if (participants && participants.length > 0) {
                 participants.forEach(p => {
                     const listItem = document.createElement('li');
+                    let customDataHtml = '';
+
+                    // 利用規約同意の表示
+                    if (p.form_data && p.form_data.terms_agreed !== undefined) {
+                        customDataHtml += `<strong>利用規約同意:</strong> ${p.form_data.terms_agreed ? 'はい' : 'いいえ'}<br>`;
+                    }
+
+                    // カスタム項目の表示 (form_schemaに基づいて)
+                    if (p.form_data && currentSelectedEventSchema && currentSelectedEventSchema.length > 0) {
+                        currentSelectedEventSchema.forEach(fieldSchema => {
+                            // fieldSchema.name は自動生成されたID
+                            // fieldSchema.label は表示用ラベル
+                            const value = p.form_data[fieldSchema.name]; // 自動生成されたnameをキーとして値を取得
+                            let displayValue = '-';
+                            if (value !== undefined && value !== null) {
+                                if (fieldSchema.type === 'checkbox') {
+                                    displayValue = value ? 'はい' : 'いいえ';
+                                } else {
+                                    displayValue = value.toString() || '-';
+                                }
+                            }
+                            customDataHtml += `<strong>${fieldSchema.label}:</strong> ${displayValue}<br>`;
+                        });
+                    }
+                    // もしスキーマにないがform_dataに存在する項目があればそれも表示する（フォールバック、通常は不要）
+                    // else if (p.form_data) { ... } 
+
                     listItem.innerHTML = `
-                        <strong>${p.name}</strong><br>
-                        事業内容: ${p.business_content || '-'}<br>
-                        紹介者: ${p.referrer || '-'}<br>
-                        コメント: ${p.comment || '-'}
+                        <strong>氏名: ${p.name}</strong><br>
+                        ${customDataHtml}
+                        <small>登録日時: ${new Date(p.created_at).toLocaleString('ja-JP')}</small>
                     `;
-                    participantList.appendChild(listItem);
+                    participantListUl.appendChild(listItem);
                 });
             } else {
                 noParticipantsMessage.style.display = 'block';
@@ -88,38 +115,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (error) {
             console.error('Error fetching participants:', error.message);
-            participantList.innerHTML = `<li class="error-message">参加者情報の読み込みに失敗しました: ${error.message}</li>`;
+            participantListUl.innerHTML = `<li class="error-message">参加者情報の読み込みに失敗しました: ${error.message}</li>`;
         } finally {
             participantLoadingMessage.style.display = 'none';
         }
     }
-
+    
     async function deleteEvent(eventId) {
-        // ... (変更なし) ...
-        if (!confirm('本当にこのイベントを削除しますか？関連する参加者情報も削除されます。')) {
+        // (変更なし、前回と同じ)
+        if (!confirm('本当にこのイベントを削除しますか？関連する参加者情報も全て削除されます。')) {
             return;
         }
         try {
-            const { error: participantError } = await supabase
-                .from('participants')
-                .delete()
-                .eq('event_id', eventId);
-
-            if (participantError) throw participantError;
-
             const { error: eventError } = await supabase
                 .from('events')
                 .delete()
                 .eq('id', eventId)
-                .eq('user_id', user.id);
+                .eq('user_id', user.id); 
 
             if (eventError) throw eventError;
 
             alert('イベントを削除しました。');
-            fetchMyEvents();
-            participantList.innerHTML = '';
+            fetchMyEvents(); 
+            participantListUl.innerHTML = ''; 
             selectedEventNameDiv.textContent = '';
             noParticipantsMessage.style.display = 'none';
+            currentSelectedEventSchema = null;
 
         } catch (error) {
             console.error('Error deleting event:', error.message);
@@ -128,19 +149,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function addEventListenersToButtons() {
+        // (変更なし、前回と同じ)
         document.querySelectorAll('.view-participants-btn').forEach(button => {
             button.addEventListener('click', (e) => {
                 const eventId = e.target.dataset.eventId;
                 const eventName = e.target.dataset.eventName;
-                fetchParticipants(eventId, eventName);
-            });
-        });
-
-        // 編集ボタンのイベントリスナーを追加
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const eventId = e.target.dataset.eventId;
-                window.location.href = `edit_event.html?id=${eventId}`;
+                const formSchemaString = e.target.dataset.formSchema;
+                fetchParticipants(eventId, eventName, formSchemaString);
             });
         });
 

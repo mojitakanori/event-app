@@ -143,3 +143,99 @@ button:hover, input[type="submit"]:hover {
 .action-buttons button.delete-btn:hover {
     background-color: #c82333;
 }
+
+/* Form Field Builder on create.html */
+#formSchemaBuilder {
+    border: 1px solid #e0e0e0;
+    padding: 15px;
+    margin-top: 20px;
+    background-color: #fdfdfd;
+    border-radius: 4px;
+}
+
+.form-field-config {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end; /* Align items to bottom for better layout with button */
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+}
+
+.form-field-config div {
+    flex: 1; /* Allow input fields to grow */
+    margin-bottom: 0; /* Reset margin for internal divs */
+}
+
+.form-field-config label {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.form-field-config input[type="text"],
+.form-field-config select {
+    width: 100%; /* Make inputs take full width of their flex container */
+    padding: 8px;
+    font-size: 0.95em;
+}
+
+.form-field-config input[type="checkbox"] {
+    width: auto;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+
+button.remove-field-btn {
+    background: #e74c3c;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    height: fit-content; /* Align with bottom of inputs */
+}
+button.remove-field-btn:hover {
+    background: #c0392b;
+}
+
+button#addFormField {
+    margin-top: 10px;
+    background-color: #2ecc71;
+}
+button#addFormField:hover {
+    background-color: #27ae60;
+}
+
+/* Dynamic Form Fields on detail.html */
+#dynamicRsvpFormFields .form-group {
+    margin-bottom: 15px;
+}
+
+#dynamicRsvpFormFields .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#dynamicRsvpFormFields .form-group input[type="text"],
+#dynamicRsvpFormFields .form-group textarea,
+#dynamicRsvpFormFields .form-group select { /* If you add select type later */
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#dynamicRsvpFormFields .form-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+#dynamicRsvpFormFields .form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}

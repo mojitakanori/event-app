@@ -21,27 +21,29 @@
         <hr>
 
         <h2>イベント出欠登録</h2>
-        <div id="capacityInfo"></div> <!-- 参加状況表示エリア -->
         <div id="messageArea"></div>
         <form id="rsvpForm">
             <input type="hidden" id="eventId" name="eventId">
-            <div>
-                <label for="participantName">氏名:</label>
+            
+            <!-- 固定の氏名入力フィールド -->
+            <div class="form-group">
+                <label for="participantName">氏名 (必須):</label>
                 <input type="text" id="participantName" name="participantName" required>
             </div>
-            <div>
-                <label for="businessContent">事業内容:</label>
-                <textarea id="businessContent" name="businessContent"></textarea>
+
+            <!-- 動的フォームフィールドがここに挿入されます -->
+            <div id="dynamicRsvpFormFields"></div>
+
+            <!-- 固定の利用規約同意フィールド -->
+            <div class="form-group">
+                <input type="checkbox" id="termsAgreement" name="termsAgreement" required>
+                <label for="termsAgreement" style="font-weight: normal; display: inline;">
+                    <a href="#" target="_blank" id="termsLink">利用規約</a>に同意します (必須)
+                </label>
+                <!-- TODO: id="termsLink" の href に実際の利用規約ページのURLを設定 -->
             </div>
-            <div>
-                <label for="referrer">紹介者:</label>
-                <input type="text" id="referrer" name="referrer">
-            </div>
-            <div>
-                <label for="comment">コメント:</label>
-                <textarea id="comment" name="comment"></textarea>
-            </div>
-            <button type="submit" id="submitRsvpButton">出欠を登録する</button>
+            
+            <button type="submit">出欠を登録する</button>
         </form>
     </div>
 
