@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イベント作成 - イベント管理アプリ</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1>イベント管理アプリ</h1>
+    </header>
+    <nav id="nav"></nav>
+
+    <div class="container">
+        <h2>新しいイベントを作成</h2>
+        <div id="messageArea"></div>
+        <form id="createEventForm">
+            <div>
+                <label for="eventName">イベント名:</label>
+                <input type="text" id="eventName" name="eventName" required>
+            </div>
+            <div>
+                <label for="eventDescription">説明:</label>
+                <textarea id="eventDescription" name="eventDescription"></textarea>
+            </div>
+            <div>
+                <label for="eventDate">日時:</label>
+                <input type="datetime-local" id="eventDate" name="eventDate">
+            </div>
+            <div>
+                <label for="eventLocation">場所:</label>
+                <input type="text" id="eventLocation" name="eventLocation">
+            </div>
+            <div>
+                <label for="maxParticipants">最大参加人数 (0または空欄で無制限):</label>
+                <input type="number" id="maxParticipants" name="maxParticipants" min="0">
+            </div>
+            <button type="submit">イベントを作成</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/create.js"></script>
+</body>
+</html>

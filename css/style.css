@@ -1,0 +1,145 @@
+/* style.css */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    overflow: hidden;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+    border-bottom: #0779e4 3px solid;
+}
+
+header h1 {
+    margin: 0;
+}
+
+nav#nav {
+    background: #444;
+    color: #fff;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+nav#nav a {
+    color: #fff;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+}
+
+nav#nav a:hover {
+    background: #555;
+}
+
+h1, h2, h3 {
+    color: #333;
+}
+
+.event-list, .participant-list {
+    list-style: none;
+    padding: 0;
+}
+
+.event-list li, .participant-list li {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.event-list li a {
+    text-decoration: none;
+    color: #0779e4;
+    font-weight: bold;
+}
+
+form div {
+    margin-bottom: 15px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="datetime-local"],
+form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+form textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+button, input[type="submit"] {
+    background: #0779e4;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+button:hover, input[type="submit"]:hover {
+    background: #0056b3;
+}
+
+.error-message {
+    color: red;
+    background: #ffe0e0;
+    padding: 10px;
+    border: 1px solid red;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.success-message {
+    color: green;
+    background: #e0ffe0;
+    padding: 10px;
+    border: 1px solid green;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+}
+
+.action-buttons button {
+    margin-right: 5px;
+}
+.action-buttons button.delete-btn {
+    background-color: #dc3545;
+}
+.action-buttons button.delete-btn:hover {
+    background-color: #c82333;
+}
