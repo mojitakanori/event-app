@@ -117,7 +117,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 新しいフィールドの値を取得
         const eventEndDate = document.getElementById('eventEndDate').value;
         const participationFee = document.getElementById('participationFee').value;
+        const maxParticipantsInput = document.getElementById('maxParticipants').value;
+        const maxParticipants = maxParticipantsInput ? parseInt(maxParticipantsInput, 10) : null;
 
+        if (maxParticipants !== null && (isNaN(maxParticipants) || maxParticipants < 1)) { // ← 追加バリデーション
+            messageArea.innerHTML = '<p class="error-message">最大参加人数は1以上の数値を入力してください。</p>';
+            document.getElementById('maxParticipants').focus();
+            loadingIndicator.style.display = 'none';
+            submitButton.disabled = false;
+            return;
+        }
         const eventData = {
             name: eventName, // trim() された値を使用
             description: document.getElementById('eventDescription').value,
@@ -125,6 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             event_end_date: eventEndDate || null, // ← 追加
             location: document.getElementById('eventLocation').value,
             participation_fee: participationFee.trim() || null, // ← 追加 (空ならnull)
+            max_participants: maxParticipants,
             image_urls: imageUrls.length > 0 ? imageUrls : null, 
             video_urls: videoUrls.length > 0 ? videoUrls : null,  
             form_schema: formSchema.length > 0 ? formSchema : null,
