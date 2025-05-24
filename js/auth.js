@@ -62,16 +62,9 @@ async function updateNav() {
                 <a href="index.html">ホーム</a> |
                 <a href="create.html">イベント作成</a> |
                 <a href="dashboard.html">ダッシュボード</a> |
-                <a href="#" id="logoutLink">ログアウト (${user.email})</a>
+                <a href="profile.html">プロフィール編集</a> | <!-- ← 追加 -->
+                <a href="logout.html">ログアウト (${user.email})</a>
             `;
-            // ログアウトリンクにイベントリスナーを追加
-            const logoutLink = document.getElementById('logoutLink');
-            if (logoutLink) {
-                logoutLink.addEventListener('click', async (event) => {
-                    event.preventDefault(); // リンクのデフォルト動作をキャンセル
-                    await handleLogout();
-                });
-            }
         } else {
             navElement.innerHTML = `
                 <a href="index.html">ホーム</a> |
