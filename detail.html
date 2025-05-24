@@ -6,20 +6,42 @@
     <title>イベント詳細 - イベント管理アプリ</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* ... 既存のスタイル ... */
-        #eventDetail img, #eventDetail video { /* ... */ }
-        .event-media-gallery { /* ... */ }
-        .event-media-gallery img, .event-media-gallery video { /* ... */ }
-        @media (max-width: 768px) { /* ... */ }
-        .participants-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
-        .participants-header { /* 新しいスタイル */
+        #eventDetail img, #eventDetail video {
+            max-width: 100%; /* 詳細ページではコンテナ幅に合わせる */
+            height: auto;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .event-media-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px; /* メディア間のスペース */
+            margin-bottom: 20px;
+        }
+        .event-media-gallery img, .event-media-gallery video {
+            max-width: calc(50% - 10px); /* 2列表示の場合。gapを考慮 */
+            /* max-width: 100%; 1列表示の場合 */
+            flex-grow: 1; /* 空きスペースを埋める */
+            object-fit: contain; /* アスペクト比を保って全体表示 */
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 768px) {
+            .event-media-gallery img, .event-media-gallery video {
+                max-width: 100%; /* スマホでは1列 */
+            }
+            .participants-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+            .participants-header { /* 新しいスタイル */
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
+            }
+            .participant-list { list-style: none; padding: 0; }
+            .participant-list li { background: #f9f9f9; border: 1px solid #ddd; margin-bottom: 10px; padding: 15px; border-radius: 5px; }
         }
-        .participant-list { list-style: none; padding: 0; }
-        .participant-list li { background: #f9f9f9; border: 1px solid #ddd; margin-bottom: 10px; padding: 15px; border-radius: 5px; }
     </style>
 </head>
 <body>
