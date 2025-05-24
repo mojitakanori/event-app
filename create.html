@@ -6,61 +6,14 @@
     <title>イベント作成 - イベント管理アプリ</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .preview-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .preview-container img, .preview-container video {
-            max-width: 150px; /* プレビュー画像の最大幅 */
-            max-height: 150px; /* プレビュー画像の最大高 */
-            object-fit: cover;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        .file-count-info {
-            font-size: 0.9em;
-            color: #555;
-            margin-top: 5px;
-        }
-        .preview-item {
-            position: relative; /* 削除ボタンの配置基準 */
-            display: inline-flex; /* 画像とボタンを横並びにする場合など */
-            flex-direction: column; /* 画像の上にボタンを置く場合など */
-            align-items: center;
-            margin: 5px; /* アイテム間のマージン */
-        }
-
-        .preview-item img, .preview-item video {
-            max-width: 120px; /* プレビュー画像のサイズ調整 */
-            max-height: 120px;
-            object-fit: cover;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            display: block; /* 謎の余白を防ぐ */
-        }
-
-        .preview-item .remove-preview-btn {
-            position: absolute;
-            top: -5px; /* ボタンの位置調整 */
-            right: -5px; /* ボタンの位置調整 */
-            background-color: rgba(255, 0, 0, 0.7);
-            color: white;
-            border: none;
-            border-radius: 50%; /* 丸いボタン */
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            line-height: 18px; /* 文字の垂直中央揃え */
-            text-align: center;
-            cursor: pointer;
-            padding: 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-        .preview-item .remove-preview-btn:hover {
-            background-color: rgba(200, 0, 0, 0.9);
-        }
+        /* ... 既存のスタイル ... */
+        .preview-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .preview-container img, .preview-container video { max-width: 150px; max-height: 150px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px; }
+        .file-count-info { font-size: 0.9em; color: #555; margin-top: 5px; }
+        .preview-item { position: relative; display: inline-flex; flex-direction: column; align-items: center; margin: 5px; }
+        .preview-item img, .preview-item video { max-width: 120px; max-height: 120px; object-fit: cover; border: 1px solid #ddd; border-radius: 4px; display: block; }
+        .preview-item .remove-preview-btn { position: absolute; top: -5px; right: -5px; background-color: rgba(255, 0, 0, 0.7); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 18px; text-align: center; cursor: pointer; padding: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .preview-item .remove-preview-btn:hover { background-color: rgba(200, 0, 0, 0.9); }
     </style>
 </head>
 <body>
@@ -74,7 +27,7 @@
         <div id="messageArea"></div>
         <form id="createEventForm">
             <div>
-                <label for="eventName">イベント名:</label>
+                <label for="eventName">イベント名 (必須):</label>
                 <input type="text" id="eventName" name="eventName" required>
             </div>
             <div>
@@ -82,30 +35,34 @@
                 <textarea id="eventDescription" name="eventDescription"></textarea>
             </div>
             <div>
-                <label for="eventDate">日時:</label>
+                <label for="eventDate">開始日時:</label>
                 <input type="datetime-local" id="eventDate" name="eventDate">
+            </div>
+            <div>
+                <label for="eventEndDate">終了予定日時:</label> <!-- ← 追加 -->
+                <input type="datetime-local" id="eventEndDate" name="eventEndDate">
             </div>
             <div>
                 <label for="eventLocation">場所:</label>
                 <input type="text" id="eventLocation" name="eventLocation">
+            </div>
+            <div>
+                <label for="participationFee">参加費用:</label> <!-- ← 追加 -->
+                <input type="text" id="participationFee" name="participationFee" placeholder="例: 1000円 または 無料">
             </div>
 
             <div>
                 <label for="eventImages">イベント画像 (複数選択可):</label>
                 <input type="file" id="eventImages" name="eventImages" accept="image/*" multiple>
                 <div class="file-count-info" id="imageCountInfo"></div>
-                <div class="preview-container" id="imagePreviewContainer">
-                    <!-- 画像プレビューはJSでここに挿入 -->
-                </div>
+                <div class="preview-container" id="imagePreviewContainer"></div>
             </div>
 
             <div>
                 <label for="eventVideos">イベント動画 (複数選択可, MP4推奨):</label>
                 <input type="file" id="eventVideos" name="eventVideos" accept="video/*" multiple>
                 <div class="file-count-info" id="videoCountInfo"></div>
-                <div class="preview-container" id="videoPreviewContainer">
-                    <!-- 動画プレビューはJSでここに挿入 -->
-                </div>
+                <div class="preview-container" id="videoPreviewContainer"></div>
             </div>
 
             <fieldset id="formSchemaBuilder">
