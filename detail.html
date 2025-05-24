@@ -7,38 +7,19 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         /* ... 既存のスタイル ... */
-        #eventDetail img, #eventDetail video { /* 変更なし */
-            max-width: 100%; height: auto; margin-top: 15px; margin-bottom: 15px;
-            border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .event-media-gallery { /* 変更なし */
-            display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;
-        }
-        .event-media-gallery img, .event-media-gallery video { /* 変更なし */
-            max-width: calc(50% - 10px); flex-grow: 1; object-fit: contain;
-            border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        @media (max-width: 768px) { /* 変更なし */
-            .event-media-gallery img, .event-media-gallery video { max-width: 100%; }
-        }
-
-        /* 参加者一覧用のスタイル (dashboard.cssと共通化も検討) */
-        .participants-section {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        .participant-list { /* dashboard.cssにもあるので重複注意 */
-            list-style: none;
-            padding: 0;
-        }
-        .participant-list li { /* dashboard.cssにもあるので重複注意 */
-            background: #f9f9f9;
-            border: 1px solid #ddd;
+        #eventDetail img, #eventDetail video { /* ... */ }
+        .event-media-gallery { /* ... */ }
+        .event-media-gallery img, .event-media-gallery video { /* ... */ }
+        @media (max-width: 768px) { /* ... */ }
+        .participants-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+        .participants-header { /* 新しいスタイル */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 10px;
-            padding: 15px;
-            border-radius: 5px;
         }
+        .participant-list { list-style: none; padding: 0; }
+        .participant-list li { background: #f9f9f9; border: 1px solid #ddd; margin-bottom: 10px; padding: 15px; border-radius: 5px; }
     </style>
 </head>
 <body>
@@ -56,7 +37,10 @@
         <hr>
 
         <div class="participants-section">
-            <h3>参加者一覧</h3>
+            <div class="participants-header"> <!-- ← ヘッダーコンテナを追加 -->
+                <h3>参加者一覧</h3>
+                <button id="exportCsvButton" style="display: none;">CSV出力</button> <!-- ← CSV出力ボタンを追加、初期非表示 -->
+            </div>
             <div id="participantListLoading" class="loading-message" style="display:none;">参加者を読み込み中...</div>
             <ul id="eventParticipantList" class="participant-list">
                 <!-- 参加者一覧はJSでここに挿入されます -->
@@ -67,9 +51,9 @@
         <hr>
         
         <h2>イベント出欠登録</h2>
+        <!-- ... フォーム内容は変更なし ... -->
         <div id="messageArea"></div>
         <form id="rsvpForm">
-            <!-- ... フォーム内容は変更なし ... -->
             <input type="hidden" id="eventId" name="eventId">
             <div class="form-group"><label for="participantName">氏名 (必須):</label><input type="text" id="participantName" name="participantName" required></div>
             <div id="dynamicRsvpFormFields"></div>
