@@ -7,11 +7,27 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         .event-list .event-image {
-            max-width: 150px; /* 一覧での画像サイズ調整 */
+            max-width: 150px;
             max-height: 100px;
-            object-fit: cover; /* アスペクト比を保ちつつ表示 */
+            object-fit: cover;
             margin-top: 10px;
             border-radius: 4px;
+        }
+        .filter-container {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        .filter-container label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .filter-container select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
         }
     </style>
 </head>
@@ -23,6 +39,15 @@
 
     <div class="container">
         <h2>開催中・開催予定のイベント</h2>
+
+        <div class="filter-container">
+            <label for="organizerFilter">開催者で絞り込む:</label>
+            <select id="organizerFilter">
+                <option value="">すべての開催者</option>
+                <!-- 開催者リストはJSでここに挿入されます -->
+            </select>
+        </div>
+
         <div id="loadingMessage" class="loading-message">イベントを読み込み中...</div>
         <ul id="eventList" class="event-list">
             <!-- イベントはJSでここに挿入されます -->
