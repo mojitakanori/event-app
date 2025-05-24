@@ -84,9 +84,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentParticipantsData.forEach(p => {
                 const listItem = document.createElement('li');
                 let customDataHtml = '';
-                if (p.form_data && p.form_data.terms_agreed !== undefined) {
-                    customDataHtml += `<strong>利用規約同意:</strong> ${p.form_data.terms_agreed ? 'はい' : 'いいえ'}<br>`;
-                }
                 if (p.form_data && formSchema && formSchema.length > 0) {
                     formSchema.forEach(fieldSchema => {
                         const value = p.form_data[fieldSchema.name];
@@ -278,7 +275,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
         const safeEventName = currentEventName.replace(/[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF_-]/g, '_');
-        link.setAttribute("download", `${safeEventName}_participants.csv`);
+        link.setAttribute("download", `${safeEventName}_参加者リスト.csv`);
         document.body.appendChild(link); 
         link.click();
         document.body.removeChild(link);
