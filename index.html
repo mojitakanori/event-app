@@ -4,56 +4,199 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>イベント一覧 - イベント管理アプリ</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css"> <!-- 共通CSSを読み込み -->
     <style>
-        .event-list .event-image {
-            max-width: 150px;
-            max-height: 100px;
-            object-fit: cover;
-            margin-top: 10px;
-            border-radius: 4px;
+        /* index.html固有のスタイル */
+        .page-title {
+            font-size: 2.25rem;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+            color: var(--dark-text);
+            text-align: center;
         }
-        .filter-container {
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border: 1px solid #eee;
-            border-radius: 4px;
+
+        .filter-section {
+            background-color: #fdfdfd;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
-        .filter-container label {
-            margin-right: 10px;
+
+        .filter-section label {
+            margin-bottom: 0; /* form共通スタイルを上書き */
+            font-size: 0.9rem;
+            color: var(--light-text);
+        }
+
+        .filter-section select {
+            min-width: 200px;
+            margin-bottom: 0; /* form共通スタイルを上書き */
+        }
+        
+        .event-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* レスポンシブなグリッド */
+            gap: 1.5rem;
+            list-style: none;
+            padding: 0;
+        }
+
+        .event-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            overflow: hidden; /* 画像の角丸を効かせるため */
+            box-shadow: var(--box-shadow-sm);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow);
+        }
+
+        .event-card__image-link {
+            display: block;
+            position: relative; /* バッジ用 */
+        }
+        .event-card__image {
+            width: 100%;
+            height: 200px; /* 画像の高さを固定 */
+            object-fit: cover; /* アスペクト比を保ちつつカバー */
+        }
+        .event-card__capacity-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.75rem;
+            border-radius: var(--border-radius);
             font-weight: bold;
         }
-        .filter-container select {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
+        .event-card__capacity-badge.full {
+            background-color: var(--danger-color);
+        }
+
+
+        .event-card__content {
+            padding: 1.25rem;
+            flex-grow: 1; /* カードの高さを揃えるため */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-card__title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .event-card__title a {
+            color: var(--dark-text);
+            text-decoration: none;
+        }
+        .event-card__title a:hover {
+            color: var(--primary-color);
+        }
+
+        .event-card__meta {
+            font-size: 0.875rem;
+            color: var(--light-text);
+            margin-bottom: 0.75rem;
+        }
+        .event-card__meta-item {
+            display: block; /* 各項目を改行 */
+            margin-bottom: 0.25rem;
+        }
+        .event-card__meta-item strong {
+            color: var(--dark-text);
+            font-weight: 500;
+        }
+
+        .event-card__description {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            flex-grow: 1; /* 詳細ボタンを一番下に配置するため */
+            color: var(--light-text);
+        }
+
+        .event-card__footer {
+            margin-top: auto; /* 詳細ボタンを一番下に配置 */
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .event-card__details-btn {
+            display: block; /* ボタンをブロック要素にして幅一杯に */
+            width: 100%;
+            text-align: center;
+        }
+        .event-card__image-wrapper {
+            position: relative;
+            display: block;
+        }
+
+        @media (max-width: 576px) {
+            .event-grid {
+                grid-template-columns: 1fr; /* スマホでは1カラム */
+            }
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-section select {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>イベント管理アプリ</h1>
+    <header class="site-header">
+        <div class="container">
+            <h1><a href="index.html">イベントハブ</a></h1>
+            <!-- ナビゲーションは nav#nav にJSで挿入される -->
+        </div>
     </header>
-    <nav id="nav"></nav>
+    <nav class="site-nav">
+        <div class="container">
+            <nav id="nav"></nav>
+        </div>
+    </nav>
 
-    <div class="container">
-        <h2>開催中・開催予定のイベント</h2>
+    <main class="main-container">
+        <h2 class="page-title">開催中のイベント</h2>
 
-        <div class="filter-container">
+        <section class="filter-section">
             <label for="organizerFilter">開催者で絞り込む:</label>
             <select id="organizerFilter">
                 <option value="">すべての開催者</option>
                 <!-- 開催者リストはJSでここに挿入されます -->
             </select>
+        </section>
+        
+        <div id="messageArea" class="message-area">
+            <!-- エラーや警告メッセージがここに表示される (js/index.jsで対応想定) -->
         </div>
 
         <div id="loadingMessage" class="loading-message">イベントを読み込み中...</div>
-        <ul id="eventList" class="event-list">
-            <!-- イベントはJSでここに挿入されます -->
+        
+        <ul id="eventList" class="event-grid">
         </ul>
-        <p id="noEventsMessage" style="display:none;">現在、開催予定のイベントはありません。</p>
-    </div>
+        <p id="noEventsMessage" class="message warning-message" style="display:none; text-align:center;">現在、表示できるイベントはありません。</p>
+    </main>
+
+    <!-- フッター (任意) -->
+    <!--
+    <footer class="site-footer" style="text-align: center; padding: 2rem 0; margin-top: 2rem; background-color: #343a40; color: #fff;">
+        <p>© 2024 イベント管理アプリ</p>
+    </footer>
+    -->
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabaseClient.js"></script>

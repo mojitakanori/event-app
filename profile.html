@@ -4,31 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>プロフィール編集 - イベント管理アプリ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* profile.html固有のスタイル */
+        .profile-form-container { /* フォームの最大幅など設定 */
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .submit-button-container { /* create.htmlと同様 */
+            margin-top: 2rem;
+            text-align: right;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>イベント管理アプリ</h1>
+    <header class="site-header">
+        <div class="container">
+            <h1><a href="index.html">イベントハブ</a></h1>
+            <!-- ナビゲーションは nav#nav にJSで挿入される -->
+        </div>
     </header>
-    <nav id="nav"></nav>
+    <nav class="site-nav">
+        <div class="container">
+            <nav id="nav"></nav>
+        </div>
+    </nav>
 
-    <div class="container">
-        <h2>プロフィール編集</h2>
-        <div id="loadingMessage" class="loading-message" style="display: none;">読み込み中...</div>
-        <div id="messageArea"></div>
+    <main class="main-content-wrapper">
+        <div class="main-container">
+            <div class="content-section">
+                <div class="page-header">
+                    <h2>プロフィール編集</h2>
+                    <p class="subtitle">コミュニティ名や自己紹介を更新できます。</p>
+                </div>
+                
+                <div id="loadingMessage" class="loading-message" style="display: none;">読み込み中...</div>
+                <div id="messageArea" class="message-area"></div>
 
-        <form id="profileForm" style="display: none;"> <!-- 初期状態では非表示 -->
-            <div>
-                <label for="communityName">コミュニティ名:</label>
-                <input type="text" id="communityName" name="communityName">
+                <div class="profile-form-container">
+                    <form id="profileForm" style="display: none;">
+                        <div class="form-group">
+                            <label for="communityName">コミュニティ名:</label>
+                            <input type="text" id="communityName" name="communityName">
+                        </div>
+                        <div class="form-group">
+                            <label for="bio">自己紹介文:</label>
+                            <textarea id="bio" name="bio" rows="6"></textarea>
+                        </div>
+                        <div class="submit-button-container">
+                            <button type="submit" class="btn">プロフィールを更新</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div>
-                <label for="bio">自己紹介文:</label>
-                <textarea id="bio" name="bio" rows="5"></textarea>
-            </div>
-            <button type="submit">プロフィールを更新</button>
-        </form>
-    </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <p>© 2024 イベントハブ. All Rights Reserved.</p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabaseClient.js"></script>

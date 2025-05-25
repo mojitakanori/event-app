@@ -4,30 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>開催者ログイン - イベント管理アプリ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* login.html固有のスタイル */
+        .login-container {
+            max-width: 450px; /* フォームの幅を制限 */
+            margin-top: 3rem; /* 上部に余白 */
+            margin-bottom: 3rem;
+        }
+        .login-container .content-section { /* 影をより強調 */
+             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .login-container h2 {
+            text-align: center;
+            color: var(--primary-color);
+        }
+        .login-container p {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 1.5rem;
+        }
+        .submit-button-container {
+            margin-top: 1.5rem; /* ボタン上のマージン */
+        }
+        .submit-button-container button {
+            width: 100%; /* ボタン幅を100%に */
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>イベント管理アプリ</h1>
+    <header class="site-header">
+        <div class="container">
+            <h1><a href="index.html">イベントハブ</a></h1>
+            <!-- ナビゲーションは nav#nav にJSで挿入される -->
+        </div>
     </header>
-    <nav id="nav"></nav>
+    <nav class="site-nav">
+        <div class="container">
+            <nav id="nav"></nav>
+        </div>
+    </nav>
 
-    <div class="container">
-        <h2>開催者ログイン</h2>
-        <div id="messageArea"></div>
-        <form id="loginForm">
-            <div>
-                <label for="email">メールアドレス:</label>
-                <input type="email" id="email" name="email" required>
+    <main class="main-content-wrapper">
+        <div class="main-container login-container"> <!-- login-container クラス追加 -->
+            <div class="content-section">
+                <div class="page-header" style="border-bottom: none; margin-bottom: 1.5rem;"> <!-- 線なし、マージン調整 -->
+                    <h2>開催者ログイン</h2>
+                </div>
+                <div id="messageArea" class="message-area"></div>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">メールアドレス:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">パスワード:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="submit-button-container">
+                        <button type="submit" class="btn">ログイン</button>
+                    </div>
+                </form>
+                <p>アカウントをお持ちでない場合は、別途管理者にご連絡ください。</p>
             </div>
-            <div>
-                <label for="password">パスワード:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit">ログイン</button>
-        </form>
-        <p>アカウントをお持ちでない場合は、Supabase上で直接ユーザー登録してください。（このサンプルではサインアップ機能は省略）</p>
-    </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <p>© 2024 イベントハブ. All Rights Reserved.</p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabaseClient.js"></script>

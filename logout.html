@@ -3,22 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ログアウト - イベント管理アプリ</title>
+    <title>ログアウト処理中 - イベント管理アプリ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .logout-message-container {
+            text-align: center;
+            padding: 3rem 0;
+        }
+        #logoutMessage { /* style.cssの.loading-messageに似せるか、専用スタイル */
+            font-size: 1.1rem;
+            color: var(--text-light);
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>イベント管理アプリ</h1>
+    <header class="site-header">
+        <div class="container">
+            <h1><a href="index.html">イベントハブ</a></h1>
+            <!-- ナビゲーションは nav#nav にJSで挿入される -->
+        </div>
     </header>
-    <nav id="nav"></nav>
-    <div class="container">
-        <!-- ↓ この要素が重要 -->
-        <p id="logoutMessage">ログアウト処理中です...</p>
-    </div>
+    <nav class="site-nav">
+        <div class="container">
+            <nav id="nav"></nav>
+        </div>
+    </nav>
+
+    <main class="main-content-wrapper">
+        <div class="main-container">
+            <div class="content-section logout-message-container">
+                <p id="logoutMessage" class="loading-message">ログアウト処理中です...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <p>© 2024 イベントハブ. All Rights Reserved.</p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabaseClient.js"></script>
-    <!-- auth.js は updateNav をグローバルに提供するために必要 -->
     <script src="js/auth.js"></script> 
     <script src="js/logout.js"></script>
 </body>

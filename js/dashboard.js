@@ -63,7 +63,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
-    async function deleteEvent(eventId) { /* (変更なし) */ /* ... */ }
+    async function deleteEvent(eventId) {
+        if (!confirm('本当にこのイベントを削除しますか？関連する参加者情報も全て削除されます。')) {
+            return;
+        }
+        try {
+            const { error: eventError } = await supabase
+                .from('events')
+                .delete()
+                .eq('id', eventId)
+                .eq('user_id', user.id); 
+
+            if (eventError) throw eventError;
+
+            alert('イベントを削除しました。');
+            fetchMyEvents(); // リストを再読み込み
+
+        } catch (error) {
+            console.error('Error deleting event:', error.message);
+            alert(`イベント削除に失敗しました: ${error.message}`);
+        }
+    }
 
     function addEventListenersToButtons() {
         document.querySelectorAll('.delete-btn').forEach(button => {

@@ -1,241 +1,379 @@
-/* style.css */
+/* css/style.css */
+
+/* --- Reset & Base --- */
+:root {
+    --primary-color: #007bff; /* 例: ブルー系 */
+    --secondary-color: #6c757d; /* 例: グレー系 */
+    --accent-color: #28a745; /* 例: グリーン系 (成功時など) */
+    --danger-color: #dc3545; /* 例: レッド系 (エラー、削除など) */
+    --light-bg: #f8f9fa;
+    --dark-text: #212529;
+    --light-text: #6c757d;
+    --border-color: #dee2e6;
+    --card-bg: #ffffff;
+    --font-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --box-shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
+    --box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    --border-radius: .375rem; /* Bootstrap 5 の border-radius */
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px; /* ベースフォントサイズ */
+    scroll-behavior: smooth;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
+    font-family: var(--font-sans-serif);
     line-height: 1.6;
+    color: var(--dark-text);
+    background-color: var(--light-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.container {
-    width: 80%;
-    margin: auto;
-    overflow: hidden;
-    padding: 20px;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+a {
+    color: var(--primary-color);
+    text-decoration: none;
 }
 
-header {
-    background: #333;
-    color: #fff;
+a:hover {
+    text-decoration: underline;
+}
+
+img, video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* --- Utility Classes (必要に応じて追加) --- */
+.text-center { text-align: center; }
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-3 { margin-bottom: 1rem; }
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 1rem; }
+
+/* --- Layout & Container --- */
+.site-header {
+    background-color: #343a40; /* ダークグレー */
     padding: 1rem 0;
-    text-align: center;
-    border-bottom: #0779e4 3px solid;
+    color: #fff;
+    box-shadow: var(--box-shadow-sm);
 }
 
-header h1 {
+.site-header .container,
+.site-nav .container {
+    max-width: 1140px; /* コンテンツ幅の上限 */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.site-header h1 {
+    font-size: 1.75rem;
     margin: 0;
+    font-weight: 500;
 }
-
-nav#nav {
-    background: #444;
-    color: #fff;
-    padding: 0.5rem;
-    text-align: center;
-}
-
-nav#nav a {
+.site-header h1 a {
     color: #fff;
     text-decoration: none;
-    padding: 0.5rem 1rem;
 }
-
-nav#nav a:hover {
-    background: #555;
-}
-
-h1, h2, h3 {
-    color: #333;
-}
-
-.event-list, .participant-list {
-    list-style: none;
-    padding: 0;
-}
-
-.event-list li, .participant-list li {
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    margin-bottom: 10px;
-    padding: 15px;
-    border-radius: 5px;
-}
-
-.event-list li a {
+.site-header h1 a:hover {
     text-decoration: none;
-    color: #0779e4;
-    font-weight: bold;
 }
 
-form div {
-    margin-bottom: 15px;
+
+.site-nav {
+    background-color: #f8f9fa; /* ヘッダーより少し明るい色 */
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
 }
 
+.site-nav nav#nav a {
+    color: var(--dark-text);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius);
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.site-nav nav#nav a:hover,
+.site-nav nav#nav a.active { /* アクティブなリンクのスタイル */
+    background-color: var(--primary-color);
+    color: #fff;
+    text-decoration: none;
+}
+
+.main-container {
+    max-width: 1140px;
+    margin: 2rem auto;
+    padding: 2rem 15px;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+@media (max-width: 768px) {
+    .site-header .container,
+    .site-nav .container {
+        flex-direction: column;
+        text-align: center;
+    }
+    .site-nav nav#nav {
+        margin-top: 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .site-nav nav#nav a {
+        margin: 0.25rem;
+    }
+    .main-container {
+        margin: 1rem;
+        padding: 1.5rem 1rem;
+    }
+}
+
+/* --- Forms --- */
 form label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--light-text);
 }
 
 form input[type="text"],
 form input[type="email"],
 form input[type="password"],
 form input[type="datetime-local"],
-form textarea {
+form input[type="number"],
+form input[type="file"],
+form textarea,
+form select {
+    display: block;
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--dark-text);
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    margin-bottom: 1rem; /* 各入力フィールド下のマージン */
 }
 
+form input[type="text"]:focus,
+form input[type="email"]:focus,
+form input[type="password"]:focus,
+form input[type="datetime-local"]:focus,
+form input[type="number"]:focus,
+form input[type="file"]:focus,
+form textarea:focus,
+form select:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 .25rem rgba(var(--primary-color-rgb, 0, 123, 255), .25); /* primary-color-rgbはJSで設定するか固定値 */
+}
+:root { /* JSで設定する場合の例 */
+    --primary-color-rgb: 0, 123, 255;
+}
+
+
+form input[type="checkbox"] {
+    width: auto;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+form input[type="checkbox"] + label { /* チェックボックス横のラベル */
+    display: inline;
+    font-weight: normal;
+    color: var(--dark-text);
+}
+
+
 form textarea {
-    height: 100px;
+    min-height: 120px;
     resize: vertical;
 }
 
 button, input[type="submit"] {
-    background: #0779e4;
+    display: inline-block;
+    font-weight: 600;
     color: #fff;
-    border: none;
-    padding: 10px 15px;
+    text-align: center;
+    vertical-align: middle;
     cursor: pointer;
-    border-radius: 4px;
-    font-size: 1em;
+    background-color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    border-radius: var(--border-radius);
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 button:hover, input[type="submit"]:hover {
-    background: #0056b3;
+    background-color: #0056b3; /* 少し暗いプライマリカラー */
+    border-color: #0056b3;
+    text-decoration: none;
+}
+button:focus, input[type="submit"]:focus {
+    outline: 0;
+    box-shadow: 0 0 0 .25rem rgba(var(--primary-color-rgb, 0, 123, 255), .5);
+}
+button:disabled, input[type="submit"]:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
 }
 
-.error-message {
-    color: red;
-    background: #ffe0e0;
-    padding: 10px;
-    border: 1px solid red;
-    margin-bottom: 10px;
-    border-radius: 4px;
+
+button.secondary-btn {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+button.secondary-btn:hover {
+    background-color: #545b62;
+    border-color: #545b62;
 }
 
+button.danger-btn, .action-buttons button.delete-btn {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+button.danger-btn:hover, .action-buttons button.delete-btn:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+
+/* --- Messages --- */
+.message-area { /* メッセージ表示エリアの共通スタイル */
+    margin-bottom: 1.5rem;
+}
+.message {
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+}
+.error-message, .registration-closed-message p.error-message { /* 共通のエラーメッセージスタイル */
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
 .success-message {
-    color: green;
-    background: #e0ffe0;
-    padding: 10px;
-    border: 1px solid green;
-    margin-bottom: 10px;
-    border-radius: 4px;
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
 }
-
+.warning-message {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
 .loading-message {
+    color: var(--light-text);
     text-align: center;
-    padding: 20px;
+    padding: 2rem 0;
     font-style: italic;
 }
-
-.action-buttons button {
-    margin-right: 5px;
+.loading-message::before { /* 簡単なスピナー風 */
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(0,0,0,0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 10px;
+    vertical-align: middle;
 }
-.action-buttons button.delete-btn {
-    background-color: #dc3545;
-}
-.action-buttons button.delete-btn:hover {
-    background-color: #c82333;
-}
-
-/* Form Field Builder on create.html */
-#formSchemaBuilder {
-    border: 1px solid #e0e0e0;
-    padding: 15px;
-    margin-top: 20px;
-    background-color: #fdfdfd;
-    border-radius: 4px;
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
-.form-field-config {
+
+/* --- Fieldset for Form Builder --- */
+fieldset#formSchemaBuilder {
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    border-radius: var(--border-radius);
+    background-color: #fcfcfc;
+}
+fieldset#formSchemaBuilder legend {
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0 0.5rem;
+    color: var(--primary-color);
+}
+.form-field-config { /* 変更なし */ }
+button#addFormField { /* 変更なし */ }
+
+
+/* --- Preview Containers --- */
+.preview-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; padding: 10px; border: 1px dashed var(--border-color); border-radius: var(--border-radius); min-height: 80px; background-color: #fafafa;}
+.preview-item { position: relative; display: inline-flex; flex-direction: column; align-items: center; margin: 5px; background: #fff; padding: 5px; border-radius: var(--border-radius); box-shadow: var(--box-shadow-sm); }
+.preview-item img, .preview-item video { max-width: 100px; max-height: 100px; object-fit: cover; border-radius: calc(var(--border-radius) - 2px); display: block; }
+.preview-item .remove-preview-btn { position: absolute; top: -8px; right: -8px; background-color: var(--danger-color); opacity: 0.8; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; line-height: 22px; text-align: center; cursor: pointer; padding: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.3); transition: opacity 0.2s; }
+.preview-item .remove-preview-btn:hover { opacity: 1; }
+.file-count-info { font-size: 0.85rem; color: var(--light-text); margin-top: 0.25rem; margin-bottom: 0.5rem; display: block; }
+
+
+/* --- Action Buttons on lists --- */
+.action-buttons {
+    margin-top: 1rem;
     display: flex;
-    gap: 10px;
-    align-items: flex-end; /* Align items to bottom for better layout with button */
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #f9f9f9;
-    border: 1px dashed #ccc;
-    border-radius: 4px;
+    gap: 0.5rem;
+}
+.action-buttons a button, /* aタグでラップされたボタンも対象 */
+.action-buttons button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    text-transform: none; /* ダッシュボードでは大文字化しないなど */
+    letter-spacing: normal;
+}
+.action-buttons .view-detail-btn { /* 詳細ボタンの色を少し変えるなど */
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+.action-buttons .view-detail-btn:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+.action-buttons .edit-event-btn {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+.action-buttons .edit-event-btn:hover {
+    background-color: #1e7e34;
+    border-color: #1c7430;
 }
 
-.form-field-config div {
-    flex: 1; /* Allow input fields to grow */
-    margin-bottom: 0; /* Reset margin for internal divs */
-}
-
-.form-field-config label {
-    font-size: 0.9em;
-    color: #555;
-}
-
-.form-field-config input[type="text"],
-.form-field-config select {
-    width: 100%; /* Make inputs take full width of their flex container */
-    padding: 8px;
-    font-size: 0.95em;
-}
-
-.form-field-config input[type="checkbox"] {
-    width: auto;
-    margin-left: 5px;
-    vertical-align: middle;
-}
-
-
-button.remove-field-btn {
-    background: #e74c3c;
-    color: white;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    height: fit-content; /* Align with bottom of inputs */
-}
-button.remove-field-btn:hover {
-    background: #c0392b;
-}
-
-button#addFormField {
-    margin-top: 10px;
-    background-color: #2ecc71;
-}
-button#addFormField:hover {
-    background-color: #27ae60;
-}
-
-/* Dynamic Form Fields on detail.html */
-#dynamicRsvpFormFields .form-group {
-    margin-bottom: 15px;
-}
-
-#dynamicRsvpFormFields .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-#dynamicRsvpFormFields .form-group input[type="text"],
-#dynamicRsvpFormFields .form-group textarea,
-#dynamicRsvpFormFields .form-group select { /* If you add select type later */
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-#dynamicRsvpFormFields .form-group input[type="checkbox"] {
-    width: auto;
-    margin-right: 8px;
-    vertical-align: middle;
-}
-#dynamicRsvpFormFields .form-group textarea {
-    min-height: 80px;
-    resize: vertical;
+/* --- Hr --- */
+hr {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 2rem 0;
 }

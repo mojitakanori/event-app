@@ -3,86 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>イベント詳細 - イベント管理アプリ</title>
+    <title>イベント詳細 - イベント管理アプリ</title> <!-- JSでイベント名に動的変更も可 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        #eventDetail img, #eventDetail video {
-            max-width: 100%; /* 詳細ページではコンテナ幅に合わせる */
-            height: auto;
-            margin-top: 15px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+        /* detail.html固有のスタイル */
         .event-media-gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px; /* メディア間のスペース */
-            margin-bottom: 20px;
+            display: grid; /* Gridでメディアを並べる */
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
-        .event-media-gallery img, .event-media-gallery video {
-            max-width: calc(50% - 10px); /* 2列表示の場合。gapを考慮 */
-            /* max-width: 100%; 1列表示の場合 */
-            flex-grow: 1; /* 空きスペースを埋める */
-            object-fit: contain; /* アスペクト比を保って全体表示 */
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        .event-media-gallery img,
+        .event-media-gallery video {
+            width: 100%;
+            height: auto;
+            max-height: 400px; /* 動画や画像の最大高 */
+            object-fit: cover;
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--box-shadow-light);
         }
-        @media (max-width: 768px) {
-            .event-media-gallery img, .event-media-gallery video {
-                max-width: 100%; /* スマホでは1列 */
-            }
-            .participants-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
-            .participants-header { /* 新しいスタイル */
+
+        .event-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .event-info-item {
+            background-color: var(--light-bg);
+            padding: 1.25rem;
+            border-radius: var(--border-radius-sm);
+        }
+        .event-info-item strong {
+            display: block;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            font-weight: 500;
+        }
+        .event-info-item p {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 0;
+        }
+        .event-description {
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+        .event-description h3 { /* 詳細説明内の小見出し */
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+            color: var(--primary-color);
+        }
+
+        .participants-section {
+            margin-top: 2.5rem;
+        }
+        .participants-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
-            }
-            .participant-list { list-style: none; padding: 0; }
-            .participant-list li { background: #f9f9f9; border: 1px solid #ddd; margin-bottom: 10px; padding: 15px; border-radius: 5px; }
+            margin-bottom: 1rem;
+        }
+        .participants-header h3 { margin-bottom: 0; }
+        #exportCsvButton { /* .btnクラスをJSで付与するか、直接スタイル */
+            /* style.css の .btn に準拠 */
+        }
+
+        .participant-list { list-style: none; padding: 0; }
+        .participant-list li {
+            background-color: var(--light-bg);
+            padding: 1rem;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+        }
+        .participant-list li strong { font-weight: 500; }
+        .participant-list li small { display: block; color: var(--text-light); font-size: 0.8rem; margin-top: 0.5rem; }
+
+        #rsvpForm { margin-top: 2.5rem; }
+        .registration-closed-message p.error-message {
+            font-size: 1.1rem !important; /* 強調 */
+            padding: 1.5rem !important;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>イベント管理アプリ</h1>
+    <header class="site-header">
+        <div class="container">
+            <h1><a href="index.html">イベントハブ</a></h1>
+            <!-- ナビゲーションは nav#nav にJSで挿入される -->
+        </div>
     </header>
-    <nav id="nav"></nav>
-
-    <div class="container">
-        <div id="eventDetail">
-            <div id="eventDetailLoading" class="loading-message">イベント詳細を読み込み中...</div>
-            <!-- イベント詳細はJSでここに挿入されます -->
+    <nav class="site-nav">
+        <div class="container">
+            <nav id="nav"></nav>
         </div>
+    </nav>
 
-        <hr>
+    <main class="main-content-wrapper">
+        <div class="main-container">
+            <div class="content-section">
+                <div id="eventDetailLoading" class="loading-message">イベント詳細を読み込み中...</div>
+                <div id="eventDetail">
+                    <!-- JSでイベント詳細をここに挿入 -->
+                    <!-- 例:
+                    <div class="page-header">
+                        <h2 id="eventTitlePlaceholder">[イベント名]</h2>
+                        <p id="eventCapacityPlaceholder" class="subtitle">[参加状況]</p>
+                    </div>
+                    <div class="event-media-gallery" id="eventMediaPlaceholder"></div>
+                    <div class="event-info-grid">
+                        <div class="event-info-item"><strong>日時:</strong> <p id="eventDateTimePlaceholder"></p></div>
+                        <div class="event-info-item"><strong>場所:</strong> <p id="eventLocationPlaceholder"></p></div>
+                        <div class="event-info-item"><strong>参加費用:</strong> <p id="eventFeePlaceholder"></p></div>
+                    </div>
+                    <div class="event-description">
+                        <h3>イベント概要</h3>
+                        <p id="eventDescriptionPlaceholder"></p>
+                    </div>
+                    -->
+                </div>
 
-        <div class="participants-section">
-            <div class="participants-header"> <!-- ← ヘッダーコンテナを追加 -->
-                <h3>参加者一覧</h3>
-                <button id="exportCsvButton" style="display: none;">CSV出力</button> <!-- ← CSV出力ボタンを追加、初期非表示 -->
+                <hr>
+
+                <div class="participants-section">
+                    <div class="participants-header">
+                        <h3>参加者一覧</h3>
+                        <button id="exportCsvButton" class="btn btn-secondary" style="display: none;">CSV出力</button>
+                    </div>
+                    <div id="participantListLoading" class="loading-message" style="display:none;">参加者を読み込み中...</div>
+                    <ul id="eventParticipantList" class="participant-list"></ul>
+                    <p id="noEventParticipantsMessage" class="message warning-message" style="display:none; text-align:center;">このイベントにはまだ参加者がいません。</p>
+                </div>
+
+                <hr>
+                
+                <div class="page-header">
+                    <h2>イベント参加登録</h2>
+                </div>
+                <div id="messageArea" class="message-area"></div>
+                <form id="rsvpForm">
+                    <input type="hidden" id="eventId" name="eventId">
+                    <div class="form-group">
+                        <label for="participantName">氏名 (必須):</label>
+                        <input type="text" id="participantName" name="participantName" required>
+                    </div>
+                    <div id="dynamicRsvpFormFields">
+                        <!-- JSで動的フォーム項目をここに挿入 -->
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="termsAgreement" name="termsAgreement" required>
+                        <label for="termsAgreement">
+                            <a href="#" target="_blank" id="termsLink" onclick="event.stopPropagation();">利用規約</a>に同意します (必須)
+                        </label>
+                    </div>
+                    <button type="submit" class="btn">参加登録する</button>
+                </form>
             </div>
-            <div id="participantListLoading" class="loading-message" style="display:none;">参加者を読み込み中...</div>
-            <ul id="eventParticipantList" class="participant-list">
-                <!-- 参加者一覧はJSでここに挿入されます -->
-            </ul>
-            <p id="noEventParticipantsMessage" style="display:none;">このイベントにはまだ参加者がいません。</p>
         </div>
+    </main>
 
-        <hr>
-        
-        <h2>イベント出欠登録</h2>
-        <!-- ... フォーム内容は変更なし ... -->
-        <div id="messageArea"></div>
-        <form id="rsvpForm">
-            <input type="hidden" id="eventId" name="eventId">
-            <div class="form-group"><label for="participantName">氏名 (必須):</label><input type="text" id="participantName" name="participantName" required></div>
-            <div id="dynamicRsvpFormFields"></div>
-            <div class="form-group"><input type="checkbox" id="termsAgreement" name="termsAgreement" required><label for="termsAgreement" style="font-weight: normal; display: inline;"><a href="#" target="_blank" id="termsLink">利用規約</a>に同意します (必須)</label></div>
-            <button type="submit">出欠を登録する</button>
-        </form>
-    </div>
+    <footer class="site-footer">
+        <p>© 2024 イベントハブ. All Rights Reserved.</p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabaseClient.js"></script>

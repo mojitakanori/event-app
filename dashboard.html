@@ -3,36 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>開催者ダッシュボード - イベント管理アプリ</title>
+    <title>ダッシュボード - イベント管理アプリ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* dashboard.html固有のスタイル */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem; /* page-headerのmargin-bottomと重複しないように */
+        }
+        .event-list { /* 共通CSSにもあるが、より詳細なスタイルをここで上書き可能 */
+            list-style: none;
+            padding: 0;
+        }
+        .event-list li {
+            background-color: var(--card-bg); /* カード背景 */
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--box-shadow-light);
+            transition: box-shadow var(--transition-speed) ease;
+        }
+        .event-list li:hover {
+            box-shadow: var(--box-shadow-medium);
+        }
+        .event-list li h3 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+        .event-list li p {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+        /* .action-buttons は共通CSSで対応 */
+    </style>
 </head>
 <body>
-    <header>
-        <h1>イベント管理アプリ</h1>
+    <header class="site-header">
+        <div class="container">
+            <h1><a href="index.html">イベントハブ</a></h1>
+            <!-- ナビゲーションは nav#nav にJSで挿入される -->
+        </div>
     </header>
-    <nav id="nav"></nav>
+    <nav class="site-nav">
+        <div class="container">
+            <nav id="nav"></nav>
+        </div>
+    </nav>
 
-    <div class="container">
-        <h2>開催者ダッシュボード</h2>
-        <p>あなたが作成したイベント一覧です。</p>
-        <a href="create.html"><button>新しいイベントを作成</button></a>
+    <main class="main-content-wrapper">
+        <div class="main-container">
+            <div class="content-section">
+                <div class="page-header dashboard-header">
+                    <h2>マイイベント管理</h2>
+                    <a href="create.html"><button>新しいイベントを作成</button></a>
+                </div>
+                <p style="color: var(--text-light); margin-bottom: 2rem;">あなたが作成したイベントの一覧です。</p>
 
-        <div id="loadingMessage" class="loading-message">あなたのイベントを読み込み中...</div>
-        <ul id="myEventList" class="event-list">
-            <!-- 自分が作成したイベントはJSでここに挿入されます -->
-        </ul>
-        <p id="noMyEventsMessage" style="display:none;">まだイベントを作成していません。</p>
-        
-        <!-- 以下の参加者一覧表示セクションを削除 -->
-        <!-- 
-        <hr>
-        <h3>選択したイベントの参加者一覧</h3>
-        <div id="selectedEventName"></div>
-        <div id="participantLoadingMessage" class="loading-message" style="display:none;">参加者を読み込み中...</div>
-        <ul id="participantList" class="participant-list"></ul>
-        <p id="noParticipantsMessage" style="display:none;">このイベントにはまだ参加者がいません。</p>
-        -->
-    </div>
+                <div id="messageArea" class="message-area"></div> <!-- メッセージ表示用 (削除成功時など) -->
+                <div id="loadingMessage" class="loading-message">イベントを読み込み中...</div>
+                <ul id="myEventList" class="event-list">
+                    <!-- JSでイベントリストを挿入 -->
+                </ul>
+                <p id="noMyEventsMessage" class="message warning-message" style="display:none; text-align:center;">まだイベントを作成していません。</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <p>© 2024 イベントハブ. All Rights Reserved.</p>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabaseClient.js"></script>
