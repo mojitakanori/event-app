@@ -71,9 +71,8 @@ img, video {
     box-shadow: var(--box-shadow-sm);
 }
 
-.site-header .container,
-.site-nav .container {
-    max-width: 1140px; /* コンテンツ幅の上限 */
+.site-header .container { /* .site-nav .container は後でメディアクエリで上書き */
+    max-width: 1140px;
     margin-left: auto;
     margin-right: auto;
     padding-left: 15px;
@@ -82,6 +81,18 @@ img, video {
     justify-content: space-between;
     align-items: center;
 }
+/* .site-nav .container は .site-header .container と基本同じだが、メディアクエリで調整 */
+.site-nav .container {
+    max-width: 1140px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 
 .site-header h1 {
     font-size: 1.75rem;
@@ -102,6 +113,44 @@ img, video {
     padding: 0.75rem 0;
     border-bottom: 1px solid var(--border-color);
     font-size: 0.95rem;
+    position: relative; /* モバイルナビゲーションの配置基準のため */
+}
+
+/* ハンバーガーメニューボタン */
+.hamburger-menu {
+    display: none; /* デスクトップでは非表示 */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem; /* タップエリア確保 */
+    margin: 0; /* buttonのデフォルトマージンリセット */
+    z-index: 1001; /* ナビゲーションメニューより手前に */
+}
+
+.hamburger-menu span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: var(--dark-text); /* site-navの背景が明るいので濃い色 */
+    margin: 5px 0;
+    transition: all 0.3s ease-in-out;
+}
+
+/* ハンバーガーメニューが開いた時のアイコン変化 (X印) */
+.hamburger-menu.active span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+}
+.hamburger-menu.active span:nth-child(2) {
+    opacity: 0;
+}
+.hamburger-menu.active span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+}
+
+/* デスクトップ時のナビゲーション */
+.site-nav nav#nav {
+    display: flex; /* 横並び */
+    gap: 0.25rem; /* リンク間の少しの隙間 */
 }
 
 .site-nav nav#nav a {
@@ -125,23 +174,60 @@ img, video {
     background-color: var(--card-bg);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
+    flex-grow: 1; /* フッターを最下部に固定するため */
 }
 
 @media (max-width: 768px) {
-    .site-header .container,
-    .site-nav .container {
+    .site-header .container {
         flex-direction: column;
         text-align: center;
     }
+
+    .site-nav .container {
+        flex-direction: row; /* ハンバーガーメニューとnav#nav(隠れている)のコンテキスト */
+        justify-content: flex-end; /* ハンバーガーメニューを右寄せ */
+        /* align-items: center; は継承される */
+    }
+
+    .hamburger-menu {
+        display: block; /* モバイルで表示 */
+    }
+
     .site-nav nav#nav {
-        margin-top: 0.5rem;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+        display: none; /* 初期状態では非表示 */
+        flex-direction: column; /* リンクを縦積み */
+        align-items: stretch; /* リンクの幅をコンテナに合わせる */
+        
+        position: absolute;
+        top: 100%; /* .site-nav の下端から開始 */
+        left: 0;
+        right: 0;
+        
+        background-color: #f8f9fa; /* site-nav と同じ背景色 */
+        box-shadow: var(--box-shadow-sm);
+        padding: 0.5rem 0; /* 上下のパディング */
+        border-top: 1px solid var(--border-color);
+        z-index: 1000;
+        max-height: calc(100vh - 100px); /* 画面の高さを超えないように、ヘッダー高さを引くなど調整 */
+        overflow-y: auto; /* 項目が多い場合にスクロール */
     }
+
+    .site-nav nav#nav.active {
+        display: flex; /* JavaScriptで active クラスが付いたら表示 */
+    }
+
     .site-nav nav#nav a {
-        margin: 0.25rem;
+        padding: 0.75rem 1rem; /* モバイルではタップしやすく */
+        text-align: left; /* 左寄せ、または center */
+        margin: 0; /* 個別のマージンは不要に */
+        border-bottom: 1px solid var(--border-color); /* リンク間の区切り線 */
+        border-radius: 0; /* 角丸をなくす */
+        width: 100%; /* 親要素いっぱいに広がる */
     }
+    .site-nav nav#nav a:last-child {
+        border-bottom: none; /* 最後のリンクの区切り線はなし */
+    }
+
     .main-container {
         margin: 1rem;
         padding: 1.5rem 1rem;
