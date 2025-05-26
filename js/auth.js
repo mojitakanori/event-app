@@ -59,15 +59,15 @@ async function updateNav() {
     if (navElement) {
         if (user) {
             navElement.innerHTML = `
-                <a href="index.html">ホーム</a> |
-                <a href="create.html">イベント作成</a> |
-                <a href="dashboard.html">ダッシュボード</a> |
-                <a href="profile.html">プロフィール編集</a> | <!-- ← 追加 -->
+                <a href="index.html">ホーム</a>
+                <a href="create.html">イベント作成</a>
+                <a href="dashboard.html">ダッシュボード</a>
+                <a href="profile.html">プロフィール編集</a>
                 <a href="logout.html">ログアウト (${user.email})</a>
             `;
         } else {
             navElement.innerHTML = `
-                <a href="index.html">ホーム</a> |
+                <a href="index.html">ホーム</a>
                 <a href="login.html">開催者ログイン</a>
             `;
         }
