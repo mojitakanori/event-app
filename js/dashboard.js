@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (events && events.length > 0) {
                 events.forEach(event => {
                     const listItem = document.createElement('li');
-                    const eventDate = event.event_date ? new Date(event.event_date).toLocaleString('ja-JP') : '未定';
+                    const eventDate = event.event_date ? event.event_date.replace('T', ' ').substring(0, 16) : '未定';
                     
                     const detailLinkButton = document.createElement('a');
                     detailLinkButton.href = `detail.html?id=${event.id}`;

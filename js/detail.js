@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         customDataHtml += `<strong>${fieldSchema.label}:</strong> ${displayValue}<br>`;
                     });
                 }
-                listItem.innerHTML = `<strong>氏名: ${p.name}</strong><br>${customDataHtml}<small>登録日時: ${new Date(p.created_at).toLocaleString('ja-JP')}</small>`;
+                listItem.innerHTML = `<strong>氏名: ${p.name}</strong><br>${customDataHtml}<small>登録日時: ${p.created_at.replace('T', ' ').substring(0, 19)}</small>`;
                 participantListUl.appendChild(listItem);
             });
         } else {
@@ -140,13 +140,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const eventStartDate = event.event_date ? new Date(event.event_date) : null;
                 const eventEndDate = event.event_end_date ? new Date(event.event_end_date) : null;
                 let dateTimeStr = '日時未定';
-                if (eventStartDate) {
-                    dateTimeStr = eventStartDate.toLocaleString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                    if (eventEndDate) {
-                        if (eventStartDate.toDateString() === eventEndDate.toDateString()) {
-                            dateTimeStr += ` 〜 ${eventEndDate.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`;
+                if (event.event_date) {
+                    // Date オブジェクトを作成せず、文字列として直接処理
+                    const startDateStr = event.event_date.replace('T', ' ').substring(0, 16);
+                    dateTimeStr = startDateStr;
+                    
+                    if (event.event_end_date) {
+                        const endDateStr = event.event_end_date.replace('T', ' ').substring(0, 16);
+                        
+                        // 同じ日付かどうかの判定（文字列で比較）
+                        if (startDateStr.substring(0, 10) === endDateStr.substring(0, 10)) {
+                            dateTimeStr += ` 〜 ${endDateStr.substring(11, 16)}`; // 時間部分のみ
                         } else {
-                            dateTimeStr += ` 〜 ${eventEndDate.toLocaleString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
+                            dateTimeStr += ` 〜 ${endDateStr}`;
                         }
                     }
                 }
@@ -257,7 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentParticipantsData.forEach(participant => {
             const row = [];
             row.push(escapeCsvValue(participant.name));
-            row.push(escapeCsvValue(new Date(participant.created_at).toLocaleString('ja-JP')));
+            row.push(escapeCsvValue(participant.created_at.replace('T', ' ').substring(0, 19)));
             const termsAgreed = (participant.form_data && participant.form_data.terms_agreed !== undefined) ? (participant.form_data.terms_agreed ? 'はい' : 'いいえ') : '';
             row.push(escapeCsvValue(termsAgreed));
             customFieldNames.forEach(fieldName => {
@@ -342,7 +348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             const submissionData = { ...customFormData, terms_agreed: termsAgreementCheckbox.checked };
             try {
-                const { data, error } = await supabase.from('participants').insert([{ event_id: currentEventId, name: participantName, form_data: Object.keys(submissionData).length > 0 ? submissionData : null }]).select();
+                const { data, error } = await supabase.from('participants').insert([{ event_id: currentEventId, name: participantName, created_at: new Date(new Date().getTime() + (9 * 60 * 60 * 1000)), form_data: Object.keys(submissionData).length > 0 ? submissionData : null }]).select();
                 if (error) throw error;
                 messageArea.innerHTML = '<p class="success-message">出欠を登録しました。ありがとうございます！</p>';
                 rsvpForm.reset(); 

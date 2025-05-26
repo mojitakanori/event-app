@@ -52,16 +52,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 listItem.classList.add('event-card'); // カードスタイルを適用
 
                 // 日時整形
-                const eventStartDate = event.event_date ? new Date(event.event_date) : null;
-                const eventEndDate = event.event_end_date ? new Date(event.event_end_date) : null;
                 let dateTimeStr = '日時未定';
-                if (eventStartDate) {
-                    dateTimeStr = eventStartDate.toLocaleString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                    if (eventEndDate) {
-                        if (eventStartDate.toDateString() === eventEndDate.toDateString()) {
-                            dateTimeStr += ` 〜 ${eventEndDate.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`;
+                if (event.event_date) {
+                    // Date オブジェクトを作成せず、文字列として直接処理
+                    const startDateStr = event.event_date.replace('T', ' ').substring(0, 16);
+                    dateTimeStr = startDateStr;
+                    
+                    if (event.event_end_date) {
+                        const endDateStr = event.event_end_date.replace('T', ' ').substring(0, 16);
+                        
+                        // 同じ日付かどうかの判定（文字列で比較）
+                        if (startDateStr.substring(0, 10) === endDateStr.substring(0, 10)) {
+                            dateTimeStr += ` 〜 ${endDateStr.substring(11, 16)}`; // 時間部分のみ
                         } else {
-                            dateTimeStr += ` 〜 ${eventEndDate.toLocaleString('ja-JP', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
+                            dateTimeStr += ` 〜 ${endDateStr}`;
                         }
                     }
                 }

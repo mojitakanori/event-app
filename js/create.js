@@ -138,6 +138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             image_urls: imageUrls.length > 0 ? imageUrls : null, 
             video_urls: videoUrls.length > 0 ? videoUrls : null,  
             form_schema: formSchema.length > 0 ? formSchema : null,
+            created_at: new Date(new Date().getTime() + (9 * 60 * 60 * 1000))
             // user_id はRLSで自動設定されるか、バックエンドで設定（今回はRLS前提）
         };
         
