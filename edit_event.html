@@ -26,6 +26,92 @@
             position: static !important; /* 絶対配置解除 */
             margin-top: 0.5rem;
         }
+        fieldset#formSchemaBuilder { /* これは create.html, edit_event.html の <fieldset> のスタイル */
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+            border-radius: var(--border-radius-md);
+            background-color: #fdfdfd; /* 少し明るい背景 */
+        }
+        fieldset#formSchemaBuilder legend { /* <legend> のスタイル */
+            font-size: 1.25rem; /* 共通CSSの h3 程度 */
+            font-weight: 600;
+            padding: 0 0.75rem; /* 左右にパディング */
+            color: var(--text-dark); /* メインテキストカラー */
+            font-family: var(--font-display);
+        }
+        fieldset#formSchemaBuilder p { /* 説明文のスタイル */
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+
+
+        /* カスタムフォーム項目設定の各行 (.form-field-config) */
+        .form-field-config {
+            display: flex;
+            flex-wrap: wrap; /* 小画面で折り返すように */
+            gap: 1rem; /* 要素間のスペース */
+            align-items: flex-end; /* 要素の下端を揃える */
+            padding: 1.25rem; /* 内側パディング */
+            margin-bottom: 1rem; /* 各設定行間のマージン */
+            background-color: var(--light-bg); /* 背景色 */
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+        }
+
+        .form-field-config div { /* 各入力グループ (ラベル + input/select) */
+            flex: 1 1 200px; /* 基本幅200pxで、スペースがあれば広がる */
+            margin-bottom: 0; /* form共通スタイルを上書き */
+        }
+
+        .form-field-config label { /* .form-field-config 内のラベル */
+            font-size: 0.85rem;
+            color: var(--text-light); /* やや薄い色 */
+            margin-bottom: 0.3rem; /* ラベルと入力欄の間のスペース */
+            font-weight: 500;
+        }
+
+        .form-field-config input[type="text"],
+        .form-field-config select {
+            /* 共通フォームスタイルが適用されるが、必要ならここで上書き */
+            padding: 0.6rem 0.8rem; /* 少し小さめ */
+            font-size: 0.9rem;
+            margin-bottom: 0; /* form共通のmargin-bottomを打ち消し */
+        }
+
+        .form-field-config input[type="checkbox"] {
+            /* 共通フォームスタイルが適用される */
+            margin-right: 0.3rem;
+            vertical-align: -1px;
+        }
+        .form-field-config input[type="checkbox"] + label { /* チェックボックス横のラベル */
+            font-size: 0.9rem;
+            font-weight: normal;
+            color: var(--text-dark);
+        }
+
+
+        /* 「フォーム項目を追加」ボタン (button#addFormField) */
+        button#addFormField {
+            /* .btn クラスと .btn-secondary (または .btn-success) クラスをHTML側で付与することを想定 */
+            /* 例: <button type="button" id="addFormField" class="btn btn-secondary"> */
+            margin-top: 1rem; /* 上の項目群とのマージン */
+            /* 個別のスタイルが必要な場合はここに記述 */
+        }
+
+
+        /* 各カスタムフォーム項目設定行の「削除」ボタン */
+        .form-field-config button.remove-field-btn {
+            flex-basis: auto; /* 幅を内容に合わせる */
+            flex-grow: 0; /* 広がらない */
+            padding: 0.5rem !important; /* 共通ボタンより小さくするため !important を使うか、より詳細なセレクタで上書き */
+            height: 36px !important;
+            line-height: 24px !important; /* 文字の垂直位置調整 */
+            font-size: 1.2rem !important; /* ×マークのサイズ */
+            border-radius: 50% !important; /* 丸く */
+        }
     </style>
 </head>
 <body>
