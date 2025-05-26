@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const videoCountInfo = document.getElementById('videoCountInfo');
     const loadingIndicator = document.getElementById('loadingIndicator');
 
-    const BUCKET_NAME = 'event_media';
+    const BUCKET_NAME = 'event-media';
     const MAX_IMAGE_UPLOADS = 10; 
     const MAX_VIDEO_UPLOADS = 10; 
 

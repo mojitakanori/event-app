@@ -124,7 +124,7 @@
 
 ## 6. ストレージ
 
-Supabase Storageの `event_media` バケットに、画像・動画を保存。
+Supabase Storageの `event-media` バケットに、画像・動画を保存。
 
 ```
 [image|video]/[user_id]/[timestamp]_[sanitized_filename]
