@@ -377,3 +377,32 @@ hr {
     border-top: 1px solid var(--border-color);
     margin: 2rem 0;
 }
+
+/* css/style.css のフッター部分 */
+
+.site-footer {
+    background-color: #343a40;
+    color: rgba(234, 222, 222, 0.7); /* やや透明度のある白文字 */
+    padding: 2.5rem 1rem; /* 上下のパディングを広めに、左右は少し */
+    text-align: center;
+    font-size: 0.875rem; /* 少し小さめのフォント */
+    margin-top: auto; /* bodyがflex-direction: column; min-height: 100vh; の場合、フッターをページ下部に押しやる */
+    border-top: 3px solid var(--primary-color); /* 上部にアクセントボーダー */
+}
+
+.site-footer p {
+    margin-bottom: 0; /* pタグのデフォルトマージンをリセット */
+    line-height: 1.5; /* 行間を少し確保 */
+}
+
+/* もしフッター内にリンクを追加する場合のスタイル (例) */
+.site-footer a {
+    color: rgba(255, 255, 255, 0.9); /* リンク色を少し明るく */
+    text-decoration: underline;
+    transition: color var(--transition-speed) ease;
+}
+
+.site-footer a:hover {
+    color: #ffffff; /* ホバーで完全に白く */
+    text-decoration: none; /* ホバーで下線を消すなど、お好みで */
+}
