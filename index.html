@@ -121,6 +121,8 @@
         }
 
         .event-card__description {
+            white-space: pre-wrap; /* 改行とスペースを保持し、必要なら折り返す */
+            word-break: break-word; /* 長い単語も折り返す */
             font-size: 0.95rem;
             margin-bottom: 1rem;
             flex-grow: 1; /* 詳細ボタンを一番下に配置するため */

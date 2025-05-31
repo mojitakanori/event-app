@@ -184,7 +184,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${feeDisplay}
                     ${capacityStatusDetail}
                     <p><strong>詳細:</strong></p>
-                    <p>${event.description || '詳細情報はありません。'}</p>
+                    <div class="event-description">
+                        <p>${event.description || '詳細情報はありません。'}</p>
+                    </div>
                 `;
                 generateDynamicFormFields(event.form_schema);
 
