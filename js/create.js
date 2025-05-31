@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const createEventForm = document.getElementById('createEventForm');
     const messageArea = document.getElementById('messageArea');
-    // ... (他の要素取得は変更なし)
     const formFieldsContainer = document.getElementById('formFieldsContainer');
     const addFormFieldButton = document.getElementById('addFormField');
     const eventImagesInput = document.getElementById('eventImages');
@@ -16,14 +15,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     const videoCountInfo = document.getElementById('videoCountInfo');
     const loadingIndicator = document.getElementById('loadingIndicator');
 
+    // --- START OF QUILL EDITOR INITIALIZATION ---
+    const eventDescriptionHiddenInput = document.getElementById('eventDescription'); // 隠しinput
+    const eventDescriptionEditorDiv = document.getElementById('eventDescriptionEditor'); // Quillエディタのdiv
+    let quillEditor; // Quillインスタンスを保持する変数
+
+    if (eventDescriptionEditorDiv && eventDescriptionHiddenInput) {
+        quillEditor = new Quill('#eventDescriptionEditor', {
+            theme: 'snow', // 'snow' はツールバー付きの標準テーマ
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }], // 見出し (レベル1, 2, 3)
+                    ['bold', 'italic', 'underline', 'strike'],        // 太字, イタリック, 下線, 取り消し線
+                    [{ 'color': [] }, { 'background': [] }],          // 文字色, 背景色
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }], // 番号付きリスト, 箇条書きリスト
+                    [{ 'align': [] }], // テキスト揃え
+                    ['link'], // リンク挿入 (画像挿入もしたい場合は ['link', 'image'])
+                    ['clean']                                         // 書式クリア
+                ]
+            },
+            placeholder: 'イベントの詳細や持ち物、注意事項などを入力してください...'
+        });
+    }
+    // --- END OF QUILL EDITOR INITIALIZATION ---
+
     const BUCKET_NAME = 'event-media';
-    const MAX_IMAGE_UPLOADS = 10; 
-    const MAX_VIDEO_UPLOADS = 10; 
+    const MAX_IMAGE_UPLOADS = 10;
+    const MAX_VIDEO_UPLOADS = 10;
 
     let selectedImageFiles = [];
     let selectedVideoFiles = [];
 
-    // handleFileSelection, updatePreviewAndFileArray 関数 (変更なし、前回と同じ)
+    // handleFileSelection, updatePreviewAndFileArray 関数は変更なし (そのまま)
     function updatePreviewAndFileArray(file, previewContainer, selectedFilesArray, fileType, index) { /* ... */ 
         const previewItem = document.createElement('div');
         previewItem.classList.add('preview-item');
@@ -66,11 +89,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     eventImagesInput.addEventListener('change', (e) => handleFileSelection(e, imagePreviewContainer, imageCountInfo, MAX_IMAGE_UPLOADS, selectedImageFiles, 'image'));
     eventVideosInput.addEventListener('change', (e) => handleFileSelection(e, videoPreviewContainer, videoCountInfo, MAX_VIDEO_UPLOADS, selectedVideoFiles, 'video'));
+
+    // generateUniqueFieldName, createFormFieldConfigElement 関数は変更なし (そのまま)
     function generateUniqueFieldName() { /* (変更なし) */ return `field_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`; }
     function createFormFieldConfigElement() { /* (変更なし) */ const fieldDiv = document.createElement('div'); fieldDiv.classList.add('form-field-config'); fieldDiv.innerHTML = `<div><label>表示ラベル:</label><input type="text" data-config-key="label" placeholder="例: 会社名" required></div><div><label>タイプ:</label><select data-config-key="type"><option value="text">一行テキスト</option><option value="textarea">複数行テキスト</option><option value="email">メールアドレス</option><option value="tel">電話番号</option><option value="checkbox">チェックボックス</option></select></div><div><label>必須:</label><input type="checkbox" data-config-key="required"></div><button type="button" class="remove-field-btn">削除</button>`; fieldDiv.dataset.fieldName = generateUniqueFieldName(); fieldDiv.querySelector('.remove-field-btn').addEventListener('click', () => fieldDiv.remove()); return fieldDiv; }
     addFormFieldButton.addEventListener('click', () => formFieldsContainer.appendChild(createFormFieldConfigElement()));
-    async function uploadSingleFile(file, typePrefix = 'media') { /* (変更なし) */ if (!file) return null; function sanitizeFileName(fileName) { const nameParts = fileName.split('.'); const extension = nameParts.length > 1 ? '.' + nameParts.pop() : ''; let baseName = nameParts.join('.'); baseName = baseName.replace(/[^a-zA-Z0-9_.\-]/g, '_').replace(/__+/g, '_').replace(/^_+|_+$/g, ''); if (!baseName) baseName = 'file'; return baseName + extension; } const originalFileName = file.name; const sanitizedFileName = sanitizeFileName(originalFileName); const filePath = `${typePrefix}/${user.id}/${Date.now()}_${sanitizedFileName}_${Math.random().toString(36).substring(2,7)}`; const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file, { cacheControl: '3600', upsert: false }); if (error) { console.error(`Error uploading ${typePrefix} (${originalFileName}):`, error); throw new Error(`${originalFileName}のアップロードに失敗しました: ${error.message}`); } const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(data.path); return publicUrlData.publicUrl; }
 
+    // uploadSingleFile 関数は変更なし (そのまま)
+    async function uploadSingleFile(file, typePrefix = 'media') { /* (変更なし) */ if (!file) return null; function sanitizeFileName(fileName) { const nameParts = fileName.split('.'); const extension = nameParts.length > 1 ? '.' + nameParts.pop() : ''; let baseName = nameParts.join('.'); baseName = baseName.replace(/[^a-zA-Z0-9_.\-]/g, '_').replace(/__+/g, '_').replace(/^_+|_+$/g, ''); if (!baseName) baseName = 'file'; return baseName + extension; } const originalFileName = file.name; const sanitizedFileName = sanitizeFileName(originalFileName); const filePath = `${typePrefix}/${user.id}/${Date.now()}_${sanitizedFileName}_${Math.random().toString(36).substring(2,7)}`; const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file, { cacheControl: '3600', upsert: false }); if (error) { console.error(`Error uploading ${typePrefix} (${originalFileName}):`, error); throw new Error(`${originalFileName}のアップロードに失敗しました: ${error.message}`); } const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(data.path); return publicUrlData.publicUrl; }
 
     createEventForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -87,40 +113,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const eventNameInput = document.getElementById('eventName');
-        const eventName = eventNameInput.value.trim(); // .trim() を追加
+        const eventName = eventNameInput.value.trim();
 
-        // イベント名必須チェック
-        if (!eventName) { // HTMLのrequiredに加え、JSでもチェック
+        if (!eventName) {
             messageArea.innerHTML = '<p class="error-message">イベント名を入力してください。</p>';
-            eventNameInput.focus(); // フォーカスを当てる
+            eventNameInput.focus();
             loadingIndicator.style.display = 'none';
             submitButton.disabled = false;
             return;
         }
-        
+
+        // --- START OF QUILL EDITOR CONTENT RETRIEVAL ---
+        let eventDescriptionContent = ''; // デフォルトは空文字
+        if (quillEditor && eventDescriptionHiddenInput) {
+            // Quillエディタの内容 (HTML) を取得
+            const descriptionHtml = quillEditor.root.innerHTML;
+            // 実質的に空（例: <p><br></p> のみ）の場合は空文字またはnullをセット
+            if (quillEditor.getText().trim().length === 0) {
+                eventDescriptionHiddenInput.value = ''; // または null (DBスキーマによる)
+            } else {
+                eventDescriptionHiddenInput.value = descriptionHtml;
+            }
+            eventDescriptionContent = eventDescriptionHiddenInput.value;
+        }
+        // --- END OF QUILL EDITOR CONTENT RETRIEVAL ---
+
         let imageUrls = [];
         let videoUrls = [];
-        // ... (ファイルアップロード処理は変更なし)
         try {
-            if (selectedImageFiles.length > 0) { /* ... */ for (let i = 0; i < selectedImageFiles.length; i++) { loadingIndicator.textContent = `画像をアップロード中 (${i + 1}/${selectedImageFiles.length}): ${selectedImageFiles[i].name}...`; const url = await uploadSingleFile(selectedImageFiles[i], 'image'); if (url) imageUrls.push(url); } }
-            if (selectedVideoFiles.length > 0) { /* ... */ for (let i = 0; i < selectedVideoFiles.length; i++) { loadingIndicator.textContent = `動画をアップロード中 (${i + 1}/${selectedVideoFiles.length}): ${selectedVideoFiles[i].name}...`; const url = await uploadSingleFile(selectedVideoFiles[i], 'video'); if (url) videoUrls.push(url); } }
+            if (selectedImageFiles.length > 0) { for (let i = 0; i < selectedImageFiles.length; i++) { loadingIndicator.textContent = `画像をアップロード中 (${i + 1}/${selectedImageFiles.length}): ${selectedImageFiles[i].name}...`; const url = await uploadSingleFile(selectedImageFiles[i], 'image'); if (url) imageUrls.push(url); } }
+            if (selectedVideoFiles.length > 0) { for (let i = 0; i < selectedVideoFiles.length; i++) { loadingIndicator.textContent = `動画をアップロード中 (${i + 1}/${selectedVideoFiles.length}): ${selectedVideoFiles[i].name}...`; const url = await uploadSingleFile(selectedVideoFiles[i], 'video'); if (url) videoUrls.push(url); } }
         } catch (uploadError) { messageArea.innerHTML += `<p class="error-message">${uploadError.message}</p>`; loadingIndicator.style.display = 'none'; submitButton.disabled = false; return; }
 
-
-        const formSchema = []; 
-        // ... (formSchemaの構築は変更なし)
+        const formSchema = [];
         const fieldConfigElements = formFieldsContainer.querySelectorAll('.form-field-config');
         let schemaValid = true;
-        fieldConfigElements.forEach(el => { /* ... */ const label = el.querySelector('input[data-config-key="label"]').value.trim(); const type = el.querySelector('select[data-config-key="type"]').value; const required = el.querySelector('input[data-config-key="required"]').checked; const name = el.dataset.fieldName; if (!label) { schemaValid = false; return; } formSchema.push({ name, label, type, required }); });
-        if (!schemaValid) { /* ... */ messageArea.innerHTML += '<p class="error-message">追加フォーム項目の「表示ラベル」を入力してください。</p>'; loadingIndicator.style.display = 'none'; submitButton.disabled = false; return; }
+        fieldConfigElements.forEach(el => { const label = el.querySelector('input[data-config-key="label"]').value.trim(); const type = el.querySelector('select[data-config-key="type"]').value; const required = el.querySelector('input[data-config-key="required"]').checked; const name = el.dataset.fieldName; if (!label) { schemaValid = false; return; } formSchema.push({ name, label, type, required }); });
+        if (!schemaValid) { messageArea.innerHTML += '<p class="error-message">追加フォーム項目の「表示ラベル」を入力してください。</p>'; loadingIndicator.style.display = 'none'; submitButton.disabled = false; return; }
 
-        // 新しいフィールドの値を取得
         const eventEndDate = document.getElementById('eventEndDate').value;
         const participationFee = document.getElementById('participationFee').value;
         const maxParticipantsInput = document.getElementById('maxParticipants').value;
         const maxParticipants = maxParticipantsInput ? parseInt(maxParticipantsInput, 10) : null;
 
-        if (maxParticipants !== null && (isNaN(maxParticipants) || maxParticipants < 1)) { // ← 追加バリデーション
+        if (maxParticipants !== null && (isNaN(maxParticipants) || maxParticipants < 1)) {
             messageArea.innerHTML = '<p class="error-message">最大参加人数は1以上の数値を入力してください。</p>';
             document.getElementById('maxParticipants').focus();
             loadingIndicator.style.display = 'none';
@@ -128,30 +164,35 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         const eventData = {
-            name: eventName, // trim() された値を使用
-            description: document.getElementById('eventDescription').value,
+            name: eventName,
+            description: eventDescriptionContent, // ★ 修正: Quillエディタから取得した内容を使用
             event_date: document.getElementById('eventDate').value || null,
-            event_end_date: eventEndDate || null, // ← 追加
+            event_end_date: eventEndDate || null,
             location: document.getElementById('eventLocation').value,
-            participation_fee: participationFee.trim() || null, // ← 追加 (空ならnull)
+            participation_fee: participationFee.trim() || null,
             max_participants: maxParticipants,
-            image_urls: imageUrls.length > 0 ? imageUrls : null, 
-            video_urls: videoUrls.length > 0 ? videoUrls : null,  
+            image_urls: imageUrls.length > 0 ? imageUrls : null,
+            video_urls: videoUrls.length > 0 ? videoUrls : null,
             form_schema: formSchema.length > 0 ? formSchema : null,
             created_at: new Date(new Date().getTime() + (9 * 60 * 60 * 1000))
-            // user_id はRLSで自動設定されるか、バックエンドで設定（今回はRLS前提）
         };
-        
+
         loadingIndicator.textContent = "イベント情報を保存中...";
         try {
             const { data, error } = await supabase.from('events').insert([eventData]).select();
             if (error) throw error;
             messageArea.innerHTML = '<p class="success-message">イベントが作成されました！ダッシュボードへ移動します。</p>';
-            createEventForm.reset();
-            // ... (プレビュークリア処理は変更なし)
+            createEventForm.reset(); // フォーム全体のリセット
+
+            // --- START OF QUILL EDITOR RESET ---
+            if (quillEditor) {
+                quillEditor.setText(''); // Quillエディタの内容をクリア
+            }
+            // --- END OF QUILL EDITOR RESET ---
+
             imagePreviewContainer.innerHTML = ''; selectedImageFiles.length = 0; imageCountInfo.textContent = '';
             videoPreviewContainer.innerHTML = ''; selectedVideoFiles.length = 0; videoCountInfo.textContent = '';
-            formFieldsContainer.innerHTML = ''; 
+            formFieldsContainer.innerHTML = '';
             setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
         } catch (dbError) {
             console.error('Error creating event in DB:', dbError.message);
@@ -160,5 +201,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadingIndicator.style.display = 'none';
             submitButton.disabled = false;
         }
-    });
+    }); 
 });
