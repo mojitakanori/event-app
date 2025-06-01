@@ -150,6 +150,19 @@
                             <label for="eventLocation">場所:</label>
                             <input type="text" id="eventLocation" name="eventLocation">
                         </div>
+                        
+                        <div class="form-group">
+                            <label for="eventArea">エリア(必須):</label>
+                            <select id="eventArea" name="eventArea" required>
+                                <option value="">エリアを選択してください</option>
+                                <option value="tokyo">東京エリア</option>
+                                <option value="osaka">大阪エリア</option>
+                                <option value="online">オンライン</option>
+                                <option value="other">その他</option>
+                                <!-- 必要に応じて他のエリアを追加 -->
+                            </select>
+                        </div>
+                        
                         <div class="form-group">
                             <label for="eventDate">開始日時:</label>
                             <input type="datetime-local" id="eventDate" name="eventDate">
@@ -169,11 +182,10 @@
                     </div>
 
                     <div class="form-group full-width">
-                        <label for="eventDescriptionEditor">説明:</label> <!-- labelのfor属性を変更 -->
-                        <div id="eventDescriptionEditorContainer" style="margin-bottom: 1rem;"> <!-- Quillエディタのコンテナ -->
-                            <div id="eventDescriptionEditor" style="height: 250px;"></div> <!-- Quillがこの要素をエディタにする -->
+                        <label for="eventDescriptionEditor">説明:</label>
+                        <div id="eventDescriptionEditorContainer" style="margin-bottom: 1rem;">
+                            <div id="eventDescriptionEditor" style="height: 250px;"></div>
                         </div>
-                        <!-- フォーム送信時にエディタの内容をバックエンドに送るための隠しinput -->
                         <input type="hidden" id="eventDescription" name="eventDescription">
                     </div>
                     

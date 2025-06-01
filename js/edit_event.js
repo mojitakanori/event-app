@@ -11,17 +11,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Form fields
     const eventNameInput = document.getElementById('eventName');
-    // const eventDescriptionInput = document.getElementById('eventDescription'); // ← これは隠しinputになるので、直接の操作対象から外す
     const eventDateInput = document.getElementById('eventDate');
     const eventEndDateInput = document.getElementById('eventEndDate');
     const eventLocationInput = document.getElementById('eventLocation');
+    // ▼▼▼ START OF MODIFICATION (Add eventAreaInput) ▼▼▼
+    const eventAreaInput = document.getElementById('eventArea'); // エリア選択のselect要素
+    // ▲▲▲ END OF MODIFICATION ▲▲▲
     const participationFeeInput = document.getElementById('participationFee');
     const maxParticipantsInput = document.getElementById('maxParticipants');
 
-    // --- START OF QUILL EDITOR INITIALIZATION ---
-    const eventDescriptionHiddenInput = document.getElementById('eventDescription'); // 隠しinput
-    const eventDescriptionEditorDiv = document.getElementById('eventDescriptionEditor'); // Quillエディタのdiv
-    let quillEditor; // Quillインスタンスを保持する変数
+    const eventDescriptionHiddenInput = document.getElementById('eventDescription');
+    const eventDescriptionEditorDiv = document.getElementById('eventDescriptionEditor');
+    let quillEditor;
 
     if (eventDescriptionEditorDiv && eventDescriptionHiddenInput) {
         quillEditor = new Quill('#eventDescriptionEditor', {
@@ -40,12 +41,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             placeholder: 'イベントの詳細や持ち物、注意事項などを入力してください...'
         });
     }
-    // --- END OF QUILL EDITOR INITIALIZATION ---
 
-
-    // File fields and previews (既存のコードはそのまま)
     const currentImagesContainer = document.getElementById('currentImagesContainer');
-    // ... (以下、変更なし) ...
     const eventNewImagesInput = document.getElementById('eventNewImages');
     const newImageCountInfo = document.getElementById('newImageCountInfo');
     const newImagePreviewContainer = document.getElementById('newImagePreviewContainer');
@@ -77,12 +74,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     eventIdInput.value = currentEventIdToEdit;
 
-    // --- Helper functions (変更なし、そのまま) ---
-    function sanitizeFileName(fileName) { /* ... */ const nameParts = fileName.split('.'); const extension = nameParts.length > 1 ? '.' + nameParts.pop() : ''; let baseName = nameParts.join('.'); baseName = baseName.replace(/[^a-zA-Z0-9_.\-]/g, '_').replace(/__+/g, '_').replace(/^_+|_+$/g, ''); if (!baseName) baseName = 'file'; return baseName + extension; }
-    async function uploadSingleFile(file, typePrefix = 'media') { /* ... */ if (!file) return null; const originalFileName = file.name; const sanitizedFileName = sanitizeFileName(originalFileName); const filePath = `${typePrefix}/${user.id}/${Date.now()}_${sanitizedFileName}_${Math.random().toString(36).substring(2,7)}`; const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file, { cacheControl: '3600', upsert: false }); if (error) { console.error(`Error uploading ${typePrefix} (${originalFileName}):`, error); throw new Error(`${originalFileName}のアップロードに失敗しました: ${error.message}`); } const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(data.path); return publicUrlData.publicUrl; }
-    function generateUniqueFieldName() { /* ... */ return `field_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`; }
+    // Helper functions (変更なし、そのまま)
+    function sanitizeFileName(fileName) { /* (変更なし) */ const nameParts = fileName.split('.'); const extension = nameParts.length > 1 ? '.' + nameParts.pop() : ''; let baseName = nameParts.join('.'); baseName = baseName.replace(/[^a-zA-Z0-9_.\-]/g, '_').replace(/__+/g, '_').replace(/^_+|_+$/g, ''); if (!baseName) baseName = 'file'; return baseName + extension; }
+    async function uploadSingleFile(file, typePrefix = 'media') { /* (変更なし) */ if (!file) return null; const originalFileName = file.name; const sanitizedFileName = sanitizeFileName(originalFileName); const filePath = `${typePrefix}/${user.id}/${Date.now()}_${sanitizedFileName}_${Math.random().toString(36).substring(2,7)}`; const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file, { cacheControl: '3600', upsert: false }); if (error) { console.error(`Error uploading ${typePrefix} (${originalFileName}):`, error); throw new Error(`${originalFileName}のアップロードに失敗しました: ${error.message}`); } const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(data.path); return publicUrlData.publicUrl; }
+    function generateUniqueFieldName() { /* (変更なし) */ return `field_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`; }
     
-    function updateNewFilePreview(file, previewContainer, selectedFilesArray, fileType) { /* ... */
+    function updateNewFilePreview(file, previewContainer, selectedFilesArray, fileType) { /* (変更なし) */
         const previewItem = document.createElement('div'); previewItem.classList.add('preview-item');
         let mediaElement;
         if (file.type.startsWith('image/')) mediaElement = document.createElement('img');
@@ -100,7 +97,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         previewItem.appendChild(mediaElement); previewItem.appendChild(removeBtn); previewContainer.appendChild(previewItem);
     }
-    function handleNewFileSelection(event, previewContainer, countInfo, maxUploads, targetSelectedFilesArray, fileType, existingCount) { /* ... */
+    function handleNewFileSelection(event, previewContainer, countInfo, maxUploads, targetSelectedFilesArray, fileType, existingCount) { /* (変更なし) */
         const currentFiles = Array.from(event.target.files);
         if (existingCount + targetSelectedFilesArray.length + currentFiles.length > maxUploads) {
             messageArea.innerHTML = `<p class="error-message">${fileType === 'image' ? '画像' : '動画'}は合計${maxUploads}個までです。既存:${existingCount}, 新規選択:${targetSelectedFilesArray.length + currentFiles.length}</p>`;
@@ -115,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     eventNewImagesInput.addEventListener('change', (e) => handleNewFileSelection(e, newImagePreviewContainer, newImageCountInfo, MAX_IMAGE_UPLOADS, newSelectedImageFiles, 'image', existingImageUrls.length));
     eventNewVideosInput.addEventListener('change', (e) => handleNewFileSelection(e, newVideoPreviewContainer, newVideoCountInfo, MAX_VIDEO_UPLOADS, newSelectedVideoFiles, 'video', existingVideoUrls.length));
 
-    function displayCurrentMedia(urls, container, type) { /* ... (変更なし、そのまま) ... */
+    function displayCurrentMedia(urls, container, type) { /* (変更なし) */
         container.innerHTML = '';
         (urls || []).forEach((url, index) => {
             if (!url) return;
@@ -164,7 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    function createFormFieldConfigElement(fieldData = {}) { /* ... (変更なし、そのまま) ... */
+    function createFormFieldConfigElement(fieldData = {}) { /* (変更なし) */
         const fieldDiv = document.createElement('div');
         fieldDiv.classList.add('form-field-config');
         const fieldName = fieldData.name || generateUniqueFieldName();
@@ -180,13 +177,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     addFormFieldButton.addEventListener('click', () => formFieldsContainer.appendChild(createFormFieldConfigElement()));
 
+    // ▼▼▼ START OF MODIFIED FUNCTION (loadEventData) ▼▼▼
     async function loadEventData() {
         formLoadingMessage.style.display = 'block';
         editEventForm.style.display = 'none';
         try {
             const { data: event, error } = await supabase
                 .from('events')
-                .select('*')
+                .select('*') // `area` カラムも取得されるはず
                 .eq('id', currentEventIdToEdit)
                 .eq('user_id', user.id)
                 .single();
@@ -198,24 +196,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (event) {
                 eventNameInput.value = event.name || '';
-                // eventDescriptionInput.value = event.description || ''; // ← 元のtextareaへのセットは不要
-
-                // --- START OF QUILL EDITOR CONTENT LOADING ---
+                
                 if (quillEditor) {
                     if (event.description) {
-                        // QuillはHTMLを直接セットするより、Delta形式か、安全ならinnerHTMLで。
-                        // ここではinnerHTMLを使うが、サニタイズ済みのHTMLであることを期待。
-                        // もしDelta形式で保存していれば quillEditor.setContents(event.description_delta); のようにする。
                         quillEditor.root.innerHTML = event.description;
                     } else {
-                        quillEditor.setText(''); // 空の場合
+                        quillEditor.setText('');
                     }
                 }
-                // --- END OF QUILL EDITOR CONTENT LOADING ---
 
                 if (event.event_date) eventDateInput.value = new Date(event.event_date).toISOString().substring(0, 16);
                 if (event.event_end_date) eventEndDateInput.value = new Date(event.event_end_date).toISOString().substring(0, 16);
                 eventLocationInput.value = event.location || '';
+                
+                if (eventAreaInput) { // eventAreaInput が存在する場合のみ処理
+                    eventAreaInput.value = event.area || ''; // データベースの値をセット。存在しない場合は空文字
+                }
+                
                 participationFeeInput.value = event.participation_fee || '';
                 maxParticipantsInput.value = event.max_participants || '';
 
@@ -243,7 +240,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
-    // フォーム送信処理 (更新)
     editEventForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         messageArea.innerHTML = '';
@@ -270,19 +266,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // --- Quillエディタの内容を取得 ---
         let eventDescriptionContent = '';
-        if (quillEditor && eventDescriptionHiddenInput) { // eventDescriptionHiddenInputもチェック（念のため）
+        if (quillEditor && eventDescriptionHiddenInput) {
             const descriptionHtml = quillEditor.root.innerHTML;
-            // 実質的に空（例: <p><br></p> のみ）の場合は空文字またはnullをセット
             if (quillEditor.getText().trim().length === 0) {
-                eventDescriptionHiddenInput.value = ''; // または null (DBスキーマによる)
+                eventDescriptionHiddenInput.value = '';
             } else {
                 eventDescriptionHiddenInput.value = descriptionHtml;
             }
             eventDescriptionContent = eventDescriptionHiddenInput.value;
         }
-        // --- ここまでQuillエディタの内容取得 ---
 
         let uploadedImageUrls = [...existingImageUrls];
         let uploadedVideoUrls = [...existingVideoUrls];
@@ -315,37 +308,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         const fieldConfigElements = formFieldsContainer.querySelectorAll('.form-field-config');
         let schemaValid = true;
         fieldConfigElements.forEach(el => {
-            const labelInput = el.querySelector('input[data-config-key="label"]'); // ラベル入力フィールドを取得
+            const labelInput = el.querySelector('input[data-config-key="label"]');
             const label = labelInput.value.trim();
             const type = el.querySelector('select[data-config-key="type"]').value;
             const required = el.querySelector('input[data-config-key="required"]').checked;
             const name = el.dataset.fieldName;
             if (!label) {
-                if (schemaValid) labelInput.focus(); // 最初の空のラベルにフォーカス
+                if (schemaValid) labelInput.focus();
                 schemaValid = false;
-                // return; // forEach内でのreturnはループを抜けないため、フラグ管理で対応
             }
             formSchema.push({ name, label, type, required });
         });
 
-        if (!schemaValid) { // ループ後にまとめてチェック
+        if (!schemaValid) {
             messageArea.innerHTML += '<p class="error-message">追加フォーム項目の「表示ラベル」を入力してください。</p>';
             loadingIndicator.style.display = 'none';
             submitButton.disabled = false;
             return;
         }
 
+        const eventArea = eventAreaInput ? eventAreaInput.value : null; // eventAreaInputが存在すれば値を取得、なければnull
 
         const eventDataToUpdate = {
             name: eventName,
-            description: eventDescriptionContent, // ★★★ 修正点: eventDescriptionContent を使用 ★★★
+            description: eventDescriptionContent,
             event_date: eventDateInput.value || null,
             event_end_date: eventEndDateInput.value || null,
             location: eventLocationInput.value,
+            area: eventArea || null, // 取得したエリアの値を更新データに追加。未選択または要素がなければnull
             participation_fee: participationFeeInput.value.trim() || null,
             max_participants: maxParticipantsVal,
             image_urls: uploadedImageUrls.length > 0 ? uploadedImageUrls : null,
-            video_urls: uploadedVideoUrls.length > 0 ? uploadedVideoUrls : null, // 修正済み
+            video_urls: uploadedVideoUrls.length > 0 ? uploadedVideoUrls : null,
             form_schema: formSchema.length > 0 ? formSchema : null,
         };
 
@@ -360,8 +354,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (error) throw error;
 
             messageArea.innerHTML = '<p class="success-message">イベント情報が更新されました。ダッシュボードに戻ります。</p>';
-            newSelectedImageFiles = []; // 送信成功したらクリア
-            newSelectedVideoFiles = []; // 送信成功したらクリア
+            newSelectedImageFiles = [];
+            newSelectedVideoFiles = [];
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
             }, 1500);
@@ -374,6 +368,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             submitButton.disabled = false;
         }
     });
-
-    loadEventData(); // ページロード時にイベントデータを読み込む
+    loadEventData();
 });

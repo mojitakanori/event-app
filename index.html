@@ -22,8 +22,15 @@
             margin-bottom: 2rem;
             box-shadow: var(--box-shadow-sm);
             display: flex;
+            flex-wrap: wrap; /* フィルターが増えた場合に折り返すように */
             align-items: center;
-            gap: 1rem;
+            gap: 1.5rem; /* フィルター間のスペースを少し広げる */
+        }
+        
+        .filter-group { /* 各フィルター（ラベル＋セレクト）をまとめる */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .filter-section label {
@@ -144,16 +151,28 @@
             display: block;
         }
 
-        @media (max-width: 576px) {
-            .event-grid {
-                grid-template-columns: 1fr; /* スマホでは1カラム */
-            }
+        @media (max-width: 768px) { /* 中間ブレークポイント調整 */
             .filter-section {
                 flex-direction: column;
                 align-items: stretch;
             }
+            .filter-group { /* スマホ表示ではグループも縦並び */
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.25rem;
+                margin-bottom: 0.75rem;
+            }
+             .filter-group:last-child {
+                margin-bottom: 0;
+            }
             .filter-section select {
                 width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .event-grid {
+                grid-template-columns: 1fr; /* スマホでは1カラム */
             }
         }
     </style>
@@ -182,11 +201,23 @@
         <h2 class="page-title">開催中のイベント</h2>
 
         <section class="filter-section">
-            <label for="organizerFilter">開催者で絞り込む:</label>
-            <select id="organizerFilter">
-                <option value="">すべての開催者</option>
-                <!-- 開催者リストはJSでここに挿入されます -->
-            </select>
+            <div class="filter-group">
+                <label for="organizerFilter">開催者で絞り込む:</label>
+                <select id="organizerFilter">
+                    <option value="">すべての開催者</option>
+                    <!-- 開催者リストはJSでここに挿入されます -->
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="areaFilter">エリアで絞り込む:</label>
+                <select id="areaFilter">
+                    <option value="">すべてのエリア</option>
+                    <option value="tokyo">東京エリア</option>
+                    <option value="osaka">大阪エリア</option>
+                    <option value="online">オンライン</option>
+                    <option value="other">その他</option>
+                </select>
+            </div>
         </section>
         
         <div id="messageArea" class="message-area">
@@ -197,7 +228,7 @@
         
         <ul id="eventList" class="event-grid">
         </ul>
-        <p id="noEventsMessage" class="message warning-message" style="display:none; text-align:center;">現在、表示できるイベントはありません。</p>
+        <p id="noEventsMessage" class="message warning-message" style="display:none; text-align:center;">申し訳ございません。<br>現在、検索と一致するイベントがございません。<br>検索情報を変更してお試しください。</p>
     </main>
 
     <footer class="site-footer">

@@ -1,10 +1,10 @@
 // js/index.js
 document.addEventListener('DOMContentLoaded', async () => {
-    const eventListUl = document.getElementById('eventList'); // これは <ul id="eventList" class="event-grid"> を指す
+    const eventListUl = document.getElementById('eventList');
     const loadingMessage = document.getElementById('loadingMessage');
     const noEventsMessage = document.getElementById('noEventsMessage');
     const organizerFilterSelect = document.getElementById('organizerFilter');
-    // messageArea は index.html の id="messageArea" を使う
+    const areaFilterSelect = document.getElementById('areaFilter');
     const messageArea = document.getElementById('messageArea'); 
 
     let allEventsData = []; 
@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
         
+        // 既存のオプションをクリア (最初の「すべての開催者」以外)
         while (organizerFilterSelect.options.length > 1) {
             organizerFilterSelect.remove(1);
         }
@@ -41,42 +42,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     function displayEvents(eventsDataToDisplay) {
         if (!eventListUl || !noEventsMessage) return;
 
-        eventListUl.innerHTML = ''; // 既存のリストをクリア
+        eventListUl.innerHTML = '';
         if (eventsDataToDisplay && eventsDataToDisplay.length > 0) {
             noEventsMessage.style.display = 'none';
             eventsDataToDisplay.forEach(eventDataObj => {
                 const event = eventDataObj.event; 
                 const participantCount = eventDataObj.participantCount;
-
+                
                 const listItem = document.createElement('li');
                 listItem.classList.add('event-card'); // カードスタイルを適用
 
-                // 日時整形
                 let dateTimeStr = '日時未定';
                 if (event.event_date) {
-                    // Date オブジェクトを作成せず、文字列として直接処理
                     const startDateStr = event.event_date.replace('T', ' ').substring(0, 16);
                     dateTimeStr = startDateStr;
-                    
                     if (event.event_end_date) {
                         const endDateStr = event.event_end_date.replace('T', ' ').substring(0, 16);
-                        
-                        // 同じ日付かどうかの判定（文字列で比較）
                         if (startDateStr.substring(0, 10) === endDateStr.substring(0, 10)) {
-                            dateTimeStr += ` 〜 ${endDateStr.substring(11, 16)}`; // 時間部分のみ
+                            dateTimeStr += ` 〜 ${endDateStr.substring(11, 16)}`;
                         } else {
                             dateTimeStr += ` 〜 ${endDateStr}`;
                         }
                     }
                 }
                 
-                // 画像 (最初の1枚、なければプレースホルダーや非表示)
-                let imageUrl = 'assets/placeholder_event_image.png'; // デフォルトのプレースホルダー画像パス
+                let imageUrl = 'assets/placeholder_event_image.png';
                 if (event.image_urls && event.image_urls.length > 0 && event.image_urls[0]) {
                     imageUrl = event.image_urls[0];
                 }
                 
-                // 主催者名
                 let organizerDisplay = '主催者情報なし'; 
                 if (event.profiles && event.profiles.community_name) {
                     organizerDisplay = event.profiles.community_name;
@@ -84,10 +78,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                      organizerDisplay = `ID: ${event.user_id.substring(0,6)}...`;
                 }
                 
-                // 参加費用
                 const feeDisplay = event.participation_fee || '未設定';
                 
-                // 参加状況・満員表示
                 let capacityBadgeHtml = '';
                 let capacityText = '';
                 if (event.max_participants !== null && event.max_participants !== undefined) {
@@ -96,11 +88,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     capacityText = isFull ? '満員御礼' : `${participantCount} / ${event.max_participants} 人`;
                 } else { 
                     capacityText = `${participantCount} 人`;
-                    // capacityBadgeHtml は最大参加人数がない場合は表示しないか、別の情報を表示
                 }
 
-                // 説明文の省略
                 const descriptionShort = event.description ? (event.description.length > 80 ? event.description.substring(0, 80) + '…' : event.description) : '詳細はクリック';
+                
+                let areaDisplay = 'エリア未設定';
+                if (event.area) {
+                    // HTMLのoptionのvalueと表示テキストを合わせるか、ここでマッピングする
+                    const areaMap = {
+                        "tokyo": "東京エリア", "osaka": "大阪エリア", "nagoya": "名古屋エリア",
+                        "fukuoka": "福岡エリア", "hokkaido": "北海道エリア",
+                        "online": "オンライン", "other": "その他"
+                    };
+                    areaDisplay = areaMap[event.area.toLowerCase()] || event.area; // DBの値が小文字と仮定
+                }
 
 
                 listItem.innerHTML = `
@@ -112,28 +113,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <h3 class="event-card__title"><a href="detail.html?id=${event.id}">${event.name || '名称未設定'}</a></h3>
                         <div class="event-card__meta">
                             <span class="event-card__meta-item">
-                                <!-- SVGアイコンの例 (カレンダー) -->
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M4.75 0a.75.75 0 01.75.75V2h5V.75a.75.75 0 011.5 0V2h.25A2.75 2.75 0 0115 4.75v8.5A2.75 2.75 0 0112.25 16H3.75A2.75 2.75 0 011 13.25v-8.5A2.75 2.75 0 013.75 2H4V.75A.75.75 0 014.75 0zm0 3.5h6.5a.25.25 0 01.25.25V6h-7V3.75a.25.25 0 01.25-.25zM3.5 7.5v5.75c0 .138.112.25.25.25h8.5a.25.25 0 00.25-.25V7.5h-9z"></path></svg>
                                 <strong>日時:</strong> ${dateTimeStr}
                             </span>
                             <span class="event-card__meta-item">
-                                <!-- SVGアイコンの例 (場所) -->
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M11.538 8.427a.75.75 0 01-.011 1.05l-4.25 3.5a.75.75 0 01-1.054-1.05l4.25-3.5a.75.75 0 011.065 0zm-1.13 1.475a.75.75 0 00.01-1.05l-4.25-3.5a.75.75 0 00-1.054 1.05l4.25 3.5a.75.75 0 001.044 0zM8 1a3.5 3.5 0 00-3.5 3.5c0 .344.036.68.105 1.006L8 15.08l3.395-9.574A3.518 3.518 0 0011.5 4.5 3.5 3.5 0 008 1zm0 1c1.38 0 2.5 1.12 2.5 2.5S9.38 7 8 7 5.5 5.88 5.5 4.5 6.62 2 8 2z"></path></svg>
                                 <strong>場所:</strong> ${event.location || '未定'}
                             </span>
                             <span class="event-card__meta-item">
-                                <!-- SVGアイコンの例 (ユーザー) -->
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8 .75A7.25 7.25 0 00.75 8a7.25 7.25 0 0011.255 6.516.75.75 0 10-.93-1.17A5.75 5.75 0 012.25 8a5.75 5.75 0 019.973-4.32.75.75 0 10.93-1.17A7.228 7.228 0 008 .75zM13.5 8a5.5 5.5 0 10-11 0 5.5 5.5 0 0011 0zm-10.22.242a.75.75 0 111.06-1.06l2.248 2.247L9.293 6.77a.75.75 0 111.06 1.06L7.105 11.077a.75.75 0 01-1.06 0L3.28 8.242z"></path></svg>
+                                <strong>エリア:</strong> ${areaDisplay}
+                            </span>
+                            <span class="event-card__meta-item">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M10.5 5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm.061 3.073a4 4 0 10-5.123 0 6.005 6.005 0 00-2.9 5.142.75.75 0 101.498.07 4.5 4.5 0 018.97 0 .75.75 0 101.498-.07 6.004 6.004 0 00-2.9-5.142z"></path></svg>
                                 <strong>主催:</strong> ${organizerDisplay}
                             </span>
                             <span class="event-card__meta-item">
-                                <!-- SVGアイコンの例 (円) -->
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm0 1A8 8 0 108 0a8 8 0 000 16z"></path><path d="M9 4.5a1 1 0 11-2 0 1 1 0 012 0zM10 8.5a1 1 0 11-2 0V10a1 1 0 11-2 0V8.5a3 3 0 015.196-2.016A1.5 1.5 0 0111.5 8c0 .828-.448 1.5-1 1.5h-.5z"></path></svg>
                                 <strong>費用:</strong> ${feeDisplay}
                             </span>
                             ${ (event.max_participants !== null && event.max_participants !== undefined) ? 
                                 `<span class="event-card__meta-item">
-                                    <!-- SVGアイコンの例 (グループ) -->
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path d="M12.5 7.5a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm-.757-3.15A5.986 5.986 0 008 2.5c-1.59 0-3.032.622-4.111 1.637a.75.75 0 101.048 1.076A4.485 4.485 0 018 4c.997 0 1.914.323 2.65 0.86A.75.75 0 0011.743 4.35zm-1.71 4.783C9.435 10.03 8.388 9.5 7.015 9.5h-.03C5.612 9.5 4.565 10.03 3.967 10.866a.75.75 0 001.066 1.068C5.456 11.412 6.188 11 7 11h-.015c.812 0 1.544.412 1.968.934a.75.75 0 101.066-1.068zM14.5 10.5a3 3 0 11-6 0 3 3 0 016 0zm-4 .75a.75.75 0 000-1.5h-2.5a.75.75 0 000 1.5h2.5z"></path></svg>
                                     <strong>参加状況:</strong> ${capacityText}
                                 </span>` :
@@ -157,9 +157,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+
+    function applyFilters() {
+        const selectedOrganizerId = organizerFilterSelect ? organizerFilterSelect.value : '';
+        const selectedArea = areaFilterSelect ? areaFilterSelect.value : '';
+
+        let filteredEventData = allEventsData;
+
+        // 開催者フィルター
+        if (selectedOrganizerId) {
+            filteredEventData = filteredEventData.filter(ed => ed.event.user_id === selectedOrganizerId);
+        }
+
+        // エリアフィルター
+        if (selectedArea) {
+            if (selectedArea === "none") { // "エリア未設定" の場合
+                filteredEventData = filteredEventData.filter(ed => !ed.event.area); // area が null または空文字
+            } else {
+                filteredEventData = filteredEventData.filter(ed => ed.event.area && ed.event.area.toLowerCase() === selectedArea.toLowerCase());
+            }
+        }
+        displayEvents(filteredEventData);
+    }
+
     async function fetchAndDisplayInitialEvents() {
-        // ... (この関数の中身は前回提示した RPC版 または クライアントサイドN+1版 のどちらかを選択して使用。変更なし)
-        // 以下はクライアントサイドN+1版のロジックのままです。RPC版が推奨。
         if (!loadingMessage || !eventListUl || !noEventsMessage) {
              console.error("Required DOM elements for events display not found.");
              return;
@@ -173,7 +194,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const { data, error } = await supabase.from('events')
                     .select(`
-                        id, name, description, event_date, event_end_date, location, 
+                        id, name, description, event_date, event_end_date, location, area,
                         participation_fee, max_participants, image_urls, video_urls, user_id,
                         profiles (id, community_name)
                     `) 
@@ -183,7 +204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (error.code === 'PGRST200' && error.message.includes("Could not find a relationship")) {
                          console.warn("Relationship 'events' -> 'profiles' not found. Fetching events without profiles.");
                          const { data: fallbackData, error: fallbackError } = await supabase.from('events')
-                            .select('id, name, description, event_date, event_end_date, location, participation_fee, max_participants, image_urls, video_urls, user_id')
+                            .select('id, name, description, event_date, event_end_date, location, area, participation_fee, max_participants, image_urls, video_urls, user_id')
                             .order('event_date', { ascending: true });
                         if (fallbackError) throw fallbackError; 
                         events = fallbackData || [];
@@ -196,7 +217,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (e) { 
                  console.error('Error fetching events (primary or first fallback):', e.message);
                  const { data: finalFallbackData, error: finalFallbackError } = await supabase.from('events')
-                    .select('id, name, description, event_date, event_end_date, location, participation_fee, max_participants, image_urls, video_urls, user_id')
+                    .select('id, name, description, event_date, event_end_date, location, area, participation_fee, max_participants, image_urls, video_urls, user_id')
                     .order('event_date', { ascending: true });
                 if (finalFallbackError) throw finalFallbackError;
                 events = finalFallbackData || [];
@@ -219,8 +240,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             
             allEventsData = eventsWithParticipantCounts; 
-            displayEvents(allEventsData);
             populateOrganizerFilter(allEventsData);
+            applyFilters(); // 初期表示もフィルターを通して行う
 
         } catch (finalError) { 
             console.error('Failed to fetch any event data:', finalError.message);
@@ -233,17 +254,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (organizerFilterSelect) {
-        organizerFilterSelect.addEventListener('change', () => {
-            const selectedOrganizerId = organizerFilterSelect.value;
-            let filteredEventData;
-            if (selectedOrganizerId) {
-                filteredEventData = allEventsData.filter(ed => ed.event.user_id === selectedOrganizerId);
-            } else {
-                filteredEventData = allEventsData;
-            }
-            displayEvents(filteredEventData);
-        });
+        organizerFilterSelect.addEventListener('change', applyFilters);
     }
-
+    if (areaFilterSelect) { // areaFilterSelect が存在する場合のみリスナーを追加
+        areaFilterSelect.addEventListener('change', applyFilters);
+    }
     fetchAndDisplayInitialEvents();
 });

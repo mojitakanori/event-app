@@ -15,29 +15,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     const videoCountInfo = document.getElementById('videoCountInfo');
     const loadingIndicator = document.getElementById('loadingIndicator');
 
-    // --- START OF QUILL EDITOR INITIALIZATION ---
-    const eventDescriptionHiddenInput = document.getElementById('eventDescription'); // 隠しinput
-    const eventDescriptionEditorDiv = document.getElementById('eventDescriptionEditor'); // Quillエディタのdiv
-    let quillEditor; // Quillインスタンスを保持する変数
+    const eventDescriptionHiddenInput = document.getElementById('eventDescription'); 
+    const eventDescriptionEditorDiv = document.getElementById('eventDescriptionEditor'); 
+    let quillEditor; 
 
     if (eventDescriptionEditorDiv && eventDescriptionHiddenInput) {
         quillEditor = new Quill('#eventDescriptionEditor', {
-            theme: 'snow', // 'snow' はツールバー付きの標準テーマ
+            theme: 'snow',
             modules: {
                 toolbar: [
-                    [{ 'header': [1, 2, 3, false] }], // 見出し (レベル1, 2, 3)
-                    ['bold', 'italic', 'underline', 'strike'],        // 太字, イタリック, 下線, 取り消し線
-                    [{ 'color': [] }, { 'background': [] }],          // 文字色, 背景色
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }], // 番号付きリスト, 箇条書きリスト
-                    [{ 'align': [] }], // テキスト揃え
-                    ['link'], // リンク挿入 (画像挿入もしたい場合は ['link', 'image'])
-                    ['clean']                                         // 書式クリア
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'align': [] }],
+                    ['link'],
+                    ['clean']
                 ]
             },
             placeholder: 'イベントの詳細や持ち物、注意事項などを入力してください...'
         });
     }
-    // --- END OF QUILL EDITOR INITIALIZATION ---
 
     const BUCKET_NAME = 'event-media';
     const MAX_IMAGE_UPLOADS = 10;
@@ -47,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedVideoFiles = [];
 
     // handleFileSelection, updatePreviewAndFileArray 関数は変更なし (そのまま)
-    function updatePreviewAndFileArray(file, previewContainer, selectedFilesArray, fileType, index) { /* ... */ 
+    function updatePreviewAndFileArray(file, previewContainer, selectedFilesArray, fileType, index) { /* (変更なし) */ 
         const previewItem = document.createElement('div');
         previewItem.classList.add('preview-item');
         previewItem.dataset.fileIndex = index; 
@@ -69,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         previewItem.appendChild(mediaElement); previewItem.appendChild(removeBtn); previewContainer.appendChild(previewItem);
     }
-    function handleFileSelection(event, previewContainer, countInfo, maxUploads, targetSelectedFilesArray, fileType) { /* ... */
+    function handleFileSelection(event, previewContainer, countInfo, maxUploads, targetSelectedFilesArray, fileType) { /* (変更なし) */
         const currentFiles = Array.from(event.target.files);
         if (targetSelectedFilesArray.length + currentFiles.length > maxUploads) {
             messageArea.innerHTML = `<p class="error-message">${fileType === 'image' ? '画像' : '動画'}は合計${maxUploads}個まで選択できます。</p>`;
@@ -123,20 +121,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // --- START OF QUILL EDITOR CONTENT RETRIEVAL ---
-        let eventDescriptionContent = ''; // デフォルトは空文字
+        let eventDescriptionContent = '';
         if (quillEditor && eventDescriptionHiddenInput) {
-            // Quillエディタの内容 (HTML) を取得
             const descriptionHtml = quillEditor.root.innerHTML;
-            // 実質的に空（例: <p><br></p> のみ）の場合は空文字またはnullをセット
             if (quillEditor.getText().trim().length === 0) {
-                eventDescriptionHiddenInput.value = ''; // または null (DBスキーマによる)
+                eventDescriptionHiddenInput.value = '';
             } else {
                 eventDescriptionHiddenInput.value = descriptionHtml;
             }
             eventDescriptionContent = eventDescriptionHiddenInput.value;
         }
-        // --- END OF QUILL EDITOR CONTENT RETRIEVAL ---
 
         let imageUrls = [];
         let videoUrls = [];
@@ -163,18 +157,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             submitButton.disabled = false;
             return;
         }
+
+        const eventArea = document.getElementById('eventArea').value; // 新しく追加したエリアのIDを取得
+
         const eventData = {
             name: eventName,
-            description: eventDescriptionContent, // ★ 修正: Quillエディタから取得した内容を使用
+            description: eventDescriptionContent,
             event_date: document.getElementById('eventDate').value || null,
             event_end_date: eventEndDate || null,
             location: document.getElementById('eventLocation').value,
+            area: eventArea || null, // 取得したエリアの値をeventDataに追加。未選択の場合はnull
             participation_fee: participationFee.trim() || null,
             max_participants: maxParticipants,
             image_urls: imageUrls.length > 0 ? imageUrls : null,
             video_urls: videoUrls.length > 0 ? videoUrls : null,
             form_schema: formSchema.length > 0 ? formSchema : null,
-            created_at: new Date(new Date().getTime() + (9 * 60 * 60 * 1000))
+            created_at: new Date(new Date().getTime() + (9 * 60 * 60 * 1000)) // JSTで保存
         };
 
         loadingIndicator.textContent = "イベント情報を保存中...";
@@ -182,14 +180,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { data, error } = await supabase.from('events').insert([eventData]).select();
             if (error) throw error;
             messageArea.innerHTML = '<p class="success-message">イベントが作成されました！ダッシュボードへ移動します。</p>';
-            createEventForm.reset(); // フォーム全体のリセット
+            createEventForm.reset(); // フォーム全体のリセット (これでselectもデフォルト値に戻ります)
 
-            // --- START OF QUILL EDITOR RESET ---
             if (quillEditor) {
-                quillEditor.setText(''); // Quillエディタの内容をクリア
+                quillEditor.setText('');
             }
-            // --- END OF QUILL EDITOR RESET ---
-
+            
             imagePreviewContainer.innerHTML = ''; selectedImageFiles.length = 0; imageCountInfo.textContent = '';
             videoPreviewContainer.innerHTML = ''; selectedVideoFiles.length = 0; videoCountInfo.textContent = '';
             formFieldsContainer.innerHTML = '';
@@ -197,9 +193,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (dbError) {
             console.error('Error creating event in DB:', dbError.message);
             messageArea.innerHTML += `<p class="error-message">イベント作成に失敗しました: ${dbError.message}</p>`;
+            // データベースにareaカラムがない場合のエラーハンドリング例
+            if (dbError.message.includes('column "area" of relation "events" does not exist')) {
+                messageArea.innerHTML += `<p class="error-message"><b>データベースエラー:</b> "events"テーブルに "area" カラムが存在しないようです。Supabaseのテーブル設定を確認し、"area" カラム (TEXT型) を追加してください。</p>`;
+            }
         } finally {
             loadingIndicator.style.display = 'none';
             submitButton.disabled = false;
         }
-    }); 
+    });
 });

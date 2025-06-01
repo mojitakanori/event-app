@@ -150,17 +150,31 @@
                     <div class="form-grid">
                         <div class="form-group"><label for="eventName">イベント名 (必須):</label><input type="text" id="eventName" name="eventName" required></div>
                         <div class="form-group"><label for="eventLocation">場所:</label><input type="text" id="eventLocation" name="eventLocation"></div>
+                        
+                        <!-- ▼▼▼ START OF MODIFICATION ▼▼▼ -->
+                        <div class="form-group">
+                            <label for="eventArea">エリア(必須):</label>
+                            <select id="eventArea" name="eventArea" required>
+                                <option value="">エリアを選択してください</option>
+                                <option value="tokyo">東京エリア</option>
+                                <option value="osaka">大阪エリア</option>
+                                <option value="online">オンライン</option>
+                                <option value="other">その他</option>
+                                <!-- 必要に応じて他のエリアを追加 -->
+                            </select>
+                        </div>
+                        <!-- ▲▲▲ END OF MODIFICATION ▲▲▲ -->
+
                         <div class="form-group"><label for="eventDate">開始日時:</label><input type="datetime-local" id="eventDate" name="eventDate"></div>
                         <div class="form-group"><label for="eventEndDate">終了予定日時:</label><input type="datetime-local" id="eventEndDate" name="eventEndDate"></div>
                         <div class="form-group"><label for="participationFee">参加費用:</label><input type="text" id="participationFee" name="participationFee" placeholder="例: 1000円 または 無料"></div>
                         <div class="form-group"><label for="maxParticipants">最大参加人数 (任意):</label><input type="number" id="maxParticipants" name="maxParticipants" min="1" placeholder="例: 50"></div>
                     </div>
                     <div class="form-group full-width">
-                        <label for="eventDescriptionEditor">説明:</label> <!-- labelのfor属性を変更 -->
-                        <div id="eventDescriptionEditorContainer" style="margin-bottom: 1rem;"> <!-- Quillエディタのコンテナ -->
-                            <div id="eventDescriptionEditor" style="height: 250px;"></div> <!-- Quillがこの要素をエディタにする -->
+                        <label for="eventDescriptionEditor">説明:</label>
+                        <div id="eventDescriptionEditorContainer" style="margin-bottom: 1rem;">
+                            <div id="eventDescriptionEditor" style="height: 250px;"></div>
                         </div>
-                        <!-- フォーム送信時にエディタの内容をバックエンドに送るための隠しinput -->
                         <input type="hidden" id="eventDescription" name="eventDescription">
                     </div>
                     <div class="current-media-section full-width">
