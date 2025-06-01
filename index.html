@@ -150,6 +150,35 @@
             position: relative;
             display: block;
         }
+        .event-card.joint-event { /* is_joint_event が true のイベントに適用するクラス */
+            border: 2px solid var(--danger-color, #dc3545); /* 赤系の枠線 */
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.3); /* 少し目立つ影 */
+            position: relative; /* バッジなどの絶対配置の基準にするため */
+            background-color: #fff9fa; /* 薄い赤系の背景色 (任意) */
+        }
+
+        .event-card.joint-event::before { /* 左上に「合同イベント」のような帯を追加する例 */
+            content: "🌟 コミュニティ合同イベント";
+            position: absolute;
+            top: -1px; /* ボーダーの上に重なるように調整 */
+            left: -1px;
+            background-color: var(--danger-color, #dc3545);
+            color: white;
+            padding: 0.3em 0.8em;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-top-left-radius: var(--border-radius); /* 左上の角丸 */
+            border-bottom-right-radius: var(--border-radius); /* 右下の角丸 */
+            z-index: 10; /* 他の要素より手前に */
+        }
+
+        /* 合同イベントの場合、画像ラッパーのマージンを調整して帯と被らないようにする（任意） */
+        .event-card.joint-event .event-card__image-wrapper {
+            margin-top: 1.8em; /* 帯の高さに応じて調整 */
+        }
+        .event-card.joint-event .event-card__capacity-badge {
+            top: calc(10px + 1.8em); /* 帯の分だけ下にずらす */
+        }
 
         @media (max-width: 768px) { /* 中間ブレークポイント調整 */
             .filter-section {

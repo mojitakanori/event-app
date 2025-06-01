@@ -3,6 +3,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const user = await redirectToLoginIfNotAuthenticated();
     if (!user) return;
 
+    // 特別な権限を持つユーザーのIDリスト (実際のユーザーIDに置き換えてください)
+    const SPECIAL_USER_IDS = [
+        '5982b68e-6b89-48ce-a4ad-25dfb71cfa94', // 例: 管理者AのID
+        // 必要に応じて他の特別なユーザーIDを追加
+    ];
+
+    const jointEventToggleContainer = document.getElementById('jointEventToggleContainer');
+    const isJointEventCheckbox = document.getElementById('isJointEvent');
+
+    // 現在のユーザーが特別なユーザーか確認し、チェックボックスを表示する
+    if (user && SPECIAL_USER_IDS.includes(user.id)) {
+        if (jointEventToggleContainer) {
+            jointEventToggleContainer.style.display = 'block'; // 表示する
+        }
+    }
+
     const createEventForm = document.getElementById('createEventForm');
     const messageArea = document.getElementById('messageArea');
     const formFieldsContainer = document.getElementById('formFieldsContainer');
@@ -15,9 +31,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const videoCountInfo = document.getElementById('videoCountInfo');
     const loadingIndicator = document.getElementById('loadingIndicator');
 
-    const eventDescriptionHiddenInput = document.getElementById('eventDescription'); 
-    const eventDescriptionEditorDiv = document.getElementById('eventDescriptionEditor'); 
-    let quillEditor; 
+    const eventDescriptionHiddenInput = document.getElementById('eventDescription');
+    const eventDescriptionEditorDiv = document.getElementById('eventDescriptionEditor');
+    let quillEditor;
 
     if (eventDescriptionEditorDiv && eventDescriptionHiddenInput) {
         quillEditor = new Quill('#eventDescriptionEditor', {
@@ -45,14 +61,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedVideoFiles = [];
 
     // handleFileSelection, updatePreviewAndFileArray 関数は変更なし (そのまま)
-    function updatePreviewAndFileArray(file, previewContainer, selectedFilesArray, fileType, index) { /* (変更なし) */ 
+    function updatePreviewAndFileArray(file, previewContainer, selectedFilesArray, fileType, index) { /* (変更なし) */
         const previewItem = document.createElement('div');
         previewItem.classList.add('preview-item');
-        previewItem.dataset.fileIndex = index; 
+        previewItem.dataset.fileIndex = index;
         let mediaElement;
         if (file.type.startsWith('image/')) mediaElement = document.createElement('img');
         else if (file.type.startsWith('video/')) { mediaElement = document.createElement('video'); mediaElement.controls = true; }
-        else return; 
+        else return;
         mediaElement.src = URL.createObjectURL(file);
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button'; removeBtn.classList.add('remove-preview-btn'); removeBtn.innerHTML = '×';
@@ -71,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const currentFiles = Array.from(event.target.files);
         if (targetSelectedFilesArray.length + currentFiles.length > maxUploads) {
             messageArea.innerHTML = `<p class="error-message">${fileType === 'image' ? '画像' : '動画'}は合計${maxUploads}個まで選択できます。</p>`;
-            return; 
+            return;
         }
         messageArea.innerHTML = '';
         currentFiles.forEach(file => {
@@ -83,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         previewContainer.innerHTML = '';
         targetSelectedFilesArray.forEach((file, index) => updatePreviewAndFileArray(file, previewContainer, targetSelectedFilesArray, fileType, index));
         countInfo.textContent = `選択中: ${targetSelectedFilesArray.length} / ${maxUploads} 個`;
-        event.target.value = ''; 
+        event.target.value = '';
     }
     eventImagesInput.addEventListener('change', (e) => handleFileSelection(e, imagePreviewContainer, imageCountInfo, MAX_IMAGE_UPLOADS, selectedImageFiles, 'image'));
     eventVideosInput.addEventListener('change', (e) => handleFileSelection(e, videoPreviewContainer, videoCountInfo, MAX_VIDEO_UPLOADS, selectedVideoFiles, 'video'));
@@ -158,7 +174,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const eventArea = document.getElementById('eventArea').value; // 新しく追加したエリアのIDを取得
+        const eventArea = document.getElementById('eventArea').value;
+
+        let isJointEventValue = false; // デフォルトはfalse
+        if (isJointEventCheckbox && jointEventToggleContainer && jointEventToggleContainer.style.display === 'block') {
+            isJointEventValue = isJointEventCheckbox.checked;
+        }
 
         const eventData = {
             name: eventName,
@@ -166,12 +187,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             event_date: document.getElementById('eventDate').value || null,
             event_end_date: eventEndDate || null,
             location: document.getElementById('eventLocation').value,
-            area: eventArea || null, // 取得したエリアの値をeventDataに追加。未選択の場合はnull
+            area: eventArea || null,
             participation_fee: participationFee.trim() || null,
             max_participants: maxParticipants,
             image_urls: imageUrls.length > 0 ? imageUrls : null,
             video_urls: videoUrls.length > 0 ? videoUrls : null,
             form_schema: formSchema.length > 0 ? formSchema : null,
+            is_joint_event: isJointEventValue,
             created_at: new Date(new Date().getTime() + (9 * 60 * 60 * 1000)) // JSTで保存
         };
 
@@ -180,12 +202,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { data, error } = await supabase.from('events').insert([eventData]).select();
             if (error) throw error;
             messageArea.innerHTML = '<p class="success-message">イベントが作成されました！ダッシュボードへ移動します。</p>';
-            createEventForm.reset(); // フォーム全体のリセット (これでselectもデフォルト値に戻ります)
+            createEventForm.reset(); // フォーム全体のリセット
 
             if (quillEditor) {
                 quillEditor.setText('');
             }
-            
+            // 合同イベントチェックボックスもリセット（非表示の場合でも安全）
+            if (isJointEventCheckbox) {
+                isJointEventCheckbox.checked = false;
+            }
+
             imagePreviewContainer.innerHTML = ''; selectedImageFiles.length = 0; imageCountInfo.textContent = '';
             videoPreviewContainer.innerHTML = ''; selectedVideoFiles.length = 0; videoCountInfo.textContent = '';
             formFieldsContainer.innerHTML = '';
@@ -193,9 +219,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (dbError) {
             console.error('Error creating event in DB:', dbError.message);
             messageArea.innerHTML += `<p class="error-message">イベント作成に失敗しました: ${dbError.message}</p>`;
-            // データベースにareaカラムがない場合のエラーハンドリング例
             if (dbError.message.includes('column "area" of relation "events" does not exist')) {
                 messageArea.innerHTML += `<p class="error-message"><b>データベースエラー:</b> "events"テーブルに "area" カラムが存在しないようです。Supabaseのテーブル設定を確認し、"area" カラム (TEXT型) を追加してください。</p>`;
+            }
+            if (dbError.message.includes('column "is_joint_event" of relation "events" does not exist')) {
+                messageArea.innerHTML += `<p class="error-message"><b>データベースエラー:</b> "events"テーブルに "is_joint_event" カラムが存在しないようです。Supabaseのテーブル設定を確認し、"is_joint_event" カラム (boolean型、デフォルトfalse) を追加してください。</p>`;
             }
         } finally {
             loadingIndicator.style.display = 'none';

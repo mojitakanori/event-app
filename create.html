@@ -19,6 +19,23 @@
         .form-group.full-width { /* 1カラム幅いっぱいに使う要素用 */
             grid-column: 1 / -1;
         }
+        .form-group.special-event-toggle {
+            display: none; /* 最初は非表示 */
+            background-color: #fff8e1; /* 少し目立つ背景色 (例) */
+            padding: 1rem;
+            border: 1px solid #ffe082; /* 少し目立つボーダー (例) */
+            border-radius: var(--border-radius-sm);
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-group.special-event-toggle label {
+            font-weight: 600;
+            color: #c55a11; /* 少し目立つ文字色 (例) */
+        }
+        .form-group.special-event-toggle input[type="checkbox"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* 少し大きく */
+        }
         .submit-button-container {
             margin-top: 2rem;
             text-align: right; /* ボタンを右寄せにするなど */
@@ -139,7 +156,7 @@
                     <p class="subtitle">イベントの詳細情報を入力してください。</p>
                 </div>
                 <div id="messageArea" class="message-area"></div>
-                
+
                 <form id="createEventForm">
                     <div class="form-grid">
                         <div class="form-group">
@@ -150,7 +167,7 @@
                             <label for="eventLocation">場所:</label>
                             <input type="text" id="eventLocation" name="eventLocation">
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="eventArea">エリア(必須):</label>
                             <select id="eventArea" name="eventArea" required>
@@ -162,7 +179,7 @@
                                 <!-- 必要に応じて他のエリアを追加 -->
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="eventDate">開始日時:</label>
                             <input type="datetime-local" id="eventDate" name="eventDate">
@@ -181,6 +198,14 @@
                         </div>
                     </div>
 
+                    <div class="form-group full-width special-event-toggle" id="jointEventToggleContainer">
+                        <input type="checkbox" id="isJointEvent" name="isJointEvent">
+                        <label for="isJointEvent">これはコミュニティ合同交流会ですか？</label>
+                        <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.3rem;">
+                            このオプションにチェックを入れると、イベントは「コミュニティ合同交流会」として扱われ、常に上位表示されます。
+                        </p>
+                    </div>
+
                     <div class="form-group full-width">
                         <label for="eventDescriptionEditor">説明:</label>
                         <div id="eventDescriptionEditorContainer" style="margin-bottom: 1rem;">
@@ -188,7 +213,7 @@
                         </div>
                         <input type="hidden" id="eventDescription" name="eventDescription">
                     </div>
-                    
+
                     <div class="form-group full-width">
                         <label for="eventImages">イベント画像 (複数選択可、最大10枚):</label>
                         <input type="file" id="eventImages" name="eventImages" accept="image/*" multiple>
@@ -209,7 +234,7 @@
                         <div id="formFieldsContainer"></div>
                         <button type="button" id="addFormField" class="btn btn-secondary" style="margin-top: 1rem;">フォーム項目を追加</button>
                     </fieldset>
-                    
+
                     <div id="loadingIndicator" class="loading-message" style="display: none;">アップロード中...</div>
                     <div class="submit-button-container">
                         <button type="submit" class="btn">イベントを作成</button>

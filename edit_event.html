@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="css/style.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
-        /* create.html とほぼ共通のスタイル */
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0 1.5rem; }
         .form-group.full-width { grid-column: 1 / -1; }
         .submit-button-container { margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem; }
@@ -113,6 +112,23 @@
             font-size: 1.2rem !important; /* ×マークのサイズ */
             border-radius: 50% !important; /* 丸く */
         }
+        .form-group.special-event-toggle {
+            display: none; /* 最初は非表示 */
+            background-color: #fff8e1; /* 少し目立つ背景色 (例) */
+            padding: 1rem;
+            border: 1px solid #ffe082; /* 少し目立つボーダー (例) */
+            border-radius: var(--border-radius-sm);
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-group.special-event-toggle label {
+            font-weight: 600;
+            color: #c55a11; /* 少し目立つ文字色 (例) */
+        }
+        .form-group.special-event-toggle input[type="checkbox"] {
+            margin-right: 0.5rem;
+            transform: scale(1.2); /* 少し大きく */
+        }
     </style>
 </head>
 <body>
@@ -144,14 +160,13 @@
                 </div>
                 <div id="messageArea" class="message-area"></div>
                 <div id="formLoadingMessage" class="loading-message">イベント情報を読み込み中...</div>
-                
+
                 <form id="editEventForm" style="display:none;">
                     <input type="hidden" id="eventId">
                     <div class="form-grid">
                         <div class="form-group"><label for="eventName">イベント名 (必須):</label><input type="text" id="eventName" name="eventName" required></div>
                         <div class="form-group"><label for="eventLocation">場所:</label><input type="text" id="eventLocation" name="eventLocation"></div>
-                        
-                        <!-- ▼▼▼ START OF MODIFICATION ▼▼▼ -->
+
                         <div class="form-group">
                             <label for="eventArea">エリア(必須):</label>
                             <select id="eventArea" name="eventArea" required>
@@ -160,16 +175,23 @@
                                 <option value="osaka">大阪エリア</option>
                                 <option value="online">オンライン</option>
                                 <option value="other">その他</option>
-                                <!-- 必要に応じて他のエリアを追加 -->
                             </select>
                         </div>
-                        <!-- ▲▲▲ END OF MODIFICATION ▲▲▲ -->
 
                         <div class="form-group"><label for="eventDate">開始日時:</label><input type="datetime-local" id="eventDate" name="eventDate"></div>
                         <div class="form-group"><label for="eventEndDate">終了予定日時:</label><input type="datetime-local" id="eventEndDate" name="eventEndDate"></div>
                         <div class="form-group"><label for="participationFee">参加費用:</label><input type="text" id="participationFee" name="participationFee" placeholder="例: 1000円 または 無料"></div>
                         <div class="form-group"><label for="maxParticipants">最大参加人数 (任意):</label><input type="number" id="maxParticipants" name="maxParticipants" min="1" placeholder="例: 50"></div>
                     </div>
+
+                    <div class="form-group full-width special-event-toggle" id="jointEventToggleContainer">
+                        <input type="checkbox" id="isJointEvent" name="isJointEvent">
+                        <label for="isJointEvent">これはコミュニティ合同交流会ですか？</label>
+                        <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.3rem;">
+                            このオプションにチェックを入れると、イベントは「コミュニティ合同交流会」として扱われ、特別な表示がされることがあります。
+                        </p>
+                    </div>
+
                     <div class="form-group full-width">
                         <label for="eventDescriptionEditor">説明:</label>
                         <div id="eventDescriptionEditorContainer" style="margin-bottom: 1rem;">
@@ -204,7 +226,7 @@
                         <div id="formFieldsContainer"></div>
                         <button type="button" id="addFormField" class="btn btn-secondary" style="margin-top: 1rem;">フォーム項目を追加</button>
                     </fieldset>
-                    
+
                     <div id="loadingIndicator" class="loading-message" style="display: none;">処理中...</div>
                     <div class="submit-button-container">
                         <a href="dashboard.html" class="btn btn-secondary">キャンセル</a>
