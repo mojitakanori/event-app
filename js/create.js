@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 特別な権限を持つユーザーのIDリスト (実際のユーザーIDに置き換えてください)
     const SPECIAL_USER_IDS = [
-        '5982b68e-6b89-48ce-a4ad-25dfb71cfa94', // 例: 管理者AのID
+        '5982b68e-6b89-48ce-a4ad-25dfb71cfa94', // 例: MT
+        '093e65ae-9f9e-4220-b805-e9b90ae979a8', // 例: dealden
         // 必要に応じて他の特別なユーザーIDを追加
     ];
 
