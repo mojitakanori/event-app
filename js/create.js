@@ -61,7 +61,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedImageFiles = [];
     let selectedVideoFiles = [];
 
-    // handleFileSelection, updatePreviewAndFileArray 関数は変更なし (そのまま)
     function updatePreviewAndFileArray(file, previewContainer, selectedFilesArray, fileType, index) { /* (変更なし) */
         const previewItem = document.createElement('div');
         previewItem.classList.add('preview-item');
@@ -105,12 +104,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     eventImagesInput.addEventListener('change', (e) => handleFileSelection(e, imagePreviewContainer, imageCountInfo, MAX_IMAGE_UPLOADS, selectedImageFiles, 'image'));
     eventVideosInput.addEventListener('change', (e) => handleFileSelection(e, videoPreviewContainer, videoCountInfo, MAX_VIDEO_UPLOADS, selectedVideoFiles, 'video'));
 
-    // generateUniqueFieldName, createFormFieldConfigElement 関数は変更なし (そのまま)
     function generateUniqueFieldName() { /* (変更なし) */ return `field_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`; }
-    function createFormFieldConfigElement() { /* (変更なし) */ const fieldDiv = document.createElement('div'); fieldDiv.classList.add('form-field-config'); fieldDiv.innerHTML = `<div><label>表示ラベル:</label><input type="text" data-config-key="label" placeholder="例: 会社名" required></div><div><label>タイプ:</label><select data-config-key="type"><option value="text">一行テキスト</option><option value="textarea">複数行テキスト</option><option value="email">メールアドレス</option><option value="tel">電話番号</option><option value="checkbox">チェックボックス</option></select></div><div><label>必須:</label><input type="checkbox" data-config-key="required"></div><button type="button" class="remove-field-btn">削除</button>`; fieldDiv.dataset.fieldName = generateUniqueFieldName(); fieldDiv.querySelector('.remove-field-btn').addEventListener('click', () => fieldDiv.remove()); return fieldDiv; }
-    addFormFieldButton.addEventListener('click', () => formFieldsContainer.appendChild(createFormFieldConfigElement()));
 
-    // uploadSingleFile 関数は変更なし (そのまま)
+    function createFormFieldConfigElement() {
+        const fieldDiv = document.createElement('div');
+        fieldDiv.classList.add('form-field-config');
+        fieldDiv.innerHTML = `
+            <div>
+                <label>表示ラベル:</label>
+                <input type="text" data-config-key="label" placeholder="例: 会社名" required>
+            </div>
+            <div>
+                <label>タイプ:</label>
+                <select data-config-key="type">
+                    <option value="text">一行テキスト</option>
+                    <option value="textarea">複数行テキスト</option>
+                    <option value="email">メールアドレス</option>
+                    <option value="tel">電話番号</option>
+                    <option value="checkbox">チェックボックス</option>
+                </select>
+            </div>
+            <div>
+                <label>必須:</label>
+                <input type="checkbox" data-config-key="required">
+            </div>
+            <button type="button" class="remove-field-btn">削除</button>
+        `;
+        fieldDiv.dataset.fieldName = generateUniqueFieldName();
+        fieldDiv.querySelector('.remove-field-btn').addEventListener('click', () => fieldDiv.remove());
+        return fieldDiv;
+    }
+
+    // デフォルトのフォーム項目を生成して追加する関数
+    function addDefaultFormField(label, type, required, placeholder = '') {
+        const fieldElement = createFormFieldConfigElement();
+        const labelInput = fieldElement.querySelector('input[data-config-key="label"]');
+        labelInput.value = label;
+        if (placeholder) {
+            labelInput.placeholder = placeholder;
+        }
+        fieldElement.querySelector('select[data-config-key="type"]').value = type;
+        fieldElement.querySelector('input[data-config-key="required"]').checked = required;
+        formFieldsContainer.appendChild(fieldElement);
+    }
+
+    // 初期状態で表示するフォーム項目を設定
+    addDefaultFormField('事業内容', 'textarea', false, '例: ITコンサルティング');
+    addDefaultFormField('メールアドレス', 'email', true, '例: your.email@example.com');
+    addDefaultFormField('電話番号', 'tel', false, '例: 090-1234-5678');
+
+    addFormFieldButton.addEventListener('click', () => {
+        formFieldsContainer.appendChild(createFormFieldConfigElement());
+    });
+
     async function uploadSingleFile(file, typePrefix = 'media') { /* (変更なし) */ if (!file) return null; function sanitizeFileName(fileName) { const nameParts = fileName.split('.'); const extension = nameParts.length > 1 ? '.' + nameParts.pop() : ''; let baseName = nameParts.join('.'); baseName = baseName.replace(/[^a-zA-Z0-9_.\-]/g, '_').replace(/__+/g, '_').replace(/^_+|_+$/g, ''); if (!baseName) baseName = 'file'; return baseName + extension; } const originalFileName = file.name; const sanitizedFileName = sanitizeFileName(originalFileName); const filePath = `${typePrefix}/${user.id}/${Date.now()}_${sanitizedFileName}_${Math.random().toString(36).substring(2,7)}`; const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file, { cacheControl: '3600', upsert: false }); if (error) { console.error(`Error uploading ${typePrefix} (${originalFileName}):`, error); throw new Error(`${originalFileName}のアップロードに失敗しました: ${error.message}`); } const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(data.path); return publicUrlData.publicUrl; }
 
     createEventForm.addEventListener('submit', async (e) => {
@@ -215,7 +261,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             imagePreviewContainer.innerHTML = ''; selectedImageFiles.length = 0; imageCountInfo.textContent = '';
             videoPreviewContainer.innerHTML = ''; selectedVideoFiles.length = 0; videoCountInfo.textContent = '';
-            formFieldsContainer.innerHTML = '';
+            formFieldsContainer.innerHTML = ''; // コンテナをクリア
+            // デフォルト項目を再追加（またはページ遷移するので不要なら削除）
+            addDefaultFormField('事業内容', 'textarea', false, '例: ITコンサルティング');
+            addDefaultFormField('メールアドレス', 'email', true, '例: your.email@example.com');
+            addDefaultFormField('電話番号', 'tel', false, '例: 090-1234-5678');
+
             setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
         } catch (dbError) {
             console.error('Error creating event in DB:', dbError.message);
