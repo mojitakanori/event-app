@@ -60,6 +60,7 @@ async function updateNav() {
         if (user) {
             navElement.innerHTML = `
                 <a href="index.html">ホーム</a>
+                <a href="premium_members.html">プレミアム会員一覧</a>
                 <a href="create.html">イベント作成</a>
                 <a href="dashboard.html">ダッシュボード</a>
                 <a href="profile.html">プロフィール編集</a>
@@ -68,7 +69,8 @@ async function updateNav() {
         } else {
             navElement.innerHTML = `
                 <a href="index.html">ホーム</a>
-                <a href="login.html">開催者ログイン</a>
+                <a href="premium_members.html">プレミアム会員一覧</a>
+                <a href="login.html">会員ログイン</a>
             `;
         }
     }

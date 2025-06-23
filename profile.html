@@ -41,34 +41,33 @@
         </div>
     </nav>
 
-    <main class="main-content-wrapper">
-        <div class="main-container">
-            <div class="content-section">
-                <div class="page-header">
-                    <h2>プロフィール編集</h2>
-                    <p class="subtitle">コミュニティ名や自己紹介を更新できます。</p>
-                </div>
-                
-                <div id="loadingMessage" class="loading-message" style="display: none;">読み込み中...</div>
-                <div id="messageArea" class="message-area"></div>
-
-                <div class="profile-form-container">
-                    <form id="profileForm" style="display: none;">
-                        <div class="form-group">
-                            <label for="communityName">コミュニティ名:</label>
-                            <input type="text" id="communityName" name="communityName">
-                        </div>
-                        <div class="form-group">
-                            <label for="bio">自己紹介文:</label>
-                            <textarea id="bio" name="bio" rows="6"></textarea>
-                        </div>
-                        <div class="submit-button-container">
-                            <button type="submit" class="btn">プロフィールを更新</button>
-                        </div>
-                    </form>
-                </div>
+    <main class="main-container">
+        <h2>プロフィール編集</h2>
+        <form id="profileForm" class="form-container">
+            <div class="form-group">
+                <label for="avatar">アイコン画像</label>
+                <img id="avatarPreview" src="https://placehold.jp/150x150.png" alt="アバタープレビュー" width="150" height="150" style="display: block; margin-bottom: 10px; border-radius: 50%;">
+                <input type="file" id="avatar" name="avatar" accept="image/*">
+                <small>※推奨サイズ: 300x300px, 1MB以下の画像を選択してください。</small>
             </div>
-        </div>
+
+            <div class="form-group">
+                <label for="community_name">お名前（コミュニティ名）</label>
+                <input type="text" id="community_name" name="community_name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="business_description">事業内容</label>
+                <textarea id="business_description" name="business_description" rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="bio">自己紹介文</label>
+                <textarea id="bio" name="bio" rows="6"></textarea>
+            </div>
+            <button type="submit" class="button">更新する</button>
+        </form>
+        <div id="messageArea" class="message-area"></div>
     </main>
 
     <footer class="site-footer">
