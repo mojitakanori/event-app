@@ -52,6 +52,36 @@ async function handleLogout() {
     }
 }
 
+
+
+//  ユーザーの会員種別をチェックする関数
+async function checkUserMembership(user) {
+    if (!user) return null;
+
+    try {
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('membership_type')
+            .eq('id', user.id)
+            .single();
+
+        if (error) {
+            // プロファイルが存在しない場合も'free'として扱うか、エラーとするか選択できます。
+            // ここでは、プロファイルがない=無料会員とみなします。
+            if (error.code === 'PGRST116') {
+                return 'free'; 
+            }
+            throw error;
+        }
+
+        return profile ? profile.membership_type : 'free';
+
+    } catch (error) {
+        console.error('Error fetching user membership:', error.message);
+        return null; // エラーが発生した場合はnullを返す
+    }
+}
+
 // ナビゲーションの表示を更新
 async function updateNav() {
     const user = await getCurrentUser();

@@ -3,6 +3,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     const user = await redirectToLoginIfNotAuthenticated();
     if (!user) return; 
 
+    const contentSection = document.querySelector('.content-section');
+
+    // 会員種別をチェック
+    const membershipType = await checkUserMembership(user);
+
+    if (membershipType !== 'premium') {
+        // 無料会員またはエラーの場合、contentSectionの中身をすべてメッセージに入れ替える
+        if (contentSection) {
+            contentSection.innerHTML = `
+                <div class="message warning-message" style="text-align: center; padding: 2rem;">
+                    <h2>プレミアム会員限定機能です</h2>
+                    <p style="margin-top: 1rem;">イベントの作成・管理機能は、プレミアム会員プランでご利用いただけます。</p>
+                    <p>プランのアップグレードをご希望の場合は、管理者までお問い合わせください。</p>
+                </div>
+            `;
+        }
+        return; // 有料会員でない場合は、ここで処理を終了
+    }
+
     const myEventListUl = document.getElementById('myEventList');
     const loadingMessage = document.getElementById('loadingMessage');
     const noMyEventsMessage = document.getElementById('noMyEventsMessage');
