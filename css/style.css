@@ -248,6 +248,7 @@ form input[type="password"],
 form input[type="datetime-local"],
 form input[type="number"],
 form input[type="file"],
+form input[type="tel"],
 form textarea,
 form select {
     display: block;
