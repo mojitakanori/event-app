@@ -181,15 +181,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function uploadSingleFile(file, typePrefix = 'media') { /* (変更なし) */ if (!file) return null; function sanitizeFileName(fileName) { const nameParts = fileName.split('.'); const extension = nameParts.length > 1 ? '.' + nameParts.pop() : ''; let baseName = nameParts.join('.'); baseName = baseName.replace(/[^a-zA-Z0-9_.\-]/g, '_').replace(/__+/g, '_').replace(/^_+|_+$/g, ''); if (!baseName) baseName = 'file'; return baseName + extension; } const originalFileName = file.name; const sanitizedFileName = sanitizeFileName(originalFileName); const filePath = `${typePrefix}/${user.id}/${Date.now()}_${sanitizedFileName}_${Math.random().toString(36).substring(2,7)}`; const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file, { cacheControl: '3600', upsert: false }); if (error) { console.error(`Error uploading ${typePrefix} (${originalFileName}):`, error); throw new Error(`${originalFileName}のアップロードに失敗しました: ${error.message}`); } const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(data.path); return publicUrlData.publicUrl; }
 
-    createEventForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        messageArea.innerHTML = '';
-        const submitButton = createEventForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        loadingIndicator.textContent = "処理を開始しています...";
-        loadingIndicator.style.display = 'block';
+createEventForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    messageArea.innerHTML = '';
+    const submitButton = createEventForm.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    loadingIndicator.textContent = "処理を開始しています...";
+    loadingIndicator.style.display = 'block';
 
-        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
         if (authError || !authUser) {
             messageArea.innerHTML = '<p class="error-message">認証エラー: 再ログインしてください。</p>';
             loadingIndicator.style.display = 'none'; submitButton.disabled = false; return;
@@ -249,6 +249,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isJointEventCheckbox && jointEventToggleContainer && jointEventToggleContainer.style.display === 'block') {
             isJointEventValue = isJointEventCheckbox.checked;
         }
+    // 4桁のランダムな数字パスワードを生成
+        const generatedPassword = Math.floor(1000 + Math.random() * 9000).toString();
 
         const eventData = {
             name: eventName,
@@ -263,14 +265,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             video_urls: videoUrls.length > 0 ? videoUrls : null,
             form_schema: formSchema.length > 0 ? formSchema : null,
             is_joint_event: isJointEventValue,
-            created_at: new Date(new Date().getTime() + (9 * 60 * 60 * 1000)) // JSTで保存
+            created_at: new Date(new Date().getTime() + (9 * 60 * 60 * 1000)),
+            view_password: generatedPassword // 生成したパスワードを追加
         };
 
         loadingIndicator.textContent = "イベント情報を保存中...";
         try {
             const { data, error } = await supabase.from('events').insert([eventData]).select();
             if (error) throw error;
-            messageArea.innerHTML = '<p class="success-message">イベントが作成されました！ダッシュボードへ移動します。</p>';
+            
+            // 成功メッセージに生成したパスワードを表示
+            messageArea.innerHTML = `
+                <p class="success-message">イベントが作成されました！10秒後にダッシュボードへ移動します。</p>
+                <div class="message warning-message" style="margin-top: 1rem;">
+                    <strong>参加者情報 閲覧用パスワード:</strong>
+                    <p style="font-size: 1.5rem; font-weight: bold; color: var(--danger-color); letter-spacing: 0.1em;">${generatedPassword}</p>
+                    <small>イベント編集画面で再度ご確認いただけます。<br>このパスワードはイベント詳細ページで参加者の詳細情報を閲覧する際に必要です。<br>参加者様にはメールで自動で届いております。</small>
+                </div>
+            `;
             createEventForm.reset(); // フォーム全体のリセット
 
             if (quillEditor) {
@@ -289,8 +301,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             addDefaultFormField('メールアドレス', 'email', true, '例: your.email@example.com');
             addDefaultFormField('電話番号', 'textarea', false, '例: 090-1234-5678');
 
-            setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
-        } catch (dbError) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 10000); // メッセージを読む時間を考慮して少し延長
+    } catch (dbError) {
             console.error('Error creating event in DB:', dbError.message);
             messageArea.innerHTML += `<p class="error-message">イベント作成に失敗しました: ${dbError.message}</p>`;
             if (dbError.message.includes('column "area" of relation "events" does not exist')) {
@@ -299,9 +312,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (dbError.message.includes('column "is_joint_event" of relation "events" does not exist')) {
                 messageArea.innerHTML += `<p class="error-message"><b>データベースエラー:</b> "events"テーブルに "is_joint_event" カラムが存在しないようです。Supabaseのテーブル設定を確認し、"is_joint_event" カラム (boolean型、デフォルトfalse) を追加してください。</p>`;
             }
-        } finally {
-            loadingIndicator.style.display = 'none';
-            submitButton.disabled = false;
-        }
+    } finally {
+        loadingIndicator.style.display = 'none';
+        submitButton.disabled = false;
+    }
     });
 });

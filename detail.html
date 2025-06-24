@@ -94,6 +94,26 @@
             font-size: 1.1rem !important; /* 強調 */
             padding: 1.5rem !important;
         }
+
+        .btn-premium {
+            background: linear-gradient(45deg, #fceabb 0%, #f8b500 100%);
+            color: #333;
+            font-weight: bold;
+            border: 1px solid #DAA520;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 8px rgba(255, 215, 0, 0.6);
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            text-decoration: none; /* aタグのデフォルト下線を消す */
+            display: inline-block; /* aタグをボタンらしく見せる */
+        }
+        /* ホバー（マウスを乗せた時）の効果 */
+        .btn-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2), 0 0 15px rgba(255, 215, 0, 0.8);
+        color: #000;
+        cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -147,11 +167,28 @@
                         <h3>参加者一覧</h3>
                         <button id="exportCsvButton" class="btn btn-secondary" style="display: none;">CSV出力</button>
                     </div>
-                    <div id="participantListLoading" class="loading-message" style="display:none;">参加者を読み込み中...</div>
+
                     <ul id="eventParticipantList" class="participant-list"></ul>
                     <p id="noEventParticipantsMessage" class="message warning-message" style="display:none; text-align:center;">このイベントにはまだ参加者がいません。</p>
-                </div>
 
+                    <hr>
+
+                    <div id="passwordSection">
+                        <h4>参加者の詳細情報を閲覧</h4>
+                        <p><small>イベント主催者から共有されたパスワードを入力してください。</small></p>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="password" id="viewPasswordInput" placeholder="4桁のパスワード" style="margin-bottom: 0; flex-grow: 1;">
+                            <button id="viewDetailsButton" class="btn">表示する</button>
+                        </div>
+                        <p id="passwordErrorMessage" class="error-message" style="display: none; margin-top: 0.5rem;"></p>
+                    </div>
+
+                    <div id="fullParticipantListContainer" style="display: none;">
+                        <h4 style="margin-top: 1.5rem;">参加者詳細</h4>
+                        <ul id="fullEventParticipantList" class="participant-list"></ul>
+                    </div>
+
+                </div>
                 <hr>
                 
                 <div class="page-header">

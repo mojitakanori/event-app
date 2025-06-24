@@ -201,6 +201,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (event) {
                 eventNameInput.value = event.name || '';
 
+                const passwordDisplayArea = document.getElementById('passwordDisplayArea');
+                if (event.view_password && passwordDisplayArea) {
+                    passwordDisplayArea.innerHTML = `
+                        <div class="message warning-message" style="margin-top: 1rem;">
+                            <strong>参加者情報 閲覧用パスワード:</strong>
+                            <p style="font-size: 1.5rem; font-weight: bold; color: var(--danger-color); letter-spacing: 0.1em;">${event.view_password}</p>
+                            <small>このパスワードはイベント詳細ページで参加者の詳細情報を閲覧する際に必要です。<br>参加者様にはメールで自動で届いております。</small>
+                        </div>
+                    `;
+                }
                 if (quillEditor) {
                     if (event.description) quillEditor.root.innerHTML = event.description;
                     else quillEditor.setText('');
