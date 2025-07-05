@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新規会員登録 - イベント管理アプリ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .signup-container {
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .submit-button-container {
+            margin-top: 2rem;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <h1><a href="index.html">イベントハブ</a></h1>
+        </div>
+    </header>
+    <nav class="site-nav">
+        <div class="container">
+            <button class="hamburger-menu" aria-label="ナビゲーションを開く" aria-expanded="false" aria-controls="nav">
+                <span></span><span></span><span></span>
+            </button>
+            <nav id="nav"></nav>
+        </div>
+    </nav>
+
+    <main class="main-container signup-container">
+        <h2>新規会員登録</h2>
+        <p>アカウントを作成するために、以下の情報を入力してください。</p>
+        <div id="messageArea" class="message-area"></div>
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="email">メールアドレス (必須):</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">パスワード (必須):</label>
+                <input type="password" id="password" name="password" minlength="6" required>
+                <small>※6文字以上で入力してください。</small>
+            </div>
+            <hr>
+            <div class="form-group">
+                <label for="community_name">お名前（コミュニティ名） (必須):</label>
+                <input type="text" id="community_name" name="community_name" required>
+            </div>
+            <div class="form-group">
+                <label for="business_description">事業内容:</label>
+                <textarea id="business_description" name="business_description" rows="4" placeholder="例: ITコンサルティング、Webデザイン"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="bio">自己紹介文:</label>
+                <textarea id="bio" name="bio" rows="6" placeholder="ご自身の活動や興味について自由にご記入ください。"></textarea>
+            </div>
+            <div class="submit-button-container">
+                <button type="submit" class="btn">登録する</button>
+            </div>
+        </form>
+         <p style="text-align: center; margin-top: 2rem;">
+            すでにアカウントをお持ちですか？ <a href="login.html">ログインはこちら</a>
+        </p>
+    </main>
+
+    <footer class="site-footer">
+        <p>© 2025 イベントハブ. All Rights Reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/signup.js"></script>
+</body>
+</html>

@@ -46,9 +46,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // ログイン成功
-            alert('ログインに成功しました！ダッシュボードへ移動します。');
+            alert('ログインに成功しました！');
             if (messageArea) {
-                messageArea.innerHTML = '<p class="success-message">ログイン成功！ダッシュボードへ移動します...</p>';
+                messageArea.innerHTML = '<p class="success-message">ログイン成功！ホームへ移動します...</p>';
             }
             
             // ナビゲーションを更新 (auth.js の updateNav を呼び出す)
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await updateNav();
             }
             
-            window.location.href = 'dashboard.html';
+            window.location.href = 'index.html';
 
         } catch (error) {
             // ログイン失敗またはその他のエラー

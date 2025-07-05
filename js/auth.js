@@ -100,6 +100,7 @@ async function updateNav() {
             navElement.innerHTML = `
                 <a href="index.html">ホーム</a>
                 <a href="premium_members.html">プレミアム会員一覧</a>
+                <a href="signup.html">会員登録</a>
                 <a href="login.html">会員ログイン</a>
             `;
         }
