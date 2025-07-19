@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const user = await redirectToLoginIfNotAuthenticated();
     if (!user) return;
 
+    // アカウントが有効か確認し、停止中ならトップページへ
+    const isActive = await checkUserStatusAndRedirectIfSuspended(user);
+    if (!isActive) return; // アカウント停止中の場合はここで処理を中断
+
     // 特別な権限を持つユーザーのIDリスト (実際のユーザーIDに置き換えてください)
     const SPECIAL_USER_IDS = [
         '5982b68e-6b89-48ce-a4ad-25dfb71cfa94', // 例: MT

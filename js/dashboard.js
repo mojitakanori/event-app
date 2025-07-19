@@ -3,6 +3,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const user = await redirectToLoginIfNotAuthenticated();
     if (!user) return; 
 
+    // アカウントが有効か確認し、停止中ならトップページへ
+    const isActive = await checkUserStatusAndRedirectIfSuspended(user);
+    if (!isActive) return; // アカウント停止中の場合はここで処理を中断
+    
     const contentSection = document.querySelector('.content-section');
 
     // 会員種別をチェック

@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .from('profiles')
                 .select('id, community_name, business_description, avatar_url')
                 .in('membership_type', ['premium', 'owner'])
+                .eq('is_active', true) // アカウントが有効なユーザーのみを対象にする
                 .order('updated_at', { ascending: false });
 
             if (error) throw error;

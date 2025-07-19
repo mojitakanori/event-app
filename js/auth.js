@@ -82,6 +82,51 @@ async function checkUserMembership(user) {
     }
 }
 
+
+/**
+ * ユーザーのアカウント状態を確認し、停止中であればアラートを表示してトップページにリダイレクトする。
+ * @param {object} user - Supabaseのユーザーオブジェクト
+ * @returns {boolean} - アカウントが有効な場合は true, 停止中の場合は false を返す
+ */
+async function checkUserStatusAndRedirectIfSuspended(user) {
+    if (!user) {
+        // そもそもログインしていない場合は何もしない（別関数が処理するため）
+        return false;
+    }
+
+    try {
+        const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('is_active')
+            .eq('id', user.id)
+            .single();
+
+        if (error) {
+            // プロファイルがない場合も念のためエラーとして扱う
+            console.error('Error fetching user status:', error.message);
+            alert('ユーザー情報の取得に失敗しました。');
+            window.location.href = 'index.html';
+            return false;
+        }
+
+        if (profile && !profile.is_active) {
+            // アカウントが停止中の場合
+            alert('現在、このアカウントは管理者によって機能が制限されています。ご不明な点は運営までお問い合わせください。');
+            window.location.href = 'index.html';
+            return false;
+        }
+
+        // アカウントが有効な場合
+        return true;
+
+    } catch (error) {
+        console.error('An unexpected error occurred:', error.message);
+        alert('予期せぬエラーが発生しました。');
+        window.location.href = 'index.html';
+        return false;
+    }
+}
+
 // ナビゲーションの表示を更新
 async function updateNav() {
     const user = await getCurrentUser();
