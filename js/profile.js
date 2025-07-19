@@ -26,11 +26,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Quillエディタの初期化
     const initQuillEditors = () => {
+        const toolbarOptions = [
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            [{ 'align': [] }],
+            ['link'],
+            ['clean']
+        ];
+
         descriptionQuill = new Quill('#communityDescriptionEditor', {
-            theme: 'snow', placeholder: 'コミュニティの活動内容や理念などを記述します。'
+            theme: 'snow',
+            placeholder: 'コミュニティの活動内容や理念などを記述します。',
+            modules: {
+                toolbar: toolbarOptions
+            }
         });
+
         projectsQuill = new Quill('#communityProjectsEditor', {
-            theme: 'snow', placeholder: '現在進行中のプロジェクトや過去の実績などを記述します。'
+            theme: 'snow',
+            placeholder: '現在進行中のプロジェクトや過去の実績などを記述します。',
+            modules: {
+                toolbar: toolbarOptions
+            }
         });
     };
     
