@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { data: members, error } = await supabase
                 .from('profiles')
                 .select('id, community_name, business_description, avatar_url')
-                .eq('membership_type', 'premium')
+                .in('membership_type', ['premium', 'owner'])
                 .order('updated_at', { ascending: false });
 
             if (error) throw error;

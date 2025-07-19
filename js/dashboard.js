@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 会員種別をチェック
     const membershipType = await checkUserMembership(user);
 
-    if (membershipType !== 'premium') {
+    if (membershipType == 'free') {
         // 無料会員またはエラーの場合、contentSectionの中身をすべてメッセージに入れ替える
         if (contentSection) {
             contentSection.innerHTML = `
