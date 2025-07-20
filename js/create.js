@@ -36,12 +36,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const jointEventToggleContainer = document.getElementById('jointEventToggleContainer');
     const isJointEventCheckbox = document.getElementById('isJointEvent');
+    const eventTypeContainer = document.getElementById('eventTypeContainer');
+    const lunchCheckbox = document.getElementById('eventTypeLunch');
+    const eveningCheckbox = document.getElementById('eventTypeEvening');
 
     // 現在のユーザーが特別なユーザーか確認し、チェックボックスを表示する
     if (user && SPECIAL_USER_IDS.includes(user.id)) {
-        if (jointEventToggleContainer) {
-            jointEventToggleContainer.style.display = 'block'; // 表示する
-        }
+        if (jointEventToggleContainer) jointEventToggleContainer.style.display = 'block';
+        if (eventTypeContainer) eventTypeContainer.style.display = 'block';
+    }
+
+    // ★追加: チェックボックスの排他選択（ラジオボタンのように動作させる）
+    if (lunchCheckbox && eveningCheckbox) {
+        lunchCheckbox.addEventListener('change', () => {
+            if (lunchCheckbox.checked) {
+                eveningCheckbox.checked = false;
+            }
+        });
+        eveningCheckbox.addEventListener('change', () => {
+            if (eveningCheckbox.checked) {
+                lunchCheckbox.checked = false;
+            }
+        });
     }
 
     const createEventForm = document.getElementById('createEventForm');
@@ -248,7 +264,14 @@ createEventForm.addEventListener('submit', async (e) => {
         }
 
         const eventArea = document.getElementById('eventArea').value;
-
+        const eveningCheckbox = document.getElementById('eventTypeEvening');
+        let eventType = null;
+        if (lunchCheckbox && lunchCheckbox.checked) {
+            eventType = lunchCheckbox.value;
+        } else if (eveningCheckbox && eveningCheckbox.checked) {
+            eventType = eveningCheckbox.value;
+        }
+        
         let isJointEventValue = false; // デフォルトはfalse
         if (isJointEventCheckbox && jointEventToggleContainer && jointEventToggleContainer.style.display === 'block') {
             isJointEventValue = isJointEventCheckbox.checked;
@@ -270,7 +293,8 @@ createEventForm.addEventListener('submit', async (e) => {
             form_schema: formSchema.length > 0 ? formSchema : null,
             is_joint_event: isJointEventValue,
             created_at: new Date(new Date().getTime() + (9 * 60 * 60 * 1000)),
-            view_password: generatedPassword // 生成したパスワードを追加
+            view_password: generatedPassword, // 生成したパスワードを追加
+            event_type: eventType || null // ★追加: eventTypeをデータに含める
         };
 
         loadingIndicator.textContent = "イベント情報を保存中...";

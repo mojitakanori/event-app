@@ -11,6 +11,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const jointEventToggleContainer = document.getElementById('jointEventToggleContainer');
     const isJointEventCheckbox = document.getElementById('isJointEvent');
+    const lunchCheckbox = document.getElementById('eventTypeLunch');
+    const eveningCheckbox = document.getElementById('eventTypeEvening');
+    
+    // ★追加: チェックボックスの排他選択
+    if (lunchCheckbox && eveningCheckbox) {
+        lunchCheckbox.addEventListener('change', () => { if (lunchCheckbox.checked) eveningCheckbox.checked = false; });
+        eveningCheckbox.addEventListener('change', () => { if (eveningCheckbox.checked) lunchCheckbox.checked = false; });
+    }
 
     const editEventForm = document.getElementById('editEventForm');
     const eventIdInput = document.getElementById('eventId');
@@ -224,14 +232,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 maxParticipantsInput.value = event.max_participants || '';
 
                 // 特別なユーザーの場合、合同イベントのチェックボックスを表示し、状態をセット
-                if (jointEventToggleContainer && isJointEventCheckbox) {
-                    if (SPECIAL_USER_IDS.includes(user.id)) {
-                        jointEventToggleContainer.style.display = 'block';
-                        isJointEventCheckbox.checked = event.is_joint_event === true; // データベースの値に基づいてチェック
-                    } else {
-                        jointEventToggleContainer.style.display = 'none'; // 念のため非表示
-                        isJointEventCheckbox.checked = false; // 非表示の場合はチェックも外しておく
-                    }
+                if (SPECIAL_USER_IDS.includes(user.id)) {
+                    if(jointEventToggleContainer) jointEventToggleContainer.style.display = 'block';
+                    isJointEventCheckbox.checked = event.is_joint_event === true;
+
+                    if(eventTypeContainer) eventTypeContainer.style.display = 'block';
+                    if(lunchCheckbox) lunchCheckbox.checked = (event.event_type === 'Lunchtime meeting');
+                    if(eveningCheckbox) eveningCheckbox.checked = (event.event_type === 'Evening meeting');
+                } else {
+                    if(jointEventToggleContainer) jointEventToggleContainer.style.display = 'none';
+                    if(eventTypeContainer) eventTypeContainer.style.display = 'none';
+                    isJointEventCheckbox.checked = false;
                 }
 
                 existingImageUrls = event.image_urls || [];
@@ -330,6 +341,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const eventArea = eventAreaInput ? eventAreaInput.value : null;
+        let eventType = null;
+        if (lunchCheckbox && lunchCheckbox.checked) {
+            eventType = lunchCheckbox.value;
+        } else if (eveningCheckbox && eveningCheckbox.checked) {
+            eventType = eveningCheckbox.value;
+        }
 
         let isJointEventValue = false; // デフォルトはfalse
         // チェックボックスが表示されていて、かつチェックされている場合のみ true を設定
@@ -369,6 +386,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             video_urls: uploadedVideoUrls.length > 0 ? uploadedVideoUrls : null,
             form_schema: formSchema.length > 0 ? formSchema : null,
             is_joint_event: isJointEventValue,
+            event_type: eventType || null, 
+            event_type: eventType, 
         };
 
         loadingIndicator.textContent = "イベント情報を更新中...";
