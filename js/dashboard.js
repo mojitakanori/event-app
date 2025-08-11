@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (contentSection) {
             contentSection.innerHTML = `
                 <div class="message warning-message" style="text-align: center; padding: 2rem;">
-                    <h2>プレミアム会員限定機能です</h2>
-                    <p style="margin-top: 1rem;">イベントの作成・管理機能は、プレミアム会員プランでご利用いただけます。</p>
+                    <h2>会員限定機能です</h2>
+                    <p style="margin-top: 1rem;">イベントの作成・管理機能は、会員プランでご利用いただけます。</p>
                     <p>プランのアップグレードをご希望の場合は、管理者までお問い合わせください。</p>
                 </div>
             `;

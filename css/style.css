@@ -65,7 +65,7 @@ img, video {
 
 /* --- Layout & Container --- */
 .site-header {
-    background-color: #343a40; /* ダークグレー */
+    background: linear-gradient(135deg, #0a2976 0%, #1a4fa3 50%, #3b8ed0 100%);
     padding: 1rem 0;
     color: #fff;
     box-shadow: var(--box-shadow-sm);
@@ -468,7 +468,7 @@ hr {
 /* css/style.css のフッター部分 */
 
 .site-footer {
-    background-color: #343a40;
+    background: linear-gradient(135deg, #133385 0%, #1a4fa3 50%, #3b8ed0 100%);
     color: rgba(234, 222, 222, 0.7); /* やや透明度のある白文字 */
     padding: 2.5rem 1rem; /* 上下のパディングを広めに、左右は少し */
     text-align: center;
@@ -476,6 +476,7 @@ hr {
     margin-top: auto; /* bodyがflex-direction: column; min-height: 100vh; の場合、フッターをページ下部に押しやる */
     border-top: 3px solid var(--primary-color); /* 上部にアクセントボーダー */
 }
+
 
 .site-footer p {
     margin-bottom: 0; /* pタグのデフォルトマージンをリセット */

@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 2. 取得したプロフィール情報を表示
             if (profile) {
-                document.title = `${profile.community_name || 'コミュニティ'}詳細 - イベントハブ`;
+                document.title = `${profile.community_name || 'コミュニティ'}詳細 - Business HUB『Deal Den』`;
                 nameEl.textContent = profile.community_name || 'コミュニティ名未設定';
 
                 if (profile.community_banner_url) {
