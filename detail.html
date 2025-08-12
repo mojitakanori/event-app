@@ -20,8 +20,6 @@
         .event-media-gallery video {
             width: 100%;
             height: auto;
-            max-height: 400px; /* 動画や画像の最大高 */
-            object-fit: cover;
             border-radius: var(--border-radius-md);
             box-shadow: var(--box-shadow-light);
         }
@@ -216,7 +214,7 @@
                     <div id="dynamicRsvpFormFields">
                         <!-- JSで動的フォーム項目をここに挿入 -->
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="margin: 20px 10px;">
                         <input type="checkbox" id="termsAgreement" name="termsAgreement" required>
                         <label for="termsAgreement">
                             <a href="#" target="_blank" id="termsLink" onclick="event.stopPropagation();">利用規約</a>に同意します (必須)

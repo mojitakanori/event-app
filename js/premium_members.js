@@ -18,10 +18,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             // --- 変更: selectにavatar_urlとbusiness_descriptionを追加 ---
             const { data: members, error } = await supabase
                 .from('profiles')
-                .select('id, community_name, business_description, avatar_url')
+                .select('id, community_name, business_description, avatar_url, score') // ★変更点: scoreを追加
                 .in('membership_type', ['premium', 'owner'])
-                .eq('is_active', true) // アカウントが有効なユーザーのみを対象にする
-                .order('updated_at', { ascending: false });
+                .eq('is_active', true) 
+                .order('score', { ascending: false }); 
 
             if (error) throw error;
 

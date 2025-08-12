@@ -242,6 +242,21 @@ form label {
     color: var(--light-text);
 }
 
+input[type="password"]{
+    display: block;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--dark-text);
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    margin-bottom: 1rem; /* 各入力フィールド下のマージン */
+}
+
 form input[type="text"],
 form input[type="email"],
 form input[type="password"],

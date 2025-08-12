@@ -12,9 +12,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const { data: owners, error } = await supabase
                 .from('profiles')
-                .select('id, community_name, community_description, community_banner_url')
+                .select('id, community_name, community_description, community_banner_url, score')
                 .eq('membership_type', 'owner')
-                .order('updated_at', { ascending: false });
+                .order('score', { ascending: false }); 
 
             if (error) throw error;
 
