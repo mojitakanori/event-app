@@ -147,8 +147,8 @@ async function updateNav() {
                 <a href="index.html">ホーム</a>
                 <a href="premium_members.html">会員一覧</a>
                 <a href="communities.html">参画コミュニティ一覧</a>
-                <a href="signup.html">会員登録</a>
-                <a href="login.html">会員ログイン</a>
+                <a href="signup.html">新規登録</a>
+                <a href="login.html">ログイン</a>
             `;
         }
     }

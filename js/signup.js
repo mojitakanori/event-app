@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 3. 成功した場合
             messageArea.innerHTML = `
                 <p class="success-message">
-                    会員登録が完了しました！<br>
+                    新規登録が完了しました！<br>
                     3秒後にログインページに移動します。
                 </p>`;
             signupForm.reset();
