@@ -189,11 +189,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // 初期状態で表示するフォーム項目を設定
-    addDefaultFormField('会社名', 'textarea', false, '例: ○○株式会社');
-    addDefaultFormField('事業内容', 'textarea', false, '例: ITコンサルティング');
+    addDefaultFormField('会社名', 'text', true, '例: ○○株式会社');
+    addDefaultFormField('事業内容', 'text', true, '例: ITコンサルティング');
     addDefaultFormField('メールアドレス', 'email', true, '例: your.email@example.com');
-    addDefaultFormField('電話番号', 'tel', false, '例: 090-1234-5678');
-    addDefaultFormField('紹介者名', 'textarea', false, '例: 田中 太郎さん');
+    addDefaultFormField('電話番号', 'tel', true, '例: 090-1234-5678');
+    addDefaultFormField('紹介者名', 'text', true, '例: 田中 太郎さん');
 
     addFormFieldButton.addEventListener('click', () => {
         formFieldsContainer.appendChild(createFormFieldConfigElement());

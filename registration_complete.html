@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お申し込み完了 - イベント管理アプリ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .main-container {
+            max-width: 1140px;
+            margin: 2rem auto;
+            padding: 2rem 15px;
+            background-color: none;
+            border-radius: none;
+            box-shadow: none;
+            flex-grow: none;
+            background-color: var(--light-bg);
+        }
+        .completion-container {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            max-width: 900px;
+            margin: 2rem auto;
+        }
+        .completion-container h2 {
+            color: var(--accent-color);
+            margin-bottom: 1.5rem;
+        }
+        .completion-container p {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        .completion-container .info-box {
+            background-color: var(--light-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-top: 2rem;
+            text-align: left;
+        }
+        .info-box li {
+            margin-bottom: 0.5rem;
+        }
+        .completion-container .info-box strong {
+            color: var(--danger-color);
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <h1><a href="index.html">Business HUB『Deal Den』</a></h1>
+        </div>
+    </header>
+    <nav class="site-nav">
+        <div class="container">
+            <button class="hamburger-menu" aria-label="ナビゲーションを開く" aria-expanded="false" aria-controls="nav">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav id="nav"></nav>
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <div class="completion-container">
+            <h2>お申し込みありがとうございます！</h2>
+            <p>イベントへの参加登録が完了しました。<br>ご登録いただいたメールアドレス宛に、確認のメールをお送りしておりますのでご確認ください。</p>
+            
+            <div class="info-box">
+                <h4>今後のステップ</h4>
+                <ol>
+                    <li>ご登録のメールアドレスに届いたメールをご確認ください。</li>
+                    <li>メール内に記載されている<strong>参加者情報閲覧用パスワード</strong>をご確認ください。</li>
+                    <li>下のボタンからイベント詳細ページに戻り、パスワードを入力すると他の参加者の詳細情報を確認できます。</li>
+                </ol>
+            </div>
+            
+            <div class="button-group">
+                <a href="index.html" class="btn secondary-btn">トップページへ戻る</a>
+                <a href="#" id="backToEventBtn" class="btn">イベント詳細へ戻る</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <p>© 2025 Business HUB『Deal Den』. All Rights Reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('event_id');
+            const backToEventBtn = document.getElementById('backToEventBtn');
+            
+            if (eventId && backToEventBtn) {
+                backToEventBtn.href = `detail.html?id=${eventId}`;
+            } else if (backToEventBtn) {
+                backToEventBtn.style.display = 'none'; // イベントIDがない場合は非表示
+            }
+        });
+    </script>
+</body>
+</html>

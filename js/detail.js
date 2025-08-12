@@ -426,12 +426,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     throw insertError;
                 }
 
+
                 // --- 成功時の共通処理 ---
-                window.scrollTo({ top: 700, behavior: 'smooth' });
-                messageArea.innerHTML = `<p class="success-message">イベントへの参加登録が完了しました！${useBenefit ? ' (会員特典を利用)' : ''}</p>`;
-                rsvpForm.reset();
-                if (currentEventFormSchema) generateDynamicFormFields(currentEventFormSchema);
-                fetchEventDetailsAndParticipants(); // 参加者リストを更新
+                // 新しい完了ページへリダイレクト
+                window.location.href = `registration_complete.html?event_id=${currentEventId}`;
 
             } catch (error) {
                 console.error('Error submitting RSVP:', error.message);
