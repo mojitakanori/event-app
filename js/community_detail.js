@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         imageUrl = event.image_urls[0];
                     }
 
-                    const eventDate = event.event_date ? new Date(event.event_date).toLocaleString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : '日時未定';
+                    const eventDate = event.event_date ? event.event_date.replace('T', ' ').substring(0, 16) : '日時未定';
 
                     listItem.innerHTML = `
                         <a href="detail.html?id=${event.id}">

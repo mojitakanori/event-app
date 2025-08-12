@@ -55,8 +55,8 @@
                 <small>※推奨サイズ: 300x300px, 1MB以下の画像を選択してください。</small>
             </div>
             <div class="form-group">
-                <label for="community_name">お名前（コミュニティ名）</label>
-                <input type="text" id="community_name" name="community_name" required>
+                <label for="username">ユーザー名</label>
+                <input type="text" id="username" name="username" required>
             </div>
             <div class="form-group">
                 <label for="business_description">事業内容</label>
@@ -70,6 +70,10 @@
             <div id="communityProfileSection">
                 <hr style="margin: 2rem 0;">
                 <h2>コミュニティプロフィール設定 (オーナー限定)</h2>
+                <div class="form-group">
+                    <label for="community_name">コミュニティ名</label>
+                    <input type="text" id="community_name" name="community_name">
+                </div>
                 <div class="form-group">
                     <label for="communityBanner">コミュニティバナー</label>
                     <img id="communityBannerPreview" src="https://placehold.jp/800x200.png" alt="コミュニティバナープレビュー" style="width:100%; height:auto; display: block; margin-bottom: 10px; border-radius: var(--border-radius);">

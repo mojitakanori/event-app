@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentEventName = 'event_participants';
     let currentParticipantsData = [];
     let eventPassword = null; // イベントのパスワードを保持
-    let currentProfilesMap = new Map(); // ★追加: プロフィール情報を保持するMap
+    let currentProfilesMap = new Map(); // プロフィール情報を保持するMap
 
     const urlParams = new URLSearchParams(window.location.search);
     const currentEventId = urlParams.get('id');
@@ -107,17 +107,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         participants.forEach(p => {
             const profile = p.user_id ? profileMap.get(p.user_id) : null;
-            const isPremium = profile?.membership_type === 'premium';
             
-            // ★修正: 表示するバッジを決定するロジック
             let statusBadgeHtml = '';
-            // 特典を利用していたら「会員特典」バッジを追加
+
+            // 1. ユーザー種別のタグを決定
+            if (profile) {
+                // アカウントを持っている場合
+                switch (profile.membership_type) {
+                    case 'owner':
+                        statusBadgeHtml += `<a href="user_profile.html?id=${p.user_id}" target="_blank" class="btn-premium">会員</a>`;
+                        break;
+                    case 'premium':
+                        statusBadgeHtml += `<a href="user_profile.html?id=${p.user_id}" target="_blank" class="btn-premium">会員</a>`;
+                        break;
+                    default: // 'free' またはその他の場合
+                        statusBadgeHtml += `<a href="user_profile.html?id=${p.user_id}" target="_blank" class="btn-user">ユーザー</a>`;
+                        break;
+                }
+            } else {
+                // アカウントを持っていない場合
+                statusBadgeHtml += `<span class="btn-guest">ゲスト</span>`;
+            }
+
+            // 2. 会員特典を利用している場合は、追加でタグを表示
             if (p.participation_type === '会員特典') {
                 statusBadgeHtml += `<span class="btn-benefit" style="margin-left: 5px;">会員特典</span>`;
-            }
-            // 有料会員またはオーナーなら「有料会員」バッジを追加
-            if (isPremium) {
-                statusBadgeHtml += `<a href="user_profile.html?id=${p.user_id}" target="_blank" class="btn-premium" style="padding: 2px 8px; font-size: 0.75rem; margin-left: 5px;">有料会員</a>`;
             }
 
             // 1. 通常リストの生成
@@ -128,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             listItem.style.alignItems = 'center';
             listItem.innerHTML = `
                 <div><strong>事業内容:</strong> ${businessDesc}</div>
-                <div>${statusBadgeHtml}</div>
+                <div style="display: flex; gap: 5px;">${statusBadgeHtml}</div>
             `;
             participantListUl.appendChild(listItem);
 
@@ -144,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p style="margin: 0 0 4px 0;"><strong>名前:</strong> ${p.name || '-'}</p>
                     <p style="margin: 0;"><strong>事業内容:</strong> ${businessDesc}</p>
                 </div>
-                <div>${statusBadgeHtml}</div>
+                <div style="display: flex; gap: 5px;">${statusBadgeHtml}</div>
             `;
             fullEventParticipantList.appendChild(fullListItem);
         });
@@ -234,7 +248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // 参加者とそのプロフィール情報を取得
                 const { data: participants, error: pError } = await supabase.from('participants')
-                .select('name, created_at, form_data, user_id, participation_type') // ★修正
+                .select('name, created_at, form_data, user_id, participation_type')
                 .eq('event_id', currentEventId).order('created_at', { ascending: true });
                 if (pError) throw pError;
 
@@ -246,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (profileError) throw profileError;
                     profiles = profileData || [];
                 }
-                // ★追加: 取得したプロフィール情報をグローバルなMapに保存
+                
                 currentProfilesMap.clear();
                 profiles.forEach(p => currentProfilesMap.set(p.id, p));
 
@@ -271,9 +285,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // 1. ヘッダーを定義
         const baseHeaders = ['氏名', '登録日時'];
-        // ★追加: 新しいヘッダー
         const newHeaders = ['会員種別', '特典利用'];
         
         let customFieldHeaders = [];
@@ -284,28 +296,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                 customFieldNames.push(field.name);    
             });
         }
-        // 全てのヘッダーを結合
+        
         const allHeaders = [...baseHeaders, ...newHeaders, ...customFieldHeaders];
 
-        // 2. CSVコンテンツを生成
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
         csvContent += allHeaders.map(v => v ? `"${v.replace(/"/g, '""')}"` : '').join(',') + '\r\n'; 
         
         currentParticipantsData.forEach(participant => {
             const row = [];
             
-            // 基本項目
             row.push(`"${participant.name.replace(/"/g, '""')}"`);
             row.push(`"${participant.created_at.replace('T', ' ').substring(0, 19)}"`);
             
-            // ★追加: 新しい項目の値を取得
-            let membershipStatus = '非会員';
+            let membershipStatus = 'ゲスト';
             const profile = participant.user_id ? currentProfilesMap.get(participant.user_id) : null;
             if (profile) {
-                if (profile.membership_type === 'premium') {
-                    membershipStatus = '有料会員';
-                } else if (profile.membership_type === 'owner') {
-                    membershipStatus = 'コミュニティオーナー';
+                switch (profile.membership_type) {
+                    case 'owner':
+                        membershipStatus = 'コミュニティオーナー';
+                        break;
+                    case 'premium':
+                        membershipStatus = '会員';
+                        break;
+                    default:
+                        membershipStatus = 'ユーザー';
+                        break;
                 }
             }
             const benefitUsed = (participant.participation_type === '会員特典') ? 'はい' : 'いいえ';
@@ -313,7 +328,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             row.push(`"${membershipStatus}"`);
             row.push(`"${benefitUsed}"`);
 
-            // カスタムフォーム項目
             customFieldNames.forEach(fieldName => {
                 let value = '';
                 if (participant.form_data && participant.form_data[fieldName] !== undefined) {
@@ -327,7 +341,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             csvContent += row.join(',') + '\r\n';
         });
 
-        // 3. ダウンロード処理
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -352,11 +365,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const participantNameInput = document.getElementById('participantName');
             const termsAgreementCheckbox = document.getElementById('termsAgreement');
 
-            // --- 基本的なバリデーション ---
             if (!participantNameInput?.value.trim()) { messageArea.innerHTML = '<p class="error-message">氏名を入力してください。</p>'; return; }
             if (!termsAgreementCheckbox?.checked) { messageArea.innerHTML = '<p class="error-message">利用規約に同意してください。</p>'; return; }
 
-            // --- 動的フォームのデータ収集 ---
             const customFormData = {};
             if (currentEventFormSchema) {
                 for (const field of currentEventFormSchema) {
@@ -374,7 +385,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const user = await getCurrentUser();
 
             try {
-                // --- ★ここから会員特典のロジック ---
                 const { data: eventData, error: eventError } = await supabase.from('events').select('event_type').eq('id', currentEventId).single();
                 if(eventError) throw new Error("イベント情報の取得に失敗しました。");
                 
@@ -382,7 +392,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let useBenefit = false;
                 let creditColumnName = null;
                 
-                // ログインユーザーかつ、特典対象イベントの場合のみチェック
                 if (user && eventType) {
                     if (eventType === 'Lunchtime meeting') creditColumnName = 'lunch_meeting_credit';
                     else if (eventType === 'Evening meeting') creditColumnName = 'evening_meeting_credit';
@@ -397,11 +406,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 let participationTypeValue = null;
 
-                // --- ★会員特典を利用する場合の処理 ---
                 if (useBenefit && creditColumnName) {
-                    // 1. 先にクレジットを減らす
                     const { error: creditError } = await supabase
-                        .rpc('decrement_credit', { // 先ほど作成したSQL関数を呼び出す
+                        .rpc('decrement_credit', {
                             user_id_param: user.id,
                             column_name_param: creditColumnName
                         });
@@ -410,25 +417,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     participationTypeValue = '会員特典';
                 }
 
-                // --- ★参加者情報を登録（通常参加・特典利用共通） ---
                 const { error: insertError } = await supabase.from('participants').insert([{
                     event_id: currentEventId,
                     name: participantName,
                     created_at: new Date(new Date().getTime() + (9 * 60 * 60 * 1000)),
                     form_data: Object.keys(submissionData).length > 0 ? submissionData : null,
                     user_id: user ? user.id : null,
-                    participation_type: participationTypeValue // 特典利用なら'会員特典', 通常ならnull
+                    participation_type: participationTypeValue
                 }]);
                 
                 if (insertError) {
-                    // 万が一、参加者登録に失敗した場合はクレジットを戻す処理も検討できますが、
-                    // 今回はエラーメッセージ表示のみとします。
                     throw insertError;
                 }
 
-
-                // --- 成功時の共通処理 ---
-                // 新しい完了ページへリダイレクト
                 window.location.href = `registration_complete.html?event_id=${currentEventId}`;
 
             } catch (error) {
@@ -460,7 +461,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (passwordErrorMessage) {
                     passwordErrorMessage.textContent = 'パスワードが正しくありません。';
                     passwordErrorMessage.style.display = 'block';
-                    viewPasswordInput.value = ""; // 入力内容をクリア
+                    viewPasswordInput.value = "";
                 }
             }
         });

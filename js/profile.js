@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const messageArea = document.getElementById('messageArea');
 
     // 基本プロフィール要素
-    const communityNameInput = document.getElementById('community_name');
+    const usernameInput = document.getElementById('username');
     const bioTextarea = document.getElementById('bio');
     const businessDescriptionTextarea = document.getElementById('business_description');
     const avatarInput = document.getElementById('avatar');
@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // コミュニティプロフィール要素
     const communityProfileSection = document.getElementById('communityProfileSection');
+    const communityNameInput = document.getElementById('community_name');
     const communityBannerInput = document.getElementById('communityBanner');
     const communityBannerPreview = document.getElementById('communityBannerPreview');
     const communityDescriptionHidden = document.getElementById('communityDescription');
@@ -22,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     let descriptionQuill, projectsQuill;
     let avatarUrl = null;
-    let communityBannerUrl = null; // コミュニティバナーURLを保持
+    let communityBannerUrl = null;
 
     // Quillエディタの初期化
     const initQuillEditors = () => {
@@ -39,17 +40,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         descriptionQuill = new Quill('#communityDescriptionEditor', {
             theme: 'snow',
             placeholder: 'コミュニティの活動内容や理念などを記述します。',
-            modules: {
-                toolbar: toolbarOptions
-            }
+            modules: { toolbar: toolbarOptions }
         });
 
         projectsQuill = new Quill('#communityProjectsEditor', {
             theme: 'snow',
             placeholder: '現在進行中のプロジェクトや過去の実績などを記述します。',
-            modules: {
-                toolbar: toolbarOptions
-            }
+            modules: { toolbar: toolbarOptions }
         });
     };
     
@@ -58,30 +55,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const { data, error } = await supabase
                 .from('profiles')
-                .select('membership_type, community_name, bio, business_description, avatar_url, community_banner_url, community_description, community_projects')
+                .select('membership_type, username, community_name, bio, business_description, avatar_url, community_banner_url, community_description, community_projects')
                 .eq('id', user.id)
                 .single();
 
             if (error && error.code !== 'PGRST116') throw error;
 
             if (data) {
-                // 基本情報
-                communityNameInput.value = data.community_name || '';
+                // 基本情報 (常に読み込み)
+                usernameInput.value = data.username || '';
                 bioTextarea.value = data.bio || '';
                 businessDescriptionTextarea.value = data.business_description || '';
                 if (data.avatar_url) {
                     avatarUrl = data.avatar_url;
-                    avatarPreview.src = supabase.storage.from('avatars').getPublicUrl(avatarUrl).data.publicUrl;
+                    const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(avatarUrl);
+                    avatarPreview.src = publicUrlData.publicUrl;
                 }
 
                 // ownerの場合のみコミュニティプロフィール欄を表示・設定
                 if (data.membership_type === 'owner') {
                     communityProfileSection.style.display = 'block';
-                    initQuillEditors();
-
+                    initQuillEditors(); // エディタもこのタイミングで初期化
+                    
+                    communityNameInput.value = data.community_name || '';
+                    
                     if (data.community_banner_url) {
                         communityBannerUrl = data.community_banner_url;
-                        communityBannerPreview.src = supabase.storage.from('avatars').getPublicUrl(communityBannerUrl).data.publicUrl;
+                        const { data: bannerUrlData } = supabase.storage.from('avatars').getPublicUrl(communityBannerUrl);
+                        communityBannerPreview.src = bannerUrlData.publicUrl;
                     }
                     if (data.community_description) descriptionQuill.root.innerHTML = data.community_description;
                     if (data.community_projects) projectsQuill.root.innerHTML = data.community_projects;
@@ -108,18 +109,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 画像アップロードの共通関数
     async function uploadImage(file, currentUrl, userId) {
         if (!file) return currentUrl;
-
-        // 古い画像があれば削除
         if (currentUrl) {
             await supabase.storage.from('avatars').remove([currentUrl]);
         }
-        
         const filePath = `${userId}/${Date.now()}_${file.name}`;
-        const { error: uploadError } = await supabase.storage
-            .from('avatars')
-            .upload(filePath, file);
+        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
         if (uploadError) throw new Error(`画像アップロード失敗: ${uploadError.message}`);
-        
         return filePath;
     }
 
@@ -136,11 +131,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                  newBannerPath = await uploadImage(communityBannerInput.files[0], communityBannerUrl, user.id);
             }
 
-            // 更新データオブジェクト作成
+            // 更新データオブジェクト作成 (基本情報)
             const updates = {
                 id: user.id,
                 updated_at: new Date(),
-                community_name: communityNameInput.value.trim(),
+                username: usernameInput.value.trim(),
                 bio: bioTextarea.value.trim(),
                 business_description: businessDescriptionTextarea.value.trim(),
                 avatar_url: newAvatarPath,
@@ -148,9 +143,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // ownerの場合、コミュニティ情報を追加
             if (communityProfileSection.style.display === 'block') {
+                const newBannerPath = await uploadImage(communityBannerInput.files[0], communityBannerUrl, user.id);
+                updates.community_name = communityNameInput.value.trim();
                 updates.community_banner_url = newBannerPath;
                 updates.community_description = descriptionQuill.root.innerHTML;
                 updates.community_projects = projectsQuill.root.innerHTML;
+                
+                // URL変数を更新
+                communityBannerUrl = newBannerPath;
             }
 
             const { error } = await supabase.from('profiles').upsert(updates);
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             communityBannerUrl = newBannerPath;
             
             messageArea.innerHTML = '<p class="success-message">プロフィールが正常に更新されました。</p>';
-
+            window.location.href = `user_profile.html?id=${user.id}`;
         } catch (error) {
             console.error('Error updating profile:', error);
             messageArea.innerHTML = `<p class="error-message">更新に失敗しました: ${error.message}</p>`;

@@ -45,11 +45,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw signInError; // catchブロックで処理
             }
 
-            // ログイン成功
-            alert('ログインに成功しました！');
-            if (messageArea) {
-                messageArea.innerHTML = '<p class="success-message">ログイン成功！ホームへ移動します...</p>';
-            }
             
             // ナビゲーションを更新 (auth.js の updateNav を呼び出す)
             if (typeof updateNav === 'function') {

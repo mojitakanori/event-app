@@ -7,41 +7,51 @@
     <link rel="stylesheet" href="css/style.css"> <!-- 共通CSSを読み込み -->
     <style>
         /* index.html固有のスタイル */
-        .page-title {
-            font-size: 2.25rem;
-            font-weight: 300;
-            margin-bottom: 1.5rem;
-            color: var(--dark-text);
-            text-align: center;
-        }
-
         .filter-section {
-            background-color: #fdfdfd;
+            background-color: #ffffff;
             padding: 1.5rem;
             border-radius: var(--border-radius);
             margin-bottom: 2rem;
             box-shadow: var(--box-shadow-sm);
-            display: flex;
-            flex-wrap: wrap; /* フィルターが増えた場合に折り返すように */
-            align-items: center;
-            gap: 1.5rem; /* フィルター間のスペースを少し広げる */
         }
-        
-        .filter-group { /* 各フィルター（ラベル＋セレクト）をまとめる */
+        .filter-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        .filter-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+        .filter-group {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            background-color: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 0.5rem 0.75rem;
+            transition: box-shadow 0.2s;
         }
-
-        .filter-section label {
-            margin-bottom: 0; /* form共通スタイルを上書き */
-            font-size: 0.9rem;
+        .filter-group:focus-within {
+             box-shadow: 0 0 0 2px var(--primary-color);
+             border-color: var(--primary-color);
+        }
+        .filter-group label, .filter-group svg {
             color: var(--light-text);
+            margin-right: 0.5rem;
+            flex-shrink: 0;
         }
-
-        .filter-section select {
-            min-width: 200px;
-            margin-bottom: 0; /* form共通スタイルを上書き */
+        .filter-group select, .filter-group input {
+            width: 100%;
+            border: none;
+            background: none;
+            outline: none;
+            font-size: 0.95rem;
+            padding: 0;
+        }
+        .filter-group.search-group {
+            grid-column: 1 / -1; /* 検索ボックスは常に幅いっぱいに */
         }
         
         .event-grid {
@@ -230,22 +240,34 @@
         <h2 class="page-title">開催中のイベント</h2>
 
         <section class="filter-section">
-            <div class="filter-group">
-                <label for="organizerFilter">開催者で絞り込む:</label>
-                <select id="organizerFilter">
-                    <option value="">すべての開催者</option>
-                    <!-- 開催者リストはJSでここに挿入されます -->
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="areaFilter">エリアで絞り込む:</label>
-                <select id="areaFilter">
-                    <option value="">すべてのエリア</option>
-                    <option value="tokyo">東京エリア</option>
-                    <option value="osaka">大阪エリア</option>
-                    <option value="online">オンライン</option>
-                    <option value="other">その他</option>
-                </select>
+            <h3 class="filter-title">イベントを探す</h3>
+            <div class="filter-controls">
+                <div class="filter-group search-group">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M10.68 11.74a6 6 0 0 1-7.922-8.556 6 6 0 0 1 8.556 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215l-3.04-3.04ZM6.5 11.5a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"></path></svg>
+                    <input type="search" id="keywordSearch" placeholder="キーワードで検索...">
+                </div>
+                <div class="filter-group">
+                    <label for="organizerFilter">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M10.5 5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm.061 3.073a4 4 0 1 0-5.123 0 6.005 6.005 0 0 0-2.9 5.142.75.75 0 1 0 1.498-.07 4.5 4.5 0 0 1 8.97 0 .75.75 0 1 0 1.498-.07 6.004 6.004 0 0 0-2.9-5.142Z"></path></svg>
+                        開催者:
+                    </label>
+                    <select id="organizerFilter">
+                        <option value="">すべての開催者</option>
+                        </select>
+                </div>
+                <div class="filter-group">
+                    <label for="areaFilter">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor"><path d="M11.538 8.427a.75.75 0 0 1-.011 1.05l-4.25 3.5a.75.75 0 0 1-1.054-1.05l4.25-3.5a.75.75 0 0 1 1.065 0ZM8 1a3.5 3.5 0 0 0-3.5 3.5c0 .344.036.68.105 1.006L8 15.08l3.395-9.574A3.518 3.518 0 0 0 11.5 4.5 3.5 3.5 0 0 0 8 1Zm0 1c1.38 0 2.5 1.12 2.5 2.5S9.38 7 8 7 5.5 5.88 5.5 4.5 6.62 2 8 2Z"></path></svg>
+                        エリア:
+                    </label>
+                    <select id="areaFilter">
+                        <option value="">すべてのエリア</option>
+                        <option value="tokyo">東京エリア</option>
+                        <option value="osaka">大阪エリア</option>
+                        <option value="online">オンライン</option>
+                        <option value="other">その他</option>
+                    </select>
+                </div>
             </div>
         </section>
         

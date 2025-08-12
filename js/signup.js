@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // フォームから値を取得
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
-        const community_name = document.getElementById('community_name').value;
+        const username = document.getElementById('username').value;
         const business_description = document.getElementById('business_description').value;
         const bio = document.getElementById('bio').value;
 
@@ -48,8 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const { error: profileError } = await supabase
                 .from('profiles')
                 .update({ // .upsert や .insert の代わりに .update を使用
-                    community_name: community_name,
+                    username: username,
                     business_description: business_description,
+                    community_name: username,
                     bio: bio,
                     updated_at: new Date(),
                     // id や membership_type はトリガーが設定するので、ここでは更新しない
@@ -70,9 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
             signupForm.reset();
             
             // ログインページへリダイレクト
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 3000);
+            window.location.href = 'login.html';
+ 
 
 
         } catch (error) {

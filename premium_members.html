@@ -23,15 +23,26 @@
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
-            padding: 1.5rem;
             box-shadow: var(--box-shadow-sm);
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            display: flex; /* Flexboxレイアウトに変更 */
-            flex-direction: column;
-            align-items: center; /* 中央揃え */
-            text-align: center;
+            /* パディングを削除し、リンク要素に移動させます */
         }
-        .profile-card img.avatar { /* アバター画像のスタイルを追加 */
+        .profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--box-shadow);
+        }
+        /* 新しく追加するリンクのスタイル */
+        a.profile-card__link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 1.5rem; /* カードの余白をここで設定 */
+            text-decoration: none; /* リンクの下線を削除 */
+            color: inherit; /* 親要素の色を継承 */
+            height: 100%; /* カードの高さいっぱいに広げる */
+        }
+        .profile-card img.avatar {
             width: 100px;
             height: 100px;
             border-radius: 50%;
@@ -39,30 +50,17 @@
             margin-bottom: 1rem;
             border: 2px solid var(--border-color);
         }
-        .profile-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--box-shadow);
-        }
         .profile-card h3 {
             margin-top: 0;
-            font-size: 1.15rem; /* 少し調整 */
+            font-size: 1.15rem;
             margin-bottom: 0.5rem;
+            color: var(--dark-text); /* 通常時の文字色 */
+            transition: color 0.2s ease-in-out;
         }
-        .profile-card h3 a {
-            color: var(--dark-text);
-            text-decoration: none;
+        .profile-card a.profile-card__link:hover h3 {
+            color: var(--primary-color); /* ホバー時の文字色 */
         }
-         .profile-card h3 a:hover {
-            color: var(--primary-color);
-        }
-        .profile-card p {
-            font-size: 0.9rem;
-            color: var(--light-text);
-            white-space: pre-wrap;
-            word-break: break-word;
-            margin-bottom: 0;
-        }
-        .profile-card .business-desc { /* 事業内容のスタイルを追加 */
+        .profile-card .business-desc {
             font-size: 0.85rem;
             color: #555;
             margin-bottom: 0;

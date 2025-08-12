@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const organizerFilterSelect = document.getElementById('organizerFilter');
     const areaFilterSelect = document.getElementById('areaFilter');
     const messageArea = document.getElementById('messageArea');
+    const keywordSearch = document.getElementById('keywordSearch'); 
 
     let allEventsData = [];
 
@@ -180,8 +181,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     function applyFilters() {
         const selectedOrganizerId = organizerFilterSelect ? organizerFilterSelect.value : '';
         const selectedArea = areaFilterSelect ? areaFilterSelect.value : '';
+        const searchTerm = keywordSearch ? keywordSearch.value.trim().toLowerCase() : ''; // ★この行を追加
 
         let filteredEventData = allEventsData;
+
+        if (searchTerm) {
+            filteredEventData = filteredEventData.filter(ed => 
+                (ed.event.name && ed.event.name.toLowerCase().includes(searchTerm)) ||
+                (ed.event.description && ed.event.description.toLowerCase().includes(searchTerm))
+            );
+        }
 
         if (selectedOrganizerId) {
             filteredEventData = filteredEventData.filter(ed => ed.event.user_id === selectedOrganizerId);
@@ -281,6 +290,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (areaFilterSelect) {
         areaFilterSelect.addEventListener('change', applyFilters);
+    }
+    if (keywordSearch) { 
+        keywordSearch.addEventListener('input', applyFilters);
     }
     fetchAndDisplayInitialEvents();
 });

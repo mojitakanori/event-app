@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // --- 変更: selectにavatar_urlとbusiness_descriptionを追加 ---
             const { data: members, error } = await supabase
                 .from('profiles')
-                .select('id, community_name, business_description, avatar_url, score') // ★変更点: scoreを追加
+                .select('id, username, community_name, business_description, avatar_url, score') // ★変更点: scoreを追加
                 .in('membership_type', ['premium', 'owner'])
                 .eq('is_active', true) 
                 .order('score', { ascending: false }); 
@@ -46,11 +46,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         : '';
 
                     listItem.innerHTML = `
-                        <img src="${avatarSrc}" alt="${member.community_name || ''}のアイコン" class="avatar">
-                        <h3><a href="user_profile.html?id=${member.id}">${member.community_name || '名称未設定'}</a></h3>
-                        <p class="business-desc">${businessDescShort}</p>
+                        <a href="user_profile.html?id=${member.id}" class="profile-card__link">
+                            <img src="${avatarSrc}" alt="${member.username || ''}のアイコン" class="avatar">
+                            <h3>${member.username || '名称未設定'}</h3>
+                            <p class="business-desc">${businessDescShort}</p>
+                        </a>
                     `;
-                    // ---------------------------------
                     memberListUl.appendChild(listItem);
                 });
             } else {
