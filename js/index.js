@@ -227,6 +227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         is_joint_event,
                         profiles (id, community_name)
                     `)
+                    .or(`event_date.gte.${new Date().toISOString()},event_date.is.null`)
                     .order('is_joint_event', { ascending: false, nullsFirst: false }) // true (合同) が先
                     .order('event_date', { ascending: true }); // 次に日時順
 

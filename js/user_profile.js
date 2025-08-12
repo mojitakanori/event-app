@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const { data: profile, error } = await supabase
                 .from('profiles')
-                .select('community_name, bio, business_description, avatar_url')
+                .select('username, bio, business_description, avatar_url')
                 .eq('id', userId) // 「userId」を使用
                 .single();
             
@@ -41,13 +41,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             if (profile) {
-                document.title = `${profile.community_name || '会員'}のプロフィール - イベント管理アプリ`;
-                if(communityNameEl) communityNameEl.textContent = profile.community_name || 'コミュニティ名未設定';
+                document.title = `${profile.username || '会員'}のプロフィール - イベント管理アプリ`;
+                if(communityNameEl) communityNameEl.textContent = profile.username || 'コミュニティ名未設定';
 
                 if (profile.avatar_url && avatarEl) {
                     const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(profile.avatar_url);
                     avatarEl.src = publicUrlData.publicUrl;
-                    avatarEl.alt = `${profile.community_name || ''}のアイコン`;
+                    avatarEl.alt = `${profile.username || ''}のアイコン`;
                 } else if (avatarEl) {
                     avatarEl.src = 'https://placehold.jp/180x180.png?text=No+Image';
                 }

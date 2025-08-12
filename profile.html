@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
         /* profile.html固有のスタイル */
         .profile-form-container { /* フォームの最大幅など設定 */
@@ -25,6 +26,33 @@
             margin-top: 3rem;
             padding-top: 2rem;
             border-top: 2px dashed var(--border-color);
+        }
+        .btn--loading {
+            position: relative; /* スピナーを中央に配置するための基準 */
+            color: transparent !important; /* 元のテキストを透明にする */
+            pointer-events: none; /* 処理中の多重クリックを防ぐ */
+            cursor: wait; /* カーソルを待機状態に */
+        }
+
+        .btn--loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;   /* スピナーのサイズ */
+            height: 20px;  /* スピナーのサイズ */
+            top: 50%;
+            left: 50%;
+            margin-top: -10px;  /* 高さの半分 */
+            margin-left: -10px; /* 幅の半分 */
+            border: 3px solid rgba(255, 255, 255, 0.4); /* スピナーの円の色 */
+            border-top-color: #ffffff; /* スピナーの回転部分の色 */
+            border-radius: 50%;
+            animation: btn-spin 0.8s linear infinite;
+        }
+
+        @keyframes btn-spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>

@@ -90,9 +90,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     eventIdInput.value = currentEventIdToEdit;
 
     // Helper functions (変更なし、そのまま)
+
+    /**
+     * 画像ファイルをWebP形式に変換・圧縮する関数
+     */
+    async function convertToWebP(imageFile) {
+        const options = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+            fileType: 'image/webp'
+        };
+        try {
+            console.log(`変換前: ${imageFile.name}, サイズ: ${(imageFile.size / 1024 / 1024).toFixed(2)} MB`);
+            const compressedFile = await imageCompression(imageFile, options);
+            console.log(`変換後: ${compressedFile.name}, サイズ: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+            return compressedFile;
+        } catch (error) {
+            console.error('画像のWebP変換に失敗しました:', error);
+            return imageFile; // エラー時は元のファイルを返す
+        }
+    }
+    
     function sanitizeFileName(fileName) { /* (変更なし) */ const nameParts = fileName.split('.'); const extension = nameParts.length > 1 ? '.' + nameParts.pop() : ''; let baseName = nameParts.join('.'); baseName = baseName.replace(/[^a-zA-Z0-9_.\-]/g, '_').replace(/__+/g, '_').replace(/^_+|_+$/g, ''); if (!baseName) baseName = 'file'; return baseName + extension; }
-    async function uploadSingleFile(file, typePrefix = 'media') { /* (変更なし) */ if (!file) return null; const originalFileName = file.name; const sanitizedFileName = sanitizeFileName(originalFileName); const filePath = `${typePrefix}/${user.id}/${Date.now()}_${sanitizedFileName}_${Math.random().toString(36).substring(2,7)}`; const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file, { cacheControl: '3600', upsert: false }); if (error) { console.error(`Error uploading ${typePrefix} (${originalFileName}):`, error); throw new Error(`${originalFileName}のアップロードに失敗しました: ${error.message}`); } const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(data.path); return publicUrlData.publicUrl; }
-    function generateUniqueFieldName() { /* (変更なし) */ return `field_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`; }
+    async function uploadSingleFile(file, typePrefix = 'media') {
+        if (!file) return null;
+
+        // WebP変換処理を呼び出す
+        const fileToUpload = await convertToWebP(file);
+
+        // .webp形式のファイル名を作成
+        const originalName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        const sanitizedFileName = sanitizeFileName(`${originalName}.webp`);
+
+        const filePath = `${typePrefix}/${user.id}/${Date.now()}_${sanitizedFileName}_${Math.random().toString(36).substring(2,7)}`;
+        const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(filePath, fileToUpload, { cacheControl: '3600', upsert: false });
+        
+        if (error) { console.error(`Error uploading ${typePrefix} (${originalName}):`, error); throw new Error(`${originalName}のアップロードに失敗しました: ${error.message}`); }
+        
+        const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(data.path);
+        return publicUrlData.publicUrl;
+    }    function generateUniqueFieldName() { /* (変更なし) */ return `field_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`; }
     function updateNewFilePreview(file, previewContainer, selectedFilesArray, fileType) { /* (変更なし) */
         const previewItem = document.createElement('div'); previewItem.classList.add('preview-item');
         let mediaElement;

@@ -195,12 +195,52 @@ document.addEventListener('DOMContentLoaded', async () => {
     addDefaultFormField('電話番号', 'tel', true, '例: 090-1234-5678');
     addDefaultFormField('紹介者名', 'text', true, '例: 田中 太郎さん');
 
+
+    /**
+     * 画像ファイルをWebP形式に変換・圧縮する関数
+     */
+    async function convertToWebP(imageFile) {
+        const options = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+            fileType: 'image/webp'
+        };
+        try {
+            console.log(`変換前: ${imageFile.name}, サイズ: ${(imageFile.size / 1024 / 1024).toFixed(2)} MB`);
+            const compressedFile = await imageCompression(imageFile, options);
+            console.log(`変換後: ${compressedFile.name}, サイズ: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
+            return compressedFile;
+        } catch (error) {
+            console.error('画像のWebP変換に失敗しました:', error);
+            return imageFile; // エラー時は元のファイルを返す
+        }
+    }
+
     addFormFieldButton.addEventListener('click', () => {
         formFieldsContainer.appendChild(createFormFieldConfigElement());
     });
 
-    async function uploadSingleFile(file, typePrefix = 'media') { /* (変更なし) */ if (!file) return null; function sanitizeFileName(fileName) { const nameParts = fileName.split('.'); const extension = nameParts.length > 1 ? '.' + nameParts.pop() : ''; let baseName = nameParts.join('.'); baseName = baseName.replace(/[^a-zA-Z0-9_.\-]/g, '_').replace(/__+/g, '_').replace(/^_+|_+$/g, ''); if (!baseName) baseName = 'file'; return baseName + extension; } const originalFileName = file.name; const sanitizedFileName = sanitizeFileName(originalFileName); const filePath = `${typePrefix}/${user.id}/${Date.now()}_${sanitizedFileName}_${Math.random().toString(36).substring(2,7)}`; const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file, { cacheControl: '3600', upsert: false }); if (error) { console.error(`Error uploading ${typePrefix} (${originalFileName}):`, error); throw new Error(`${originalFileName}のアップロードに失敗しました: ${error.message}`); } const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(data.path); return publicUrlData.publicUrl; }
+    async function uploadSingleFile(file, typePrefix = 'media') {
+        if (!file) return null;
 
+        // WebP変換処理を呼び出す
+        const fileToUpload = await convertToWebP(file);
+
+        function sanitizeFileName(fileName) { const nameParts = fileName.split('.'); const extension = nameParts.length > 1 ? '.' + nameParts.pop() : ''; let baseName = nameParts.join('.'); baseName = baseName.replace(/[^a-zA-Z0-9_.\-]/g, '_').replace(/__+/g, '_').replace(/^_+|_+$/g, ''); if (!baseName) baseName = 'file'; return baseName + extension; }
+        
+        // .webp形式のファイル名を作成
+        const originalName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+        const sanitizedFileName = sanitizeFileName(`${originalName}.webp`);
+
+        const filePath = `${typePrefix}/${user.id}/${Date.now()}_${sanitizedFileName}_${Math.random().toString(36).substring(2,7)}`;
+        const { data, error } = await supabase.storage.from(BUCKET_NAME).upload(filePath, fileToUpload, { cacheControl: '3600', upsert: false });
+        
+        if (error) { console.error(`Error uploading ${typePrefix} (${originalFileName}):`, error); throw new Error(`${originalFileName}のアップロードに失敗しました: ${error.message}`); }
+        
+        const { data: publicUrlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(data.path);
+        return publicUrlData.publicUrl;
+    }
 createEventForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     messageArea.innerHTML = '';
