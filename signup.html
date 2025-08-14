@@ -7,13 +7,17 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         .signup-container {
-            max-width: 600px;
+            max-width: 500px;
             margin-left: auto;
             margin-right: auto;
         }
+        .signup-container h2 {
+            text-align: center;
+            color: var(--primary-color);
+        }
         .submit-button-container {
             margin-top: 2rem;
-            text-align: right;
+            text-align: center;
         }
     </style>
 </head>
@@ -34,7 +38,6 @@
 
     <main class="main-container signup-container">
         <h2>新規登録</h2>
-        <p>アカウントを作成するために、以下の情報を入力してください。</p>
         <div id="messageArea" class="message-area"></div>
         <form id="signupForm">
             <div class="form-group">
@@ -44,7 +47,6 @@
             <div class="form-group">
                 <label for="password">パスワード (必須):</label>
                 <input type="password" id="password" name="password" minlength="6" required>
-                <small>※6文字以上で入力してください。</small>
             </div>
             <hr>
             <div class="form-group">

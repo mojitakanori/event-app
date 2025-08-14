@@ -134,7 +134,7 @@ async function updateNav() {
     if (navElement) {
         if (user) {
             navElement.innerHTML = `
-                <a href="index.html">ホーム</a>
+                <a href="index.html">イベント検索</a>
                 <a href="premium_members.html">会員一覧</a>
                 <a href="communities.html">コミュニティ一覧</a>
                 <a href="create.html">イベント作成</a>
@@ -144,7 +144,7 @@ async function updateNav() {
             `;
         } else {
             navElement.innerHTML = `
-                <a href="index.html">ホーム</a>
+                <a href="index.html">イベント検索</a>
                 <a href="premium_members.html">会員一覧</a>
                 <a href="communities.html">参画コミュニティ一覧</a>
                 <a href="signup.html">新規登録</a>
