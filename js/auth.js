@@ -134,6 +134,7 @@ async function updateNav() {
     if (navElement) {
         if (user) {
             navElement.innerHTML = `
+                <a href="https://dealden.jp/">ホーム</a>
                 <a href="index.html">イベント検索</a>
                 <a href="premium_members.html">会員一覧</a>
                 <a href="communities.html">コミュニティ一覧</a>
@@ -144,6 +145,7 @@ async function updateNav() {
             `;
         } else {
             navElement.innerHTML = `
+                <a href="https://dealden.jp/">ホーム</a>
                 <a href="index.html">イベント検索</a>
                 <a href="premium_members.html">会員一覧</a>
                 <a href="communities.html">参画コミュニティ一覧</a>

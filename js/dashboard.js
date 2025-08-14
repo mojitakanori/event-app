@@ -49,29 +49,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const listItem = document.createElement('li');
                     const eventDate = event.event_date ? event.event_date.replace('T', ' ').substring(0, 16) : '未定';
                     
-                    const detailLinkButton = document.createElement('a');
-                    detailLinkButton.href = `detail.html?id=${event.id}`;
-                    detailLinkButton.innerHTML = `<button class="view-detail-btn">詳細・参加者</button>`; // ボタンテキスト変更
+                    const ownerDetailLinkButton = document.createElement('a');
+                    ownerDetailLinkButton.href = `detail_owner.html?id=${event.id}`;
+                    ownerDetailLinkButton.innerHTML = `<button class="view-detail-btn">参加者情報</button>`;
 
-                    // 編集ボタンの追加
+                    // 編集ボタン
                     const editLinkButton = document.createElement('a');
                     editLinkButton.href = `edit_event.html?id=${event.id}`;
                     editLinkButton.innerHTML = `<button class="edit-event-btn">編集</button>`;
-                    editLinkButton.style.marginLeft = "5px"; // 少しマージン
+
+                    // 削除ボタン
+                    const deleteButton = document.createElement('button');
+                    deleteButton.classList.add('delete-btn');
+                    deleteButton.dataset.eventId = event.id;
+                    deleteButton.textContent = '削除';
 
                     listItem.innerHTML = `
-                        <h3>${event.name}</h3>
+                        <h3><a href="detail.html?id=${event.id}" target="_blank">${event.name}</a></h3>
                         <p><strong>日時:</strong> ${eventDate}</p>
                         <p><strong>場所:</strong> ${event.location || '未定'}</p>
                         <div class="action-buttons">
-                            <button class="delete-btn" data-event-id="${event.id}">削除</button>
                         </div>
                     `;
                     const actionButtonsDiv = listItem.querySelector('.action-buttons');
                     if (actionButtonsDiv) {
-                        actionButtonsDiv.prepend(editLinkButton); // 編集ボタンを追加
-                        actionButtonsDiv.prepend(detailLinkButton); // 詳細ボタンを先頭に
+                        actionButtonsDiv.appendChild(ownerDetailLinkButton);
+                        actionButtonsDiv.appendChild(editLinkButton);
+                        actionButtonsDiv.appendChild(deleteButton);
                     }
+                    
                     myEventListUl.appendChild(listItem);
                 });
                 addEventListenersToButtons();
