@@ -235,9 +235,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `<p><strong>日時:</strong> ${dateTimeStr}</p>` +
                     `<p><strong>場所:</strong> ${event.location || '未定'}</p>` +
                     `${feeDisplay}${capacityStatusDetail}` +
-                    `<p><strong>詳細:</strong></p><div class="event-description"><p>${event.description || '詳細情報はありません。'}</p></div>`;
-
-                generateDynamicFormFields(event.form_schema);
+                    `<hr>` + // ここに線を追加
+                    `<div class="event-description"><h3>イベント概要</h3><p>${event.description || '詳細情報はありません。'}</p></div>`;
+                
+                    generateDynamicFormFields(event.form_schema);
 
                 if (registrationClosed) {
                     rsvpForm.style.display = 'none';
