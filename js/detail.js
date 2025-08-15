@@ -105,60 +105,71 @@ document.addEventListener('DOMContentLoaded', async () => {
         const businessDescField = (currentEventFormSchema || []).find(f => f.label.includes('事業内容'))?.name;
         const companyNameField = (currentEventFormSchema || []).find(f => f.label.includes('会社名'))?.name;
 
-        participants.forEach(p => {
+        participants.forEach((p, index) => {
             const profile = p.user_id ? profileMap.get(p.user_id) : null;
             
+            // --- ステータスバッジの生成ロジック (変更なし) ---
             let statusBadgeHtml = '';
-
-            // 1. ユーザー種別のタグを決定
             if (profile) {
-                // アカウントを持っている場合
                 switch (profile.membership_type) {
                     case 'owner':
-                        statusBadgeHtml += `<a href="user_profile.html?id=${p.user_id}" target="_blank" class="btn-premium">会員</a>`;
-                        break;
                     case 'premium':
                         statusBadgeHtml += `<a href="user_profile.html?id=${p.user_id}" target="_blank" class="btn-premium">会員</a>`;
                         break;
-                    default: // 'free' またはその他の場合
+                    default:
                         statusBadgeHtml += `<a href="user_profile.html?id=${p.user_id}" target="_blank" class="btn-user">非会員</a>`;
                         break;
                 }
             } else {
-                // アカウントを持っていない場合
                 statusBadgeHtml += `<span class="btn-guest">非会員</span>`;
             }
-
-            // 2. 会員特典を利用している場合は、追加でタグを表示
             if (p.participation_type === '会員特典') {
                 statusBadgeHtml += `<span class="btn-benefit" style="margin-left: 5px;">会員特典</span>`;
             }
 
-            // 1. 通常リストの生成
+            // --- 1. 通常リストの生成 (パスワード入力前) ---
+            let anonymizedName;
+            if (index < 26) {
+                // 26人目 (Zさん) までは今まで通り
+                anonymizedName = String.fromCharCode(65 + index) + 'さん';
+            } else {
+                // 27人目以降は AAさん, ABさん... と表示
+                const firstLetter = String.fromCharCode(65 + Math.floor(index / 26) - 1);
+                const secondLetter = String.fromCharCode(65 + (index % 26));
+                anonymizedName = firstLetter + secondLetter + 'さん';
+            }
             const businessDesc = (p.form_data && businessDescField && p.form_data[businessDescField]) ? p.form_data[businessDescField] : '未入力';
+
             const listItem = document.createElement('li');
-            listItem.style.display = 'flex';
-            listItem.style.justifyContent = 'space-between';
-            listItem.style.alignItems = 'center';
+            listItem.classList.add('participant-list-item'); // 共通のクラス
             listItem.innerHTML = `
-                <div><strong>事業内容:</strong> ${businessDesc}</div>
-                <div style="display: flex; gap: 5px;">${statusBadgeHtml}</div>
+                <div class="participant-info-anonymous">
+                    <img src="assets/person_icon.webp" alt="参加者アイコン" class="participant-icon">
+                    <div class="participant-details">
+                        <span>${anonymizedName}</span>
+                        <p class="business-desc"><strong>事業内容:</strong> ${businessDesc}</p>
+                    </div>
+                </div>
+                <div class="participant-status">${statusBadgeHtml}</div>
             `;
             participantListUl.appendChild(listItem);
 
-            // 2. 詳細リストの生成
+            // --- 2. 詳細リストの生成 (パスワード入力後) ---
             const companyName = (p.form_data && companyNameField && p.form_data[companyNameField]) ? p.form_data[companyNameField] : '未入力';
+            // 紹介者名を取得するためのフィールド名を探す
+            const referrerNameField = (currentEventFormSchema || []).find(f => f.label.includes('紹介者名'))?.name;
+            const referrerName = (p.form_data && referrerNameField && p.form_data[referrerNameField]) ? p.form_data[referrerNameField] : '未入力';
+
             const fullListItem = document.createElement('li');
-            fullListItem.style.display = 'flex';
-            fullListItem.style.justifyContent = 'space-between';
-            fullListItem.style.alignItems = 'center';
+            fullListItem.classList.add('participant-list-item', 'full-details'); // 詳細リスト用のクラスを追加
             fullListItem.innerHTML = `
-                <div>
-                    <p style="margin: 0 0 4px 0;"><strong>会社名:</strong> ${companyName}</p>
-                    <p style="margin: 0 0 4px 0;"><strong>名前:</strong> ${p.name || '-'}</p>
-                    <p style="margin: 0;"><strong>事業内容:</strong> ${businessDesc}</p>
+                <div class="participant-details-full">
+                    <p><strong>会社名:</strong> ${companyName}</p>
+                    <p><strong>名前:</strong> ${p.name || '-'}</p>
+                    <p><strong>事業内容:</strong> ${businessDesc}</p>
+                    <p><strong>紹介者名:</strong> ${referrerName}</p>
                 </div>
-                <div style="display: flex; gap: 5px;">${statusBadgeHtml}</div>
+                <div class="participant-status">${statusBadgeHtml}</div>
             `;
             fullEventParticipantList.appendChild(fullListItem);
         });

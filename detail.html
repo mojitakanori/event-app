@@ -86,6 +86,50 @@
         }
         .participant-list li strong { font-weight: 500; }
         .participant-list li small { display: block; color: var(--text-light); font-size: 0.8rem; margin-top: 0.5rem; }
+        .participant-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem; /* 要素間の余白を追加 */
+        }
+
+        .participant-status {
+            display: flex;
+            gap: 5px;
+            flex-shrink: 0; /* バッジが縮まないように設定 */
+        }
+        .participant-info-anonymous {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .participant-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .participant-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .participant-details .business-desc {
+            font-size: 0.85rem;
+            color: var(--light-text);
+            margin-top: 4px;
+        }
+
+        .participant-details-full p {
+            margin: 0 0 4px 0;
+            word-break: break-word; /* 長いテキストがはみ出ないように */
+        }
+        .participant-details-full p:last-child {
+            margin-bottom: 0;
+        }
 
         #rsvpForm { margin-top: 2.5rem; }
         .registration-closed-message p.error-message {
@@ -151,6 +195,16 @@
             font-size: 0.75rem;
             display: inline-block;
             text-decoration: none;
+        }
+        @media (max-width: 576px) {
+            .participant-list-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .participant-list-item .participant-status {
+                margin-top: 0.75rem; /* 上に少し余白を追加 */
+            }
         }
     </style>
 </head>
