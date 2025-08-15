@@ -121,12 +121,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         statusBadgeHtml += `<a href="user_profile.html?id=${p.user_id}" target="_blank" class="btn-premium">会員</a>`;
                         break;
                     default: // 'free' またはその他の場合
-                        statusBadgeHtml += `<a href="user_profile.html?id=${p.user_id}" target="_blank" class="btn-user">ユーザー</a>`;
+                        statusBadgeHtml += `<a href="user_profile.html?id=${p.user_id}" target="_blank" class="btn-user">非会員</a>`;
                         break;
                 }
             } else {
                 // アカウントを持っていない場合
-                statusBadgeHtml += `<span class="btn-guest">ゲスト</span>`;
+                statusBadgeHtml += `<span class="btn-guest">非会員</span>`;
             }
 
             // 2. 会員特典を利用している場合は、追加でタグを表示
