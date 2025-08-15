@@ -131,7 +131,7 @@ img, video {
     display: block;
     width: 25px;
     height: 3px;
-    background-color: var(--dark-text); /* site-navの背景が明るいので濃い色 */
+    background-color: #ffffff; /* site-navの背景が明るいので濃い色 */
     margin: 5px 0;
     transition: all 0.3s ease-in-out;
 }
@@ -179,14 +179,15 @@ img, video {
 
 @media (max-width: 768px) {
     .site-header .container {
-        flex-direction: column;
-        text-align: center;
+        flex-direction: row; /* 縦並びから横並びに変更 */
+        justify-content: space-between; /* タイトルとメニューを両端に配置 */
+        align-items: center; /* 垂直方向の中央揃えを維持 */
+        text-align: left; /* 中央揃えを解除 */
     }
 
     .site-nav .container {
-        flex-direction: row; /* ハンバーガーメニューとnav#nav(隠れている)のコンテキスト */
-        justify-content: flex-end; /* ハンバーガーメニューを右寄せ */
-        /* align-items: center; は継承される */
+        /* ハンバーガーがなくなったので中央寄せに変更 */
+        justify-content: center; 
     }
 
     .hamburger-menu {

@@ -14,7 +14,7 @@
     <style>
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0 1.5rem; }
         .form-group.full-width { grid-column: 1 / -1; }
-        .submit-button-container { margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem; }
+        .submit-button-container { margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem; align-items: center; }
 
         .current-media-section { margin-bottom: 1.5rem; }
         .current-media-section h4 { font-size: 1rem; font-weight: 500; color: var(--text-light); margin-bottom: 0.75rem; }
@@ -134,22 +134,21 @@
     </style>
 </head>
 <body>
-    <header class="site-header">
+<header class="site-header">
         <div class="container">
             <h1><a href="index.html">Business HUB『Deal Den』</a></h1>
-        </div>
-    </header>
-    <nav class="site-nav">
-        <div class="container">
-            <!-- ハンバーガーボタンを追加 -->
+            
             <button class="hamburger-menu" aria-label="ナビゲーションを開く" aria-expanded="false" aria-controls="nav">
                 <span></span>
                 <span></span>
                 <span></span>
             </button>
+        </div>
+    </header>
+    <nav class="site-nav">
+        <div class="container">
             <nav id="nav">
-                <!-- ナビゲーションリンクは auth.js によってここに挿入されます -->
-            </nav>
+                </nav>
         </div>
     </nav>
 
