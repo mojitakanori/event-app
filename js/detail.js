@@ -365,8 +365,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const participantNameInput = document.getElementById('participantName');
             const termsAgreementCheckbox = document.getElementById('termsAgreement');
 
-            if (!participantNameInput?.value.trim()) { messageArea.innerHTML = '<p class="error-message">氏名を入力してください。</p>'; return; }
-            if (!termsAgreementCheckbox?.checked) { messageArea.innerHTML = '<p class="error-message">利用規約に同意してください。</p>'; return; }
+            if (!participantNameInput?.value.trim()) {
+                messageArea.innerHTML = '<p class="error-message">氏名を入力してください。</p>';
+                return;
+            }
+            if (!termsAgreementCheckbox?.checked) {
+                messageArea.innerHTML = '<p class="error-message">利用規約に同意してください。</p>';
+                return;
+            }
 
             const customFormData = {};
             if (currentEventFormSchema) {
@@ -375,29 +381,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (inputElement) {
                         if (field.type === 'checkbox') customFormData[field.name] = inputElement.checked;
                         else customFormData[field.name] = inputElement.value.trim();
-                        if (field.required && !customFormData[field.name] && field.type !== 'checkbox') { messageArea.innerHTML = `<p class="error-message">${field.label} を入力してください。</p>`; return; }
-                        if (field.required && field.type === 'checkbox' && !inputElement.checked) { messageArea.innerHTML = `<p class="error-message">${field.label} にチェックを入れてください。</p>`; return; }
+                        if (field.required && !customFormData[field.name] && field.type !== 'checkbox') {
+                            messageArea.innerHTML = `<p class="error-message">${field.label} を入力してください。</p>`;
+                            return;
+                        }
+                        if (field.required && field.type === 'checkbox' && !inputElement.checked) {
+                            messageArea.innerHTML = `<p class="error-message">${field.label} にチェックを入れてください。</p>`;
+                            return;
+                        }
                     }
                 }
             }
-            const submissionData = { ...customFormData, terms_agreed: termsAgreementCheckbox.checked };
+            const submissionData = { ...customFormData,
+                terms_agreed: termsAgreementCheckbox.checked
+            };
             const participantName = participantNameInput.value.trim();
             const user = await getCurrentUser();
 
             try {
-                const { data: eventData, error: eventError } = await supabase.from('events').select('event_type').eq('id', currentEventId).single();
-                if(eventError) throw new Error("イベント情報の取得に失敗しました。");
-                
+                const {
+                    data: eventData,
+                    error: eventError
+                } = await supabase.from('events').select('event_type').eq('id', currentEventId).single();
+                if (eventError) throw new Error("イベント情報の取得に失敗しました。");
+
                 const eventType = eventData?.event_type;
                 let useBenefit = false;
                 let creditColumnName = null;
-                
+
                 if (user && eventType) {
                     if (eventType === 'Lunchtime meeting') creditColumnName = 'lunch_meeting_credit';
                     else if (eventType === 'Evening meeting') creditColumnName = 'evening_meeting_credit';
 
                     if (creditColumnName) {
-                        const { data: profile } = await supabase.from('profiles').select(`membership_type, ${creditColumnName}`).eq('id', user.id).single();
+                        const {
+                            data: profile
+                        } = await supabase.from('profiles').select(`membership_type, ${creditColumnName}`).eq('id', user.id).single();
                         if ((profile?.membership_type === 'premium' || profile?.membership_type === 'owner') && profile[creditColumnName] > 0) {
                             useBenefit = true;
                         }
@@ -407,25 +426,34 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let participationTypeValue = null;
 
                 if (useBenefit && creditColumnName) {
-                    const { error: creditError } = await supabase
+                    const {
+                        error: creditError
+                    } = await supabase
                         .rpc('decrement_credit', {
                             user_id_param: user.id,
                             column_name_param: creditColumnName
                         });
                     if (creditError) throw new Error(`特典利用処理に失敗しました: ${creditError.message}`);
-                    
+
                     participationTypeValue = '会員特典';
                 }
 
-                const { error: insertError } = await supabase.from('participants').insert([{
+                // ★★★ 修正点：ここで参加者IDを生成する ★★★
+                const participantData = {
+                    id: crypto.randomUUID(), // 新しいUUIDを生成してIDとして設定
                     event_id: currentEventId,
                     name: participantName,
                     created_at: new Date(new Date().getTime() + (9 * 60 * 60 * 1000)),
                     form_data: Object.keys(submissionData).length > 0 ? submissionData : null,
                     user_id: user ? user.id : null,
                     participation_type: participationTypeValue
-                }]);
-                
+                };
+                // ★★★★★★★★★★★★★★★★★★★★★★★★★★
+
+                const {
+                    error: insertError
+                } = await supabase.from('participants').insert([participantData]); // 修正したデータで保存
+
                 if (insertError) {
                     throw insertError;
                 }
