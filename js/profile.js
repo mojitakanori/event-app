@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     avatarPreview.src = publicUrlData.publicUrl;
                 }
 
-                if (data.membership_type === 'owner') {
+                if (data.membership_type === 'owner' || data.membership_type === 'admin') {
                     communityProfileSection.style.display = 'block';
                     initQuillEditors();
                     communityNameInput.value = data.community_name || '';

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ユーザー権限管理 - イベント管理アプリ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+        .user-table th, .user-table td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .user-table th {
+            background-color: var(--light-bg);
+        }
+        .user-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .user-table tbody tr.inactive-row {
+            background-color: #ffebee;
+            color: #c62828;
+            text-decoration: line-through;
+        }
+        .user-table select, .user-table input {
+            padding: 0.5rem;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .user-table select {
+            width: 100%;
+        }
+        .user-table input[type="number"] {
+            width: 80px;
+        }
+        .user-table .is-active-cell {
+            text-align: center;
+        }
+        .user-table .is-active-cell input[type="checkbox"] {
+            transform: scale(1.4);
+            cursor: pointer;
+        }
+        /* ★★★ 追加: 説明エリアのスタイル ★★★ */
+        .admin-description {
+            background-color: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1rem 1.5rem;
+            margin-top: 1.5rem;
+        }
+        .admin-description ul {
+            padding-left: 20px;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+        .admin-description li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <h1><a href="index.html">Business HUB『Deal Den』</a></h1>
+            <button class="hamburger-menu" aria-label="ナビゲーションを開く" aria-expanded="false" aria-controls="nav">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+    <nav class="site-nav">
+        <div class="container">
+            <nav id="nav"></nav>
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <h2>ユーザー権限管理</h2>
+        <div id="messageArea" class="message-area"></div>
+        <div id="loadingMessage" class="loading-message">ユーザー情報を読み込み中...</div>
+
+        <div id="adminContent" style="display: none;">
+            <div class="admin-description">
+                <ul>
+                    <li><strong>権限:</strong> ユーザーの種別を設定します。</li>
+                    <li><strong>有効:</strong> チェックを外すと、そのユーザーはイベント作成などの主要機能を使えなくなります。</li>
+                    <li><strong>昼/夜:</strong> 会員が無料でイベントに参加できる特典クレジットの数です。</li>
+                    <li><strong>スコア:</strong> ユーザーの活動量などを示す内部的な値です。大きいほど一覧で上位に表示されます。ユーザには見えません。</li>
+                </ul>
+            </div>
+
+            <div class="table-responsive" style="overflow-x: auto;">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>ユーザー名</th>
+                            <th>コミュニティ名</th>
+                            <th>権限</th>
+                            <th>有効</th>
+                            <th>昼</th>
+                            <th>夜</th>
+                            <th>スコア</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userList"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <p>© 2025 Business HUB『Deal Den』. All Rights Reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/adminuser.js"></script>
+</body>
+</html>

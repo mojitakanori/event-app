@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { data: owners, error } = await supabase
                 .from('profiles')
                 .select('id, community_name, community_description, community_banner_url, score')
-                .eq('membership_type', 'owner')
+                .in('membership_type', ['owner', 'admin'])
                 .order('score', { ascending: false }); 
 
             if (error) throw error;

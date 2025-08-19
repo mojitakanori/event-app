@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .from('profiles')
                 .select('community_name, community_banner_url, community_description, community_projects')
                 .eq('id', ownerId)
-                .eq('membership_type', 'owner')
+                .in('membership_type', ['owner', 'admin'])
                 .single();
 
             if (profileError) {

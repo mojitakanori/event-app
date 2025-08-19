@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { data: members, error } = await supabase
                 .from('profiles')
                 .select('id, username, community_name, business_description, avatar_url, score') // ★変更点: scoreを追加
-                .in('membership_type', ['premium', 'owner'])
+                .in('membership_type', ['premium', 'owner', 'admin'])
                 .eq('is_active', true) 
                 .order('score', { ascending: false }); 
 
