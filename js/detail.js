@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let statusBadgeHtml = '';
             if (profile) {
                 switch (profile.membership_type) {
+                    case 'admin':
                     case 'owner':
                     case 'premium':
                         statusBadgeHtml += `<a href="user_profile.html?id=${p.user_id}" target="_blank" class="btn-premium">会員</a>`;
@@ -324,6 +325,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const profile = participant.user_id ? currentProfilesMap.get(participant.user_id) : null;
             if (profile) {
                 switch (profile.membership_type) {
+                    case 'admin':
                     case 'owner':
                         membershipStatus = 'コミュニティオーナー';
                         break;

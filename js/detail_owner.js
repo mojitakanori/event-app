@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const profile = p.user_id ? profilesMap.get(p.user_id) : null;
                 if (profile) {
                     switch (profile.membership_type) {
-                        case 'owner': membershipStatus = 'コミュニティオーナー'; break;
+                        case 'owner': case 'admin':membershipStatus = 'コミュニティオーナー'; break;
                         case 'premium': membershipStatus = '会員'; break;
                         default: membershipStatus = 'ユーザー'; break;
                     }
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const profile = p.user_id ? profilesMap.get(p.user_id) : null;
             if (profile) {
                 switch (profile.membership_type) {
-                    case 'owner': membershipStatus = 'コミュニティオーナー'; break;
+                    case 'owner': case 'admin':membershipStatus = 'コミュニティオーナー'; break;
                     case 'premium': membershipStatus = '会員'; break;
                     default: membershipStatus = 'ユーザー'; break;
                 }
