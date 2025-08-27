@@ -49,7 +49,6 @@
             transform: scale(1.4);
             cursor: pointer;
         }
-        /* ★★★ 追加: 説明エリアのスタイル ★★★ */
         .admin-description {
             background-color: var(--light-bg);
             border: 1px solid var(--border-color);
@@ -64,6 +63,24 @@
         }
         .admin-description li {
             margin-bottom: 0.5rem;
+        }
+        /* ★★★ 追加: 更新ボタンのスタイル ★★★ */
+        .update-btn {
+            padding: 0.5rem 1rem !important;
+            font-size: 0.85rem !important;
+            background-color: var(--accent-color) !important;
+            border-color: var(--accent-color) !important;
+            color: white !important;
+            cursor: pointer;
+        }
+        .update-btn:hover {
+            background-color: #218838 !important;
+            border-color: #1e7e34 !important;
+        }
+        .update-btn:disabled {
+            background-color: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -92,7 +109,7 @@
                 <ul>
                     <li><strong>権限:</strong> ユーザーの種別を設定します。</li>
                     <li><strong>有効:</strong> チェックを外すと、そのユーザーはイベント作成などの主要機能を使えなくなります。</li>
-                    <li><strong>昼/夜:</strong> 会員が無料でイベントに参加できる特典クレジットの数です。</li>
+                    <li><strong>昼/夜:</strong> 会員が無料でイベントに参加できる特典クレジットの数です。会員に変更したときは、クレジットをつけてください。</li>
                     <li><strong>スコア:</strong> ユーザーの活動量などを示す内部的な値です。大きいほど一覧で上位に表示されます。ユーザには見えません。</li>
                 </ul>
             </div>
@@ -108,6 +125,7 @@
                             <th>昼</th>
                             <th>夜</th>
                             <th>スコア</th>
+                            <th>操作</th>
                         </tr>
                     </thead>
                     <tbody id="userList"></tbody>

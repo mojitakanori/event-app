@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const internalMembershipValues = Object.keys(membershipMap);
 
-    // 1. ログイン状態と権限をチェック
     const user = await getCurrentUser();
     if (!user) {
         window.location.href = 'login.html';
@@ -30,20 +29,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    async function updateUserField(userId, username, field, value, displayFieldName) {
-        const { error } = await supabase
-            .from('profiles')
-            .update({ [field]: value })
-            .eq('id', userId);
-
-        if (error) {
-            messageArea.innerHTML = `<p class="error-message">「${username}」の${displayFieldName}更新に失敗: ${error.message}</p>`;
-        } else {
-            messageArea.innerHTML = `<p class="success-message">「${username}」の${displayFieldName}を更新しました。</p>`;
-        }
-    }
-
-    // 2. 全ユーザーの情報を取得して表示
     try {
         const { data: users, error: usersError } = await supabase
             .from('profiles')
@@ -53,101 +38,98 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         users.forEach(u => {
             const row = document.createElement('tr');
+            row.id = `user-row-${u.id}`;
             if (!u.is_active) {
                 row.classList.add('inactive-row');
             }
 
-            // ユーザー名
-            const usernameCell = document.createElement('td');
-            usernameCell.textContent = u.username || '(未設定)';
-            row.appendChild(usernameCell);
+            row.innerHTML = `
+                <td>${u.username || '(未設定)'}</td>
+                <td>${u.community_name || '(なし)'}</td>
+                <td><select class="membership-select"></select></td>
+                <td class="is-active-cell"><input type="checkbox" class="is-active-checkbox"></td>
+                <td><input type="number" class="lunch-credit-input" min="0"></td>
+                <td><input type="number" class="evening-credit-input" min="0"></td>
+                <td><input type="number" class="score-input" min="0"></td>
+                <td><button class="update-btn">更新</button></td>
+            `;
 
-            // コミュニティ名
-            const communityNameCell = document.createElement('td');
-            communityNameCell.textContent = u.community_name || '(なし)';
-            row.appendChild(communityNameCell);
-            
-            // 権限
-            const membershipCell = document.createElement('td');
-            const select = document.createElement('select');
+            const membershipSelect = row.querySelector('.membership-select');
+            const isActiveCheckbox = row.querySelector('.is-active-checkbox');
+            const lunchInput = row.querySelector('.lunch-credit-input');
+            const eveningInput = row.querySelector('.evening-credit-input');
+            const scoreInput = row.querySelector('.score-input');
+            const updateButton = row.querySelector('.update-btn');
 
-            // ★★★ ここからが修正箇所 ★★★
-            // 表示する権限の選択肢を動的に決める
-            let optionsToShow = internalMembershipValues;
-
-            // もし対象ユーザー(u)が管理者で、かつ自分自身ではない場合
-            if (u.membership_type === 'admin' && u.id !== user.id) {
-                // ドロップダウン自体を無効化する
-                select.disabled = true;
-            } else {
-                // 管理者権限への変更オプションを表示させない
-                optionsToShow = internalMembershipValues.filter(v => v !== 'admin');
-            }
-            
-            // ログイン中の管理者自身の行には、管理者オプションを含める
+            let optionsToShow = internalMembershipValues.filter(v => v !== 'admin');
             if (u.id === user.id) {
-                 optionsToShow = internalMembershipValues;
+                optionsToShow = internalMembershipValues;
             }
-
-
             optionsToShow.forEach(value => {
                 const option = document.createElement('option');
                 option.value = value;
                 option.textContent = membershipMap[value];
                 if (u.membership_type === value) option.selected = true;
-                select.appendChild(option);
+                membershipSelect.appendChild(option);
             });
-            // ★★★ ここまでが修正箇所 ★★★
+            if (u.membership_type === 'admin') {
+                 const adminOption = document.createElement('option');
+                 adminOption.value = 'admin';
+                 adminOption.textContent = '管理者';
+                 adminOption.selected = true;
+                 membershipSelect.innerHTML = '';
+                 membershipSelect.appendChild(adminOption);
+            }
 
-            select.addEventListener('change', (e) => {
-                updateUserField(u.id, u.username || '(未設定)', 'membership_type', e.target.value, '権限');
-            });
-            membershipCell.appendChild(select);
-            row.appendChild(membershipCell);
-
-            // アカウント有効/無効
-            const isActiveCell = document.createElement('td');
-            isActiveCell.classList.add('is-active-cell');
-            const isActiveCheckbox = document.createElement('input');
-            isActiveCheckbox.type = 'checkbox';
             isActiveCheckbox.checked = u.is_active;
-            isActiveCheckbox.addEventListener('change', (e) => {
-                const newStatus = e.target.checked;
-                updateUserField(u.id, u.username || '(未設定)', 'is_active', newStatus, 'アカウント状態');
-                row.classList.toggle('inactive-row', !newStatus);
-            });
-            isActiveCell.appendChild(isActiveCheckbox);
-            row.appendChild(isActiveCell);
+            lunchInput.value = u.lunch_meeting_credit || 0;
+            eveningInput.value = u.evening_meeting_credit || 0;
+            scoreInput.value = u.score || 0;
 
-            // 数値項目
-            const numberFields = [
-                { key: 'lunch_meeting_credit', name: '昼クレジット' },
-                { key: 'evening_meeting_credit', name: '夜クレジット' },
-                { key: 'score', name: 'スコア' }
-            ];
-            numberFields.forEach(field => {
-                const cell = document.createElement('td');
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.value = u[field.key] || 0;
-                input.min = 0;
+            if (u.membership_type === 'admin' && u.id !== user.id) {
+                membershipSelect.disabled = true;
+                isActiveCheckbox.disabled = true;
+                lunchInput.disabled = true;
+                eveningInput.disabled = true;
+                scoreInput.disabled = true;
+                updateButton.disabled = true;
+            }
 
-                // ★★★ 追加: 自分以外の管理者の数値項目も無効化 ★★★
-                if (u.membership_type === 'admin' && u.id !== user.id) {
-                    input.disabled = true;
-                    isActiveCheckbox.disabled = true; // 有効/無効チェックボックスも無効化
-                }
+            // ★★★ 修正箇所: 更新ボタンの処理をEdge Function呼び出しに変更 ★★★
+            updateButton.addEventListener('click', async () => {
+                updateButton.disabled = true;
+                updateButton.textContent = '更新中...';
                 
-                input.addEventListener('change', (e) => {
-                    const newValue = parseInt(e.target.value, 10);
-                    if (!isNaN(newValue)) {
-                        updateUserField(u.id, u.username || '(未設定)', field.key, newValue, field.name);
+                const dataToUpdate = {
+                    target_user_id: u.id, // どのユーザーを更新するか
+                    updates: { // 何を更新するか
+                        membership_type: membershipSelect.value,
+                        is_active: isActiveCheckbox.checked,
+                        lunch_meeting_credit: parseInt(lunchInput.value, 10),
+                        evening_meeting_credit: parseInt(eveningInput.value, 10),
+                        score: parseInt(scoreInput.value, 10)
                     }
-                });
-                cell.appendChild(input);
-                row.appendChild(cell);
+                };
+
+                try {
+                    // 'update-user-admin' という名前のEdge Functionを呼び出す
+                    const { data, error } = await supabase.functions.invoke('update-user-admin', {
+                        body: dataToUpdate
+                    });
+
+                    if (error) throw error;
+
+                    messageArea.innerHTML = `<p class="success-message">「${u.username || '(未設定)'}」の情報を更新しました。</p>`;
+                    row.classList.toggle('inactive-row', !dataToUpdate.updates.is_active);
+
+                } catch (err) {
+                    messageArea.innerHTML = `<p class="error-message">更新に失敗しました: ${err.message}</p>`;
+                } finally {
+                    updateButton.disabled = false;
+                    updateButton.textContent = '更新';
+                }
             });
-            
+
             userList.appendChild(row);
         });
 
