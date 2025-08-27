@@ -43,12 +43,143 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (eventIdInput) eventIdInput.value = currentEventId;
 
+    /**
+     * ログインしているユーザーのプロフィール情報を取得し、フォームに自動入力する
+     * @param {object} user - Supabaseのユーザーオブジェクト
+     * @param {Array} formSchema - イベントのフォームスキーマ
+     */
+    async function autofillFormWithUserData(user, formSchema) {
+        if (!user) return;
+
+        try {
+            // ユーザーのプロフィール情報を取得
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('username, business_description, bio')
+                .eq('id', user.id)
+                .single();
+
+            if (error && error.code !== 'PGRST116') throw error;
+
+            if (profile) {
+                // 1. 「氏名」フィールドは常に自動入力
+                const participantNameInput = document.getElementById('participantName');
+                if (participantNameInput && profile.username) {
+                    participantNameInput.value = profile.username;
+                }
+
+                // 2. カスタムフォーム項目をチェックして自動入力
+                if (formSchema && formSchema.length > 0) {
+                    formSchema.forEach(field => {
+                        const inputElement = document.getElementById(`custom_field_${field.name}`);
+                        // 項目が空の場合のみプロフィール情報で埋める
+                        if (!inputElement || inputElement.value) return;
+
+                        // ラベル名にキーワードが含まれているかで判断
+                        const label = field.label.toLowerCase();
+                        if (label.includes('メールアドレス') && user.email) {
+                            inputElement.value = user.email;
+                        } else if (label.includes('事業内容') && profile.business_description) {
+                            inputElement.value = profile.business_description;
+                        } else if (label.includes('自己紹介') && profile.bio) {
+                            inputElement.value = profile.bio;
+                        }
+                    });
+                }
+            }
+        } catch (error) {
+            console.warn('ユーザー情報の自動入力に失敗しました:', error.message);
+        }
+    }
+
+    // ★★★ 変更点1: 過去の参加履歴からフォームを自動入力する関数を修正 ★★★
+    /**
+     * 過去の類似イベントへの参加履歴からフォームを自動入力する
+     * @param {object} user - Supabaseのユーザーオブジェクト
+     * @param {string} organizerId - 現在表示中イベントの主催者ID
+     * @param {Array} currentFormSchema - 現在表示中イベントのフォームスキーマ
+     */
+    async function autofillFromPastParticipation(user, organizerId, currentFormSchema) {
+        if (!user || !organizerId) return;
+
+        try {
+            // Step 1: 同じ主催者が作成した全てのイベントIDを取得
+            const { data: organizerEvents, error: eventsError } = await supabase
+                .from('events')
+                .select('id')
+                .eq('user_id', organizerId);
+
+            if (eventsError) throw eventsError;
+            if (!organizerEvents || organizerEvents.length === 0) return;
+
+            const organizerEventIds = organizerEvents.map(e => e.id);
+
+            // Step 2: 取得したイベントIDリストの中から、ユーザーの最新の参加履歴を1件取得
+            const { data: lastParticipation, error: participationError } = await supabase
+                .from('participants')
+                .select('form_data, event_id') // event_idも取得して、どのイベントのデータか特定する
+                .in('event_id', organizerEventIds)
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (participationError) {
+                if (participationError.code !== 'PGRST116') {
+                    console.warn('過去の参加履歴の検索中にエラー:', participationError);
+                }
+                return; // 履歴がなければここで終了
+            }
+
+            // Step 3: 履歴が見つかった場合、その履歴がどのイベントのものか特定し、そのイベントのフォーム定義(form_schema)を取得
+            if (lastParticipation && lastParticipation.form_data) {
+                const { data: pastEvent, error: pastEventError } = await supabase
+                    .from('events')
+                    .select('form_schema')
+                    .eq('id', lastParticipation.event_id)
+                    .single();
+
+                if (pastEventError) throw pastEventError;
+                
+                // Step 4: 過去の入力データから「ラベル名 -> 入力値」の対応表を作成
+                const pastSchema = pastEvent.form_schema || [];
+                const pastData = lastParticipation.form_data;
+                const labelToValueMap = new Map();
+
+                pastSchema.forEach(field => {
+                    if (pastData[field.name] !== undefined) {
+                        labelToValueMap.set(field.label, pastData[field.name]);
+                    }
+                });
+
+                // Step 5: 作成した対応表を元に、現在のフォームの項目を埋める
+                if (currentFormSchema) {
+                    currentFormSchema.forEach(field => {
+                        const inputElement = document.getElementById(`custom_field_${field.name}`);
+                        // 対応表に現在のフォームのラベル名が存在すれば、その値で入力
+                        if (inputElement && labelToValueMap.has(field.label)) {
+                            const valueToSet = labelToValueMap.get(field.label);
+                            if (field.type === 'checkbox') {
+                                inputElement.checked = valueToSet;
+                            } else {
+                                inputElement.value = valueToSet;
+                            }
+                        }
+                    });
+                }
+            }
+        } catch (error) {
+            console.warn('過去の参加履歴からの自動入力に失敗しました:', error.message);
+        }
+    }
+
+
     // --- 動的フォーム生成 ---
     function generateDynamicFormFields(formSchema) {
-        currentEventFormSchema = formSchema; 
+        currentEventFormSchema = formSchema;
         if (!dynamicRsvpFormFieldsDiv) return;
-        dynamicRsvpFormFieldsDiv.innerHTML = ''; 
-        if (!formSchema || formSchema.length === 0) return; 
+        dynamicRsvpFormFieldsDiv.innerHTML = '';
+        if (!formSchema || formSchema.length === 0) return;
 
         formSchema.forEach(field => {
             const formGroup = document.createElement('div');
@@ -56,11 +187,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const labelEl = document.createElement('label');
             labelEl.htmlFor = `custom_field_${field.name}`;
             labelEl.textContent = `${field.label}${field.required ? ' (必須)' : ''}:`;
-            
+
             let inputElement;
             if (field.type === 'textarea') {
                 inputElement = document.createElement('textarea');
-                formGroup.appendChild(labelEl); 
+                formGroup.appendChild(labelEl);
                 formGroup.appendChild(inputElement);
             } else if (field.type === 'checkbox') {
                 inputElement = document.createElement('input');
@@ -72,11 +203,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 formGroup.appendChild(labelEl);
             } else {
                 inputElement = document.createElement('input');
-                inputElement.type = field.type; 
-                formGroup.appendChild(labelEl); 
+                inputElement.type = field.type;
+                formGroup.appendChild(labelEl);
                 formGroup.appendChild(inputElement);
             }
-            
+
             inputElement.id = `custom_field_${field.name}`;
             inputElement.dataset.fieldName = field.name;
             if (field.required) {
@@ -97,7 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (passwordSection) passwordSection.style.display = 'none';
             return;
         }
-        
+
         noEventParticipantsMessage.style.display = 'none';
         if (passwordSection) passwordSection.style.display = 'block';
 
@@ -107,8 +238,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         participants.forEach((p, index) => {
             const profile = p.user_id ? profileMap.get(p.user_id) : null;
-            
-            // --- ステータスバッジの生成ロジック (変更なし) ---
+
             let statusBadgeHtml = '';
             if (profile) {
                 switch (profile.membership_type) {
@@ -128,13 +258,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 statusBadgeHtml += `<span class="btn-benefit" style="margin-left: 5px;">会員特典</span>`;
             }
 
-            // --- 1. 通常リストの生成 (パスワード入力前) ---
             let anonymizedName;
             if (index < 26) {
-                // 26人目 (Zさん) までは今まで通り
                 anonymizedName = String.fromCharCode(65 + index) + 'さん';
             } else {
-                // 27人目以降は AAさん, ABさん... と表示
                 const firstLetter = String.fromCharCode(65 + Math.floor(index / 26) - 1);
                 const secondLetter = String.fromCharCode(65 + (index % 26));
                 anonymizedName = firstLetter + secondLetter + 'さん';
@@ -142,7 +269,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const businessDesc = (p.form_data && businessDescField && p.form_data[businessDescField]) ? p.form_data[businessDescField] : '未入力';
 
             const listItem = document.createElement('li');
-            listItem.classList.add('participant-list-item'); // 共通のクラス
+            listItem.classList.add('participant-list-item');
             listItem.innerHTML = `
                 <div class="participant-info-anonymous">
                     <img src="assets/person_icon.webp" alt="参加者アイコン" class="participant-icon">
@@ -155,14 +282,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
             participantListUl.appendChild(listItem);
 
-            // --- 2. 詳細リストの生成 (パスワード入力後) ---
             const companyName = (p.form_data && companyNameField && p.form_data[companyNameField]) ? p.form_data[companyNameField] : '未入力';
-            // 紹介者名を取得するためのフィールド名を探す
             const referrerNameField = (currentEventFormSchema || []).find(f => f.label.includes('紹介者名'))?.name;
             const referrerName = (p.form_data && referrerNameField && p.form_data[referrerNameField]) ? p.form_data[referrerNameField] : '未入力';
 
             const fullListItem = document.createElement('li');
-            fullListItem.classList.add('participant-list-item', 'full-details'); // 詳細リスト用のクラスを追加
+            fullListItem.classList.add('participant-list-item', 'full-details');
             fullListItem.innerHTML = `
                 <div class="participant-details-full">
                     <p><strong>会社名:</strong> ${companyName}</p>
@@ -185,7 +310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const { data: event, error: eventError } = await supabase
                 .from('events')
-                .select('*, form_schema, image_urls, video_urls, participation_fee, event_end_date, max_participants, view_password')
+                .select('*, user_id, form_schema, image_urls, video_urls, participation_fee, event_end_date, max_participants, view_password')
                 .eq('id', currentEventId)
                 .single();
 
@@ -195,12 +320,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 currentEventName = event.name || 'event_participants';
                 currentEventFormSchema = event.form_schema;
                 eventPassword = event.view_password;
+                const organizerId = event.user_id; // 主催者IDを保持
 
                 const { count: participantCount, error: countError } = await supabase
                     .from('participants').select('*', { count: 'exact', head: true }).eq('event_id', currentEventId);
                 const currentParticipantNum = countError ? 0 : (participantCount || 0);
 
-                // イベント詳細の表示（元のコードを流用・整理）
                 let dateTimeStr = '日時未定';
                 if (event.event_date) {
                     const startDateStr = event.event_date.replace('T', ' ').substring(0, 16);
@@ -236,10 +361,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `<p><strong>日時:</strong> ${dateTimeStr}</p>` +
                     `<p><strong>場所:</strong> ${event.location || '未定'}</p>` +
                     `${feeDisplay}${capacityStatusDetail}` +
-                    `<hr>` + // ここに線を追加
+                    `<hr>` +
                     `<div class="event-description"><h3>イベント概要</h3><p>${event.description || '詳細情報はありません。'}</p></div>`;
-                
-                    generateDynamicFormFields(event.form_schema);
+
+                generateDynamicFormFields(event.form_schema);
+
+                // ★★★ 変更点2: 2段階で自動入力処理を呼び出す順序を維持 ★★★
+                const user = await getCurrentUser();
+                if (user) {
+                    // 1. まず過去の参加履歴から入力
+                    await autofillFromPastParticipation(user, organizerId, event.form_schema);
+                    // 2. 次にプロフィール情報で、まだ空の項目を埋める
+                    await autofillFormWithUserData(user, event.form_schema);
+                }
 
                 if (registrationClosed) {
                     rsvpForm.style.display = 'none';
@@ -259,10 +393,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (existingClosedMessage) existingClosedMessage.style.display = 'none';
                 }
 
-                // 参加者とそのプロフィール情報を取得
                 const { data: participants, error: pError } = await supabase.from('participants')
-                .select('name, created_at, form_data, user_id, participation_type')
-                .eq('event_id', currentEventId).order('created_at', { ascending: true });
+                    .select('name, created_at, form_data, user_id, participation_type')
+                    .eq('event_id', currentEventId).order('created_at', { ascending: true });
                 if (pError) throw pError;
 
                 const userIds = participants.map(p => p.user_id).filter(id => id);
@@ -273,7 +406,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (profileError) throw profileError;
                     profiles = profileData || [];
                 }
-                
+
                 currentProfilesMap.clear();
                 profiles.forEach(p => currentProfilesMap.set(p.id, p));
 
@@ -300,27 +433,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const baseHeaders = ['氏名', '登録日時'];
         const newHeaders = ['会員種別', '特典利用'];
-        
+
         let customFieldHeaders = [];
         let customFieldNames = [];
         if (currentEventFormSchema && currentEventFormSchema.length > 0) {
             currentEventFormSchema.forEach(field => {
-                customFieldHeaders.push(field.label); 
-                customFieldNames.push(field.name);    
+                customFieldHeaders.push(field.label);
+                customFieldNames.push(field.name);
             });
         }
-        
+
         const allHeaders = [...baseHeaders, ...newHeaders, ...customFieldHeaders];
 
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-        csvContent += allHeaders.map(v => v ? `"${v.replace(/"/g, '""')}"` : '').join(',') + '\r\n'; 
-        
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+        csvContent += allHeaders.map(v => v ? `"${v.replace(/"/g, '""')}"` : '').join(',') + '\r\n';
+
         currentParticipantsData.forEach(participant => {
             const row = [];
-            
+
             row.push(`"${participant.name.replace(/"/g, '""')}"`);
             row.push(`"${participant.created_at.replace('T', ' ').substring(0, 19)}"`);
-            
+
             let membershipStatus = 'ゲスト';
             const profile = participant.user_id ? currentProfilesMap.get(participant.user_id) : null;
             if (profile) {
@@ -360,7 +493,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         link.setAttribute("href", encodedUri);
         const safeEventName = currentEventName.replace(/[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF_-]/g, '_');
         link.setAttribute("download", `${safeEventName}_参加者リスト.csv`);
-        document.body.appendChild(link); 
+        document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     }
@@ -368,7 +501,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (exportCsvButton) {
         exportCsvButton.addEventListener('click', generateAndDownloadCsv);
     }
-    
+
     // --- 参加登録フォームの送信処理 ---
     if (rsvpForm) {
         rsvpForm.addEventListener('submit', async (e) => {
@@ -452,9 +585,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     participationTypeValue = '会員特典';
                 }
 
-                // ★★★ 修正点：ここで参加者IDを生成する ★★★
                 const participantData = {
-                    id: crypto.randomUUID(), // 新しいUUIDを生成してIDとして設定
+                    id: crypto.randomUUID(),
                     event_id: currentEventId,
                     name: participantName,
                     created_at: new Date(new Date().getTime() + (9 * 60 * 60 * 1000)),
@@ -462,11 +594,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     user_id: user ? user.id : null,
                     participation_type: participationTypeValue
                 };
-                // ★★★★★★★★★★★★★★★★★★★★★★★★★★
 
                 const {
                     error: insertError
-                } = await supabase.from('participants').insert([participantData]); // 修正したデータで保存
+                } = await supabase.from('participants').insert([participantData]);
 
                 if (insertError) {
                     throw insertError;
@@ -482,11 +613,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- パスワード確認ボタンのリスナー ---
-    if(viewDetailsButton) {
+    if (viewDetailsButton) {
         viewDetailsButton.addEventListener('click', () => {
             if (passwordErrorMessage) passwordErrorMessage.style.display = 'none';
             const inputPassword = viewPasswordInput.value;
-    
+
             if (!inputPassword) {
                 if (passwordErrorMessage) {
                     passwordErrorMessage.textContent = 'パスワードを入力してください。';
@@ -494,7 +625,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 return;
             }
-    
+
             if (inputPassword === eventPassword) {
                 if (passwordSection) passwordSection.style.display = 'none';
                 if (fullParticipantListContainer) fullParticipantListContainer.style.display = 'block';
