@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deal Den | イベント詳細</title> <!-- JSでイベント名に動的変更も可 -->
+    <title>Deal Den | イベント詳細</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
     <style>
         /* detail.html固有のスタイル */
         .event-media-gallery {
-            display: grid; /* Gridでメディアを並べる */
+            display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
@@ -23,7 +23,6 @@
             border-radius: var(--border-radius-md);
             box-shadow: var(--box-shadow-light);
         }
-
         .event-info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -51,20 +50,17 @@
             margin-bottom: 2rem;
             line-height: 1.7;
         }
-        .event-description h3 { /* 詳細説明内の小見出し */
+        .event-description h3 {
             margin-top: 1.5rem;
             margin-bottom: 0.5rem;
             font-size: 1.25rem;
             color: var(--primary-color);
         }
         .event-description p {
-            white-space: pre-wrap; /* 改行とスペースを保持し、必要なら折り返す */
+            white-space: pre-wrap;
             word-break: break-word;
         }
-
-        .participants-section {
-            margin-top: 2.5rem;
-        }
+        .participants-section { margin-top: 2.5rem; }
         .participants-header {
             display: flex;
             justify-content: space-between;
@@ -72,10 +68,6 @@
             margin-bottom: 1rem;
         }
         .participants-header h3 { margin-bottom: 0; }
-        #exportCsvButton { /* .btnクラスをJSで付与するか、直接スタイル */
-            /* style.css の .btn に準拠 */
-        }
-
         .participant-list { list-style: none; padding: 0; }
         .participant-list li {
             background-color: var(--light-bg);
@@ -84,26 +76,22 @@
             margin-bottom: 0.75rem;
             font-size: 0.9rem;
         }
-        .participant-list li strong { font-weight: 500; }
-        .participant-list li small { display: block; color: var(--text-light); font-size: 0.8rem; margin-top: 0.5rem; }
         .participant-list-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 1rem; /* 要素間の余白を追加 */
+            gap: 1rem;
         }
-
         .participant-status {
             display: flex;
             gap: 5px;
-            flex-shrink: 0; /* バッジが縮まないように設定 */
+            flex-shrink: 0;
         }
         .participant-info-anonymous {
             display: flex;
             align-items: center;
             gap: 0.75rem;
         }
-
         .participant-icon {
             width: 40px;
             height: 40px;
@@ -111,210 +99,164 @@
             object-fit: cover;
             flex-shrink: 0;
         }
-
-        .participant-details {
-            display: flex;
-            flex-direction: column;
-        }
-
+        .participant-details { display: flex; flex-direction: column; }
         .participant-details .business-desc {
             font-size: 0.85rem;
             color: var(--light-text);
             margin-top: 4px;
         }
-
-        .participant-details-full p {
-            margin: 0 0 4px 0;
-            word-break: break-word; /* 長いテキストがはみ出ないように */
-        }
-        .participant-details-full p:last-child {
-            margin-bottom: 0;
-        }
-
+        .participant-details-full p { margin: 0 0 4px 0; word-break: break-word; }
+        .participant-details-full p:last-child { margin-bottom: 0; }
         #rsvpForm { margin-top: 2.5rem; }
-        .registration-closed-message p.error-message {
-            font-size: 1.1rem !important; /* 強調 */
-            padding: 1.5rem !important;
-        }
-
-        .btn-premium {
-            background: linear-gradient(45deg, #fceabb 0%, #f8b500 100%);
-            color: #333;
-            font-weight: bold;
-            border: 1px solid #DAA520;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 8px rgba(255, 215, 0, 0.6);
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
-            transition: all 0.3s ease;
-            text-decoration: none; /* aタグのデフォルト下線を消す */
-            display: inline-block; /* aタグをボタンらしく見せる */
-            padding: 2px 8px; 
-            font-size: 0.75rem;
-        }
-        /* ホバー（マウスを乗せた時）の効果 */
-        .btn-premium:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2), 0 0 15px rgba(255, 215, 0, 0.8);
-        color: #000;
-        cursor: pointer;
-        }
-        .btn-benefit {
-            background: linear-gradient(45deg, #c8e6c9 0%, #4caf50 100%); /* 緑系のグラデーション */
-            color: #fff;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-            font-weight: bold;
-            border: 1px solid #388e3c;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 2px 8px; 
-            font-size: 0.75rem;
-            display: inline-block;
-        }
-        .btn-guest {
-            background: linear-gradient(45deg, #e0e0e0 0%, #bdbdbd 100%); /* グレー系 */
-            color: #333;
-            text-shadow: none;
-            font-weight: bold;
-            border: 1px solid #9e9e9e;
-            border-radius: 5px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            padding: 2px 8px; 
-            font-size: 0.75rem;
-            display: inline-block;
-            text-decoration: none;
-        }
-        .btn-user {
-            background: linear-gradient(45deg, #bbdefb 0%, #64b5f6 100%); /* ブルー系 */
-            color: #333;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-            font-weight: bold;
-            border: 1px solid #42a5f5;
-            border-radius: 5px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            padding: 2px 8px; 
-            font-size: 0.75rem;
-            display: inline-block;
-            text-decoration: none;
-        }
+        .registration-closed-message p.error-message { font-size: 1.1rem !important; padding: 1.5rem !important; }
+        .btn-premium { background: linear-gradient(45deg, #fceabb 0%, #f8b500 100%); color: #333; font-weight: bold; border: 1px solid #DAA520; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 8px rgba(255, 215, 0, 0.6); text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5); transition: all 0.3s ease; text-decoration: none; display: inline-block; padding: 2px 8px; font-size: 0.75rem; }
+        .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2), 0 0 15px rgba(255, 215, 0, 0.8); color: #000; cursor: pointer; }
+        .btn-benefit { background: linear-gradient(45deg, #c8e6c9 0%, #4caf50 100%); color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); font-weight: bold; border: 1px solid #388e3c; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 2px 8px; font-size: 0.75rem; display: inline-block; }
+        .btn-guest { background: linear-gradient(45deg, #e0e0e0 0%, #bdbdbd 100%); color: #333; text-shadow: none; font-weight: bold; border: 1px solid #9e9e9e; border-radius: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); padding: 2px 8px; font-size: 0.75rem; display: inline-block; text-decoration: none; }
+        .btn-user { background: linear-gradient(45deg, #bbdefb 0%, #64b5f6 100%); color: #333; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); font-weight: bold; border: 1px solid #42a5f5; border-radius: 5px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); padding: 2px 8px; font-size: 0.75rem; display: inline-block; text-decoration: none; }
         @media (max-width: 576px) {
-            .participant-list-item {
+            .participant-list-item { flex-direction: column; align-items: flex-start; }
+            .participant-list-item .participant-status { margin-top: 0.75rem; }
+        }
+        
+        /* ▼▼▼ 新デザインのCSS ▼▼▼ */
+        .signup-prompt-box {
+            background: linear-gradient(135deg, #e6f2ff 0%, #f7faff 100%);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin: 2.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            border-left: 5px solid var(--primary-color);
+        }
+        .signup-prompt-box .icon {
+            flex-shrink: 0;
+        }
+        .signup-prompt-box .content h3 {
+            color: var(--dark-text);
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        .signup-prompt-box .content p {
+            margin-bottom: 0;
+            color: var(--light-text);
+            font-size: 0.95rem;
+        }
+        .signup-prompt-box .actions {
+            margin-left: auto; /* ボタンを右端に配置 */
+            flex-shrink: 0;
+        }
+        .signup-prompt-box .btn {
+            display: inline-block;
+            font-weight: bold;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 0.6rem 1.5rem;
+            white-space: nowrap; /* ボタンのテキストが改行しないように */
+            color: #fff;
+            border-radius: 5px;
+        }
+        .signup-prompt-box .btn:hover {
+            background-color: #0056b3;
+        }
+        @media (max-width: 768px) {
+            .signup-prompt-box {
                 flex-direction: column;
                 align-items: flex-start;
+                text-align: left;
             }
-
-            .participant-list-item .participant-status {
-                margin-top: 0.75rem; /* 上に少し余白を追加 */
+            .signup-prompt-box .actions {
+                margin-left: 0;
+                margin-top: 1rem;
+                width: 100%;
+            }
+            .signup-prompt-box .btn {
+                width: 100%;
+                text-align: center;
             }
         }
     </style>
 </head>
 <body>
 <header class="site-header">
-        <div class="container">
-            <h1><a href="index.html">Business HUB『Deal Den』</a></h1>
-            
-            <button class="hamburger-menu" aria-label="ナビゲーションを開く" aria-expanded="false" aria-controls="nav">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </header>
-    <nav class="site-nav">
-        <div class="container">
-            <nav id="nav">
-                </nav>
-        </div>
-    </nav>
+    <div class="container">
+        <h1><a href="index.html">Business HUB『Deal Den』</a></h1>
+        <button class="hamburger-menu" aria-label="ナビゲーションを開く" aria-expanded="false" aria-controls="nav">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+<nav class="site-nav">
+    <div class="container">
+        <nav id="nav"></nav>
+    </div>
+</nav>
 
-    <main class="main-content-wrapper">
-        <div class="main-container">
-            <div class="content-section">
-                <div id="eventDetailLoading" class="loading-message">イベント詳細を読み込み中...</div>
-                <div id="eventDetail">
-                    <!-- JSでイベント詳細をここに挿入 -->
-                    <!-- 例:
-                    <div class="page-header">
-                        <h2 id="eventTitlePlaceholder">[イベント名]</h2>
-                        <p id="eventCapacityPlaceholder" class="subtitle">[参加状況]</p>
-                    </div>
-                    <div class="event-media-gallery" id="eventMediaPlaceholder"></div>
-                    <div class="event-info-grid">
-                        <div class="event-info-item"><strong>日時:</strong> <p id="eventDateTimePlaceholder"></p></div>
-                        <div class="event-info-item"><strong>場所:</strong> <p id="eventLocationPlaceholder"></p></div>
-                        <div class="event-info-item"><strong>参加費用:</strong> <p id="eventFeePlaceholder"></p></div>
-                    </div>
-                    <div class="event-description">
-                        <h3>イベント概要</h3>
-                        <p id="eventDescriptionPlaceholder"></p>
-                    </div>
-                    -->
+<main class="main-content-wrapper">
+    <div class="main-container">
+        <div class="content-section">
+            <div id="eventDetailLoading" class="loading-message">イベント詳細を読み込み中...</div>
+            <div id="eventDetail"></div>
+            <hr>
+            <div class="participants-section">
+                <div class="participants-header">
+                    <h3>参加者一覧</h3>
+                    <button id="exportCsvButton" class="btn btn-secondary" style="display: none;">CSV出力</button>
                 </div>
-
+                <ul id="eventParticipantList" class="participant-list"></ul>
+                <p id="noEventParticipantsMessage" class="message warning-message" style="display:none; text-align:center;">このイベントにはまだ参加者がいません。</p>
                 <hr>
-
-                <div class="participants-section">
-                    <div class="participants-header">
-                        <h3>参加者一覧</h3>
-                        <button id="exportCsvButton" class="btn btn-secondary" style="display: none;">CSV出力</button>
+                <div id="passwordSection">
+                    <h4>参加者の詳細情報を閲覧</h4>
+                    <p><small>イベント主催者から共有されたパスワードを入力してください。</small></p>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="password" id="viewPasswordInput" placeholder="4桁のパスワード" style="margin-bottom: 0; flex-grow: 1;">
+                        <button id="viewDetailsButton" class="btn">表示する</button>
                     </div>
-
-                    <ul id="eventParticipantList" class="participant-list"></ul>
-                    <p id="noEventParticipantsMessage" class="message warning-message" style="display:none; text-align:center;">このイベントにはまだ参加者がいません。</p>
-
-                    <hr>
-
-                    <div id="passwordSection">
-                        <h4>参加者の詳細情報を閲覧</h4>
-                        <p><small>イベント主催者から共有されたパスワードを入力してください。</small></p>
-                        <div style="display: flex; gap: 10px; align-items: center;">
-                            <input type="password" id="viewPasswordInput" placeholder="4桁のパスワード" style="margin-bottom: 0; flex-grow: 1;">
-                            <button id="viewDetailsButton" class="btn">表示する</button>
-                        </div>
-                        <p id="passwordErrorMessage" class="error-message" style="display: none; margin-top: 0.5rem;"></p>
-                    </div>
-
-                    <div id="fullParticipantListContainer" style="display: none;">
-                        <h4 style="margin-top: 1.5rem;">参加者詳細</h4>
-                        <ul id="fullEventParticipantList" class="participant-list"></ul>
-                    </div>
-
+                    <p id="passwordErrorMessage" class="error-message" style="display: none; margin-top: 0.5rem;"></p>
                 </div>
-                <hr>
-                
-                <div class="page-header">
-                    <h2>イベント参加申し込み</h2>
+                <div id="fullParticipantListContainer" style="display: none;">
+                    <h4 style="margin-top: 1.5rem;">参加者詳細</h4>
+                    <ul id="fullEventParticipantList" class="participant-list"></ul>
                 </div>
-                <div id="messageArea" class="message-area"></div>
-                <form id="rsvpForm">
-                    <input type="hidden" id="eventId" name="eventId">
-                    <div class="form-group">
-                        <label for="participantName">氏名 (必須):</label>
-                        <input type="text" id="participantName" name="participantName" required>
-                    </div>
-                    <div id="dynamicRsvpFormFields">
-                        <!-- JSで動的フォーム項目をここに挿入 -->
-                    </div>
-                    <div class="form-group" style="margin: 20px 10px;">
-                        <input type="checkbox" id="termsAgreement" name="termsAgreement" required>
-                        <label for="termsAgreement">
-                            <a href="terms" target="_blank" id="termsLink" onclick="event.stopPropagation();">利用規約</a>に同意します (必須)
-                        </label>
-                    </div>
-                    <button type="submit" class="btn">参加登録する</button>
-                </form>
             </div>
+            <hr>
+            
+            <div id="signup-prompt" style="display: none;"></div>
+            
+            <div class="page-header">
+                <h2>イベント参加申し込み</h2>
+            </div>
+            <div id="messageArea" class="message-area"></div>
+            <form id="rsvpForm">
+                <input type="hidden" id="eventId" name="eventId">
+                <div class="form-group">
+                    <label for="participantName">氏名 (必須):</label>
+                    <input type="text" id="participantName" name="participantName" required>
+                </div>
+                <div id="dynamicRsvpFormFields"></div>
+                <div class="form-group" style="margin: 20px 10px;">
+                    <input type="checkbox" id="termsAgreement" name="termsAgreement" required>
+                    <label for="termsAgreement">
+                        <a href="terms.html" target="_blank" id="termsLink" onclick="event.stopPropagation();">利用規約</a>に同意します (必須)
+                    </label>
+                </div>
+                <button type="submit" class="btn">参加登録する</button>
+            </form>
         </div>
-    </main>
+    </div>
+</main>
 
-    <footer class="site-footer">
-        <p>© 2025 Business HUB『Deal Den』. All Rights Reserved.</p>
-    </footer>
+<footer class="site-footer">
+    <p>© 2025 Business HUB『Deal Den』. All Rights Reserved.</p>
+</footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabaseClient.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/script.js"></script>
-    <script src="js/detail.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/script.js"></script>
+<script src="js/detail.js"></script>
 </body>
 </html>
