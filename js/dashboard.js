@@ -5,15 +5,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // アカウントが有効か確認し、停止中ならトップページへ
     const isActive = await checkUserStatusAndRedirectIfSuspended(user);
-    if (!isActive) return; // アカウント停止中の場合はここで処理を中断
+    if (!isActive) return;
     
     const contentSection = document.querySelector('.content-section');
+    const myEventListUl = document.getElementById('myEventList');
+    const loadingMessage = document.getElementById('loadingMessage');
+    const noMyEventsMessage = document.getElementById('noMyEventsMessage');
+    const adminViewToggle = document.getElementById('adminViewToggle');
 
-    // 会員種別をチェック
     const membershipType = await checkUserMembership(user);
+    const isAdminUser = membershipType === 'admin';
 
-    if (membershipType == 'free') {
-        // 無料会員またはエラーの場合、contentSectionの中身をすべてメッセージに入れ替える
+    if (membershipType === 'free') {
         if (contentSection) {
             contentSection.innerHTML = `
                 <div class="message warning-message" style="text-align: center; padding: 2rem;">
@@ -23,18 +26,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `;
         }
-        return; // 有料会員でない場合は、ここで処理を終了
+        return;
     }
 
-    const myEventListUl = document.getElementById('myEventList');
-    const loadingMessage = document.getElementById('loadingMessage');
-    const noMyEventsMessage = document.getElementById('noMyEventsMessage');
-    
-    /**
-     * ランダムな短いIDを生成する関数
-     * @param {number} length 生成するIDの長さ
-     * @returns {string} 生成されたID
-     */
+    // 管理者であれば、表示切り替えスイッチを表示し、イベントリスナーを設定
+    if (isAdminUser && adminViewToggle) {
+        adminViewToggle.style.display = 'flex';
+        const viewRadios = document.querySelectorAll('input[name="eventView"]');
+        viewRadios.forEach(radio => radio.addEventListener('change', fetchMyEvents));
+    }
+
     function generateShortId(length = 3) {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let result = '';
@@ -50,11 +51,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             myEventListUl.innerHTML = '';
             noMyEventsMessage.style.display = 'none';
 
-            const { data: events, error } = await supabase
+            let query = supabase
                 .from('events')
-                .select('id, name, event_date, location')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
+                .select(`
+                    id, name, event_date, location, user_id,
+                    profiles ( username )
+                `);
+
+            // 管理者の場合、表示範囲をチェック
+            if (isAdminUser) {
+                const viewAllRadio = document.getElementById('viewAll');
+                if (!viewAllRadio.checked) { // 「自分のイベント」が選択されている場合
+                    query = query.eq('user_id', user.id);
+                }
+            } else { // 管理者でない場合は、自分のイベントのみを対象にする
+                query = query.eq('user_id', user.id);
+            }
+
+            const { data: events, error } = await query.order('created_at', { ascending: false });
 
             if (error) throw error;
 
@@ -63,41 +77,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const listItem = document.createElement('li');
                     const eventDate = event.event_date ? event.event_date.replace('T', ' ').substring(0, 16) : '未定';
                     
-                    const ownerDetailLinkButton = document.createElement('a');
-                    ownerDetailLinkButton.href = `detail_owner.html?id=${event.id}`;
-                    ownerDetailLinkButton.innerHTML = `<button class="view-detail-btn">参加者情報</button>`;
-
-                    // 編集ボタン
-                    const editLinkButton = document.createElement('a');
-                    editLinkButton.href = `edit_event.html?id=${event.id}`;
-                    editLinkButton.innerHTML = `<button class="edit-event-btn">編集</button>`;
-
-                    // コピーボタン
-                    const copyButton = document.createElement('button');
-                    copyButton.classList.add('copy-btn');
-                    copyButton.dataset.eventId = event.id;
-                    copyButton.textContent = 'コピー';
-
-                    // 削除ボタン
-                    const deleteButton = document.createElement('button');
-                    deleteButton.classList.add('delete-btn');
-                    deleteButton.dataset.eventId = event.id;
-                    deleteButton.textContent = '削除';
+                    let ownerDisplay = '';
+                    if (isAdminUser) {
+                        const ownerName = event.profiles ? event.profiles.username : '不明なユーザー';
+                        const isOwnEvent = event.user_id === user.id ? ' (自分)' : '';
+                        ownerDisplay = `<p style="font-size: 0.85rem; color: var(--danger-color); font-weight: bold;">主催者: ${ownerName || '(名前未設定)'}${isOwnEvent}</p>`;
+                    }
+                    
+                    const actionButtonsDiv = document.createElement('div');
+                    actionButtonsDiv.classList.add('action-buttons');
+                    actionButtonsDiv.innerHTML = `
+                        <a href="detail_owner.html?id=${event.id}"><button class="view-detail-btn">参加者情報</button></a>
+                        <a href="edit_event.html?id=${event.id}"><button class="edit-event-btn">編集</button></a>
+                        <button class="copy-btn" data-event-id="${event.id}">コピー</button>
+                        <button class="delete-btn" data-event-id="${event.id}">削除</button>
+                    `;
 
                     listItem.innerHTML = `
                         <h3><a href="detail.html?id=${event.id}" target="_blank">${event.name}</a></h3>
+                        ${ownerDisplay}
                         <p><strong>日時:</strong> ${eventDate}</p>
                         <p><strong>場所:</strong> ${event.location || '未定'}</p>
-                        <div class="action-buttons">
-                        </div>
                     `;
-                    const actionButtonsDiv = listItem.querySelector('.action-buttons');
-                    if (actionButtonsDiv) {
-                        actionButtonsDiv.appendChild(ownerDetailLinkButton);
-                        actionButtonsDiv.appendChild(editLinkButton);
-                        actionButtonsDiv.appendChild(copyButton);
-                        actionButtonsDiv.appendChild(deleteButton);
-                    }
+                    listItem.appendChild(actionButtonsDiv);
                     
                     myEventListUl.appendChild(listItem);
                 });
@@ -106,55 +108,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                 noMyEventsMessage.style.display = 'block';
             }
         } catch (error) {
-            console.error('Error fetching my events:', error.message);
+            console.error('Error fetching events:', error.message);
             myEventListUl.innerHTML = `<li class="error-message">イベントの読み込みに失敗しました: ${error.message}</li>`;
         } finally {
             loadingMessage.style.display = 'none';
         }
     }
     
-    /**
-     * イベントをコピーする関数
-     * @param {string} eventId コピー元のイベントID
-     */
     async function copyEvent(eventId) {
-        if (!confirm('このイベントをコピーしますか？')) {
-            return;
-        }
+        if (!confirm('このイベントをコピーしますか？')) return;
         try {
-            // 1. コピー元のイベントデータを取得
             const { data: originalEvent, error: fetchError } = await supabase
                 .from('events')
                 .select('*')
                 .eq('id', eventId)
                 .single();
-
             if (fetchError) throw fetchError;
 
-            // 2. 新しいイベントデータを作成
             const newEventData = { ...originalEvent };
-            
-            // 新しいIDを生成して設定
             newEventData.id = generateShortId(); 
-            
-            // created_at はDBが自動設定するので削除
             delete newEventData.created_at; 
-            
-            // 新しい閲覧用パスワードを生成
             newEventData.view_password = Math.floor(1000 + Math.random() * 9000).toString();
-            
-            // イベント名の先頭に「[コピー] 」を追加
             newEventData.name = `[コピー] ${originalEvent.name}`;
+            
+            // 管理者が他人のイベントをコピーした場合、所有者は管理者自身になる
+            newEventData.user_id = user.id;
 
-            // 3. 新しいイベントデータをDBに挿入
-            const { error: insertError } = await supabase
-                .from('events')
-                .insert([newEventData]);
-
+            const { error: insertError } = await supabase.from('events').insert([newEventData]);
             if (insertError) throw insertError;
 
             alert('イベントをコピーしました。');
-            fetchMyEvents(); // リストを再読み込み
+            fetchMyEvents();
 
         } catch (error) {
             console.error('Error copying event:', error.message);
@@ -162,38 +146,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
-    // ★★★ ここから関数を修正 ★★★
     async function deleteEvent(eventId) {
-        if (!confirm('本当にこのイベントを削除しますか？関連する参加者情報も全て削除されます。')) {
-            return;
-        }
+        if (!confirm('本当にこのイベントを削除しますか？関連する参加者情報も全て削除されます。')) return;
         try {
-            // 1. 先に関連する参加者情報をすべて削除
             const { error: participantsError } = await supabase
                 .from('participants')
                 .delete()
                 .eq('event_id', eventId);
-            
             if (participantsError) throw participantsError;
 
-            // 2. 参加者情報が削除された後、イベント本体を削除
             const { error: eventError } = await supabase
                 .from('events')
                 .delete()
-                .eq('id', eventId)
-                .eq('user_id', user.id); 
-
+                .eq('id', eventId);
             if (eventError) throw eventError;
 
             alert('イベントを削除しました。');
-            fetchMyEvents(); // リストを再読み込み
+            fetchMyEvents();
 
         } catch (error) {
             console.error('Error deleting event:', error.message);
             alert(`イベント削除に失敗しました: ${error.message}`);
         }
     }
-    // ★★★ ここまで ★★★
 
     function addEventListenersToButtons() {
         document.querySelectorAll('.delete-btn').forEach(button => {
@@ -209,8 +184,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 copyEvent(eventId);
             });
         });
-
-        // 編集ボタン、詳細ボタンは<a>タグなのでJSでのリスナーは基本不要
     }
+
     fetchMyEvents();
 });
+

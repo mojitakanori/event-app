@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const SPECIAL_USER_IDS = [
         '5982b68e-6b89-48ce-a4ad-25dfb71cfa94', // 例: MT
         '093e65ae-9f9e-4220-b805-e9b90ae979a8', // 例: dealden
-        // 必要に応じて他の特別なユーザーIDを追加
     ];
 
     const jointEventToggleContainer = document.getElementById('jointEventToggleContainer');
@@ -14,10 +13,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const lunchCheckbox = document.getElementById('eventTypeLunch');
     const eveningCheckbox = document.getElementById('eventTypeEvening');
     
-    // ★追加: チェックボックスの排他選択
     if (lunchCheckbox && eveningCheckbox) {
         lunchCheckbox.addEventListener('change', () => { if (lunchCheckbox.checked) eveningCheckbox.checked = false; });
-        eveningCheckbox.addEventListener('change', () => { if (eveningCheckbox.checked) lunchCheckbox.checked = false; });
+        eveningCheckbox.addEventListener('change', () => { if (eveningCheckbox.checked) eveningCheckbox.checked = false; });
     }
 
     const editEventForm = document.getElementById('editEventForm');
@@ -26,7 +24,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const formLoadingMessage = document.getElementById('formLoadingMessage');
     const loadingIndicator = document.getElementById('loadingIndicator');
 
-    // Form fields
+    const userSelectionContainer = document.getElementById('userSelectionContainer');
+    const eventOwnerSelect = document.getElementById('eventOwner');
+
     const eventNameInput = document.getElementById('eventName');
     const eventDateInput = document.getElementById('eventDate');
     const eventEndDateInput = document.getElementById('eventEndDate');
@@ -61,12 +61,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const eventNewImagesInput = document.getElementById('eventNewImages');
     const newImageCountInfo = document.getElementById('newImageCountInfo');
     const newImagePreviewContainer = document.getElementById('newImagePreviewContainer');
-
     const currentVideosContainer = document.getElementById('currentVideosContainer');
     const eventNewVideosInput = document.getElementById('eventNewVideos');
     const newVideoCountInfo = document.getElementById('newVideoCountInfo');
     const newVideoPreviewContainer = document.getElementById('newVideoPreviewContainer');
-
     const formFieldsContainer = document.getElementById('formFieldsContainer');
     const addFormFieldButton = document.getElementById('addFormField');
 
@@ -88,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     eventIdInput.value = currentEventIdToEdit;
-
+    
     // Helper functions (変更なし、そのまま)
 
     /**
@@ -232,12 +230,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         formLoadingMessage.style.display = 'block';
         editEventForm.style.display = 'none';
         try {
-            const { data: event, error } = await supabase
+            const membershipType = await checkUserMembership(user);
+            const isAdminUser = membershipType === 'admin';
+
+            let query = supabase
                 .from('events')
-                .select('*') // `is_joint_event` も取得される
-                .eq('id', currentEventIdToEdit)
-                .eq('user_id', user.id)
-                .single();
+                .select('*')
+                .eq('id', currentEventIdToEdit);
+
+            if (!isAdminUser) {
+                query = query.eq('user_id', user.id);
+            }
+            
+            const { data: event, error } = await query.single();
 
             if (error) {
                 if (error.code === 'PGRST116') throw new Error('指定されたイベントが見つからないか、編集権限がありません。');
@@ -245,6 +250,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             if (event) {
+                if (isAdminUser) {
+                    userSelectionContainer.style.display = 'block';
+                    try {
+                        const { data: users, error: usersError } = await supabase
+                            .from('profiles')
+                            .select('id, username')
+                            .in('membership_type', ['premium', 'owner', 'admin'])
+                            .order('username', { ascending: true });
+
+                        if (usersError) throw usersError;
+
+                        eventOwnerSelect.innerHTML = '';
+                        
+                        users.forEach(u => {
+                            const option = document.createElement('option');
+                            option.value = u.id;
+                            if (u.id === user.id) {
+                                option.textContent = `${u.username || '自分自身'} (管理者)`;
+                            } else {
+                                option.textContent = u.username || `(未設定: ${u.id.substring(0, 6)})`;
+                            }
+                            eventOwnerSelect.appendChild(option);
+                        });
+
+                        eventOwnerSelect.value = event.user_id;
+
+                    } catch (err) {
+                        messageArea.innerHTML += `<p class="error-message">ユーザーリストの読み込みに失敗しました: ${err.message}</p>`;
+                    }
+                }
+
                 eventNameInput.value = event.name || '';
 
                 const passwordDisplayArea = document.getElementById('passwordDisplayArea');
@@ -269,27 +305,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 participationFeeInput.value = event.participation_fee || '';
                 maxParticipantsInput.value = event.max_participants || '';
 
-                // 特別なユーザーの場合、合同イベントのチェックボックスを表示し、状態をセット
-                if (SPECIAL_USER_IDS.includes(user.id)) {
+                if (SPECIAL_USER_IDS.includes(user.id) || isAdminUser) {
                     if(jointEventToggleContainer) jointEventToggleContainer.style.display = 'block';
                     isJointEventCheckbox.checked = event.is_joint_event === true;
-
                     if(eventTypeContainer) eventTypeContainer.style.display = 'block';
                     if(lunchCheckbox) lunchCheckbox.checked = (event.event_type === 'Lunchtime meeting');
                     if(eveningCheckbox) eveningCheckbox.checked = (event.event_type === 'Evening meeting');
-                } else {
-                    if(jointEventToggleContainer) jointEventToggleContainer.style.display = 'none';
-                    if(eventTypeContainer) eventTypeContainer.style.display = 'none';
-                    isJointEventCheckbox.checked = false;
                 }
 
                 existingImageUrls = event.image_urls || [];
                 existingVideoUrls = event.video_urls || [];
                 displayCurrentMedia(existingImageUrls, currentImagesContainer, 'image');
                 displayCurrentMedia(existingVideoUrls, currentVideosContainer, 'video');
-                handleNewFileSelection({target:{files:[]}}, newImagePreviewContainer, newImageCountInfo, MAX_IMAGE_UPLOADS, newSelectedImageFiles, 'image', existingImageUrls.length);
-                handleNewFileSelection({target:{files:[]}}, newVideoPreviewContainer, newVideoCountInfo, MAX_VIDEO_UPLOADS, newSelectedVideoFiles, 'video', existingVideoUrls.length);
-
+                
                 formFieldsContainer.innerHTML = '';
                 (event.form_schema || []).forEach(field => {
                     formFieldsContainer.appendChild(createFormFieldConfigElement(field));
@@ -328,88 +356,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         let eventDescriptionContent = '';
-        if (quillEditor && eventDescriptionHiddenInput) {
-            const descriptionHtml = quillEditor.root.innerHTML;
-            if (quillEditor.getText().trim().length === 0) eventDescriptionHiddenInput.value = '';
-            else eventDescriptionHiddenInput.value = descriptionHtml;
-            eventDescriptionContent = eventDescriptionHiddenInput.value;
+        if (quillEditor) {
+             eventDescriptionContent = quillEditor.root.innerHTML;
         }
 
         let uploadedImageUrls = [...existingImageUrls];
         let uploadedVideoUrls = [...existingVideoUrls];
-
         try {
-            loadingIndicator.textContent = "新しい画像をアップロード中...";
+            // ▼▼▼ ここから修正 ▼▼▼
             if (newSelectedImageFiles.length > 0) {
                 for (let i = 0; i < newSelectedImageFiles.length; i++) {
-                    loadingIndicator.textContent = `新しい画像をアップロード中 (${i + 1}/${newSelectedImageFiles.length}): ${newSelectedImageFiles[i].name}...`;
+                    loadingIndicator.textContent = `新しい画像をアップロード中 (${i + 1}/${newSelectedImageFiles.length})...`;
                     const url = await uploadSingleFile(newSelectedImageFiles[i], 'image');
                     if (url) uploadedImageUrls.push(url);
                 }
             }
-            loadingIndicator.textContent = "新しい動画をアップロード中...";
             if (newSelectedVideoFiles.length > 0) {
                 for (let i = 0; i < newSelectedVideoFiles.length; i++) {
-                    loadingIndicator.textContent = `新しい動画をアップロード中 (${i + 1}/${newSelectedVideoFiles.length}): ${newSelectedVideoFiles[i].name}...`;
+                    loadingIndicator.textContent = `新しい動画をアップロード中 (${i + 1}/${newSelectedVideoFiles.length})...`;
                     const url = await uploadSingleFile(newSelectedVideoFiles[i], 'video');
                     if (url) uploadedVideoUrls.push(url);
                 }
             }
-        } catch (uploadError) {
+            // ▲▲▲ ここまで修正 ▲▲▲
+        } catch (uploadError) { 
             messageArea.innerHTML += `<p class="error-message">${uploadError.message}</p>`;
             loadingIndicator.style.display = 'none'; submitButton.disabled = false; return;
         }
-
-        const formSchema = [];
-        const fieldConfigElements = formFieldsContainer.querySelectorAll('.form-field-config');
+        
+        const formSchema = []; 
         let schemaValid = true;
-        fieldConfigElements.forEach(el => {
-            const labelInput = el.querySelector('input[data-config-key="label"]');
-            const label = labelInput.value.trim();
-            const type = el.querySelector('select[data-config-key="type"]').value;
-            const required = el.querySelector('input[data-config-key="required"]').checked;
-            const name = el.dataset.fieldName;
-            if (!label) { if (schemaValid) labelInput.focus(); schemaValid = false; }
-            formSchema.push({ name, label, type, required });
+        formFieldsContainer.querySelectorAll('.form-field-config').forEach(el => {
+            const label = el.querySelector('[data-config-key="label"]').value.trim();
+            if(!label) schemaValid = false;
+            formSchema.push({
+                name: el.dataset.fieldName,
+                label: label,
+                type: el.querySelector('[data-config-key="type"]').value,
+                required: el.querySelector('[data-config-key="required"]').checked
+            });
         });
-
         if (!schemaValid) {
-            messageArea.innerHTML += '<p class="error-message">追加フォーム項目の「表示ラベル」を入力してください。</p>';
-            loadingIndicator.style.display = 'none'; submitButton.disabled = false; return;
+             messageArea.innerHTML += '<p class="error-message">追加フォーム項目の「表示ラベル」を入力してください。</p>';
+             loadingIndicator.style.display = 'none'; submitButton.disabled = false; return;
         }
-
-        const eventArea = eventAreaInput ? eventAreaInput.value : null;
-        let eventType = null;
-        if (lunchCheckbox && lunchCheckbox.checked) {
-            eventType = lunchCheckbox.value;
-        } else if (eveningCheckbox && eveningCheckbox.checked) {
-            eventType = eveningCheckbox.value;
-        }
-
-        let isJointEventValue = false; // デフォルトはfalse
-        // チェックボックスが表示されていて、かつチェックされている場合のみ true を設定
-        if (isJointEventCheckbox && jointEventToggleContainer && jointEventToggleContainer.style.display === 'block') {
-            isJointEventValue = isJointEventCheckbox.checked;
-        } else if (isJointEventCheckbox && jointEventToggleContainer && jointEventToggleContainer.style.display !== 'block' && SPECIAL_USER_IDS.includes(user.id)) {
-            const { data: currentEventDataForJointFlag } = await supabase
-                .from('events')
-                .select('is_joint_event')
-                .eq('id', currentEventIdToEdit)
-                .single();
-            if (currentEventDataForJointFlag) {
-                isJointEventValue = currentEventDataForJointFlag.is_joint_event;
-            }
-        } else if (isJointEventCheckbox && jointEventToggleContainer && jointEventToggleContainer.style.display !== 'block' && !SPECIAL_USER_IDS.includes(user.id)) {
-             const { data: currentEventDataForJointFlag } = await supabase
-                .from('events')
-                .select('is_joint_event')
-                .eq('id', currentEventIdToEdit)
-                .single();
-            if (currentEventDataForJointFlag) {
-                isJointEventValue = currentEventDataForJointFlag.is_joint_event;
-            }
-        }
-
 
         const eventDataToUpdate = {
             name: eventName,
@@ -417,43 +407,42 @@ document.addEventListener('DOMContentLoaded', async () => {
             event_date: eventDateInput.value || null,
             event_end_date: eventEndDateInput.value || null,
             location: eventLocationInput.value,
-            area: eventArea || null,
+            area: eventAreaInput.value || null,
             participation_fee: participationFeeInput.value.trim() || null,
             max_participants: maxParticipantsVal,
-            image_urls: uploadedImageUrls.length > 0 ? uploadedImageUrls : null,
-            video_urls: uploadedVideoUrls.length > 0 ? uploadedVideoUrls : null,
-            form_schema: formSchema.length > 0 ? formSchema : null,
-            is_joint_event: isJointEventValue,
-            event_type: eventType || null, 
-            event_type: eventType, 
+            image_urls: uploadedImageUrls,
+            video_urls: uploadedVideoUrls,
+            form_schema: formSchema,
+            is_joint_event: isJointEventCheckbox.checked,
+            event_type: lunchCheckbox.checked ? lunchCheckbox.value : (eveningCheckbox.checked ? eveningCheckbox.checked : null)
         };
+        
+        const membershipType = await checkUserMembership(user);
+        if (membershipType === 'admin') {
+            eventDataToUpdate.user_id = eventOwnerSelect.value;
+        }
 
-        loadingIndicator.textContent = "イベント情報を更新中...";
         try {
+            loadingIndicator.textContent = "イベント情報を更新中...";
             const { data, error } = await supabase
                 .from('events')
                 .update(eventDataToUpdate)
-                .eq('id', currentEventIdToEdit)
-                .eq('user_id', user.id); // 念のため自分のイベントであることも確認
+                .eq('id', currentEventIdToEdit);
 
             if (error) throw error;
 
             messageArea.innerHTML = '<p class="success-message">イベント情報が更新されました。ダッシュボードに戻ります。</p>';
-            newSelectedImageFiles = []; newSelectedVideoFiles = []; // リセット
             setTimeout(() => { window.location.href = 'dashboard.html'; }, 1500);
 
         } catch (dbError) {
             console.error('Error updating event:', dbError);
             messageArea.innerHTML += `<p class="error-message">イベント更新に失敗しました: ${dbError.message}</p>`;
-            // is_joint_event カラムがない場合のエラーハンドリング例 (create.js と同様)
-            if (dbError.message.includes('column "is_joint_event" of relation "events" does not exist')) {
-                messageArea.innerHTML += `<p class="error-message"><b>データベースエラー:</b> "events"テーブルに "is_joint_event" カラムが存在しないようです。Supabaseのテーブル設定を確認し、"is_joint_event" カラム (boolean型、デフォルトfalse) を追加してください。</p>`;
-            }
         } finally {
             loadingIndicator.style.display = 'none';
             submitButton.disabled = false;
         }
     });
 
-    loadEventData(); // ページ読み込み時にイベントデータをロード
+    loadEventData();
 });
+

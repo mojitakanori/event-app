@@ -18,250 +18,195 @@
 
         .current-media-section { margin-bottom: 1.5rem; }
         .current-media-section h4 { font-size: 1rem; font-weight: 500; color: var(--text-light); margin-bottom: 0.75rem; }
-        /* .preview-container, .preview-item などは共通CSSで対応 */
-        .current-media-item button.remove-preview-btn { /* 既存メディア削除ボタン */
-            font-size: 0.8rem !important; /* 他の削除ボタンより小さく */
+        .current-media-item button.remove-preview-btn {
+            font-size: 0.8rem !important;
             padding: 0.2rem 0.5rem !important;
             height: auto !important; width: auto !important;
             line-height: normal !important;
             border-radius: var(--border-radius-sm) !important;
-            position: static !important; /* 絶対配置解除 */
+            position: static !important;
             margin-top: 0.5rem;
         }
-        fieldset#formSchemaBuilder { /* これは create.html, edit_event.html の <fieldset> のスタイル */
+        fieldset#formSchemaBuilder {
             border: 1px solid var(--border-color);
             padding: 1.5rem;
             margin-top: 2rem;
             margin-bottom: 1.5rem;
             border-radius: var(--border-radius-md);
-            background-color: #fdfdfd; /* 少し明るい背景 */
+            background-color: #fdfdfd;
         }
-        fieldset#formSchemaBuilder legend { /* <legend> のスタイル */
-            font-size: 1.25rem; /* 共通CSSの h3 程度 */
+        fieldset#formSchemaBuilder legend {
+            font-size: 1.25rem;
             font-weight: 600;
-            padding: 0 0.75rem; /* 左右にパディング */
-            color: var(--text-dark); /* メインテキストカラー */
+            padding: 0 0.75rem;
+            color: var(--text-dark);
             font-family: var(--font-display);
         }
-        fieldset#formSchemaBuilder p { /* 説明文のスタイル */
+        fieldset#formSchemaBuilder p {
             font-size: 0.9rem;
             color: var(--text-light);
             margin-bottom: 1.5rem;
         }
 
-
-        /* カスタムフォーム項目設定の各行 (.form-field-config) */
         .form-field-config {
             display: flex;
-            flex-wrap: wrap; /* 小画面で折り返すように */
-            gap: 1rem; /* 要素間のスペース */
-            align-items: flex-end; /* 要素の下端を揃える */
-            padding: 1.25rem; /* 内側パディング */
-            margin-bottom: 1rem; /* 各設定行間のマージン */
-            background-color: var(--light-bg); /* 背景色 */
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            background-color: var(--light-bg);
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius-sm);
         }
-
-        .form-field-config div { /* 各入力グループ (ラベル + input/select) */
-            flex: 1 1 200px; /* 基本幅200pxで、スペースがあれば広がる */
-            margin-bottom: 0; /* form共通スタイルを上書き */
-        }
-
-        .form-field-config label { /* .form-field-config 内のラベル */
-            font-size: 0.85rem;
-            color: var(--text-light); /* やや薄い色 */
-            margin-bottom: 0.3rem; /* ラベルと入力欄の間のスペース */
-            font-weight: 500;
-        }
-
+        .form-field-config div { flex: 1 1 200px; margin-bottom: 0; }
+        .form-field-config label { font-size: 0.85rem; color: var(--text-light); margin-bottom: 0.3rem; font-weight: 500; }
         .form-field-config input[type="text"],
-        .form-field-config select {
-            /* 共通フォームスタイルが適用されるが、必要ならここで上書き */
-            padding: 0.6rem 0.8rem; /* 少し小さめ */
-            font-size: 0.9rem;
-            margin-bottom: 0; /* form共通のmargin-bottomを打ち消し */
-        }
+        .form-field-config select { padding: 0.6rem 0.8rem; font-size: 0.9rem; margin-bottom: 0; }
+        .form-field-config input[type="checkbox"] { margin-right: 0.3rem; vertical-align: -1px; }
+        .form-field-config input[type="checkbox"] + label { font-size: 0.9rem; font-weight: normal; color: var(--text-dark); }
+        button#addFormField { margin-top: 1rem; }
 
-        .form-field-config input[type="checkbox"] {
-            /* 共通フォームスタイルが適用される */
-            margin-right: 0.3rem;
-            vertical-align: -1px;
-        }
-        .form-field-config input[type="checkbox"] + label { /* チェックボックス横のラベル */
-            font-size: 0.9rem;
-            font-weight: normal;
-            color: var(--text-dark);
-        }
-
-
-        /* 「フォーム項目を追加」ボタン (button#addFormField) */
-        button#addFormField {
-            /* .btn クラスと .btn-secondary (または .btn-success) クラスをHTML側で付与することを想定 */
-            /* 例: <button type="button" id="addFormField" class="btn btn-secondary"> */
-            margin-top: 1rem; /* 上の項目群とのマージン */
-            /* 個別のスタイルが必要な場合はここに記述 */
-        }
-
-
-        /* 各カスタムフォーム項目設定行の「削除」ボタン */
         .form-field-config button.remove-field-btn {
-            flex-basis: auto; /* 幅を内容に合わせる */
-            flex-grow: 0; /* 広がらない */
-            padding: 0.5rem !important; /* 共通ボタンより小さくするため !important を使うか、より詳細なセレクタで上書き */
-            height: 36px !important;
-            line-height: 24px !important; /* 文字の垂直位置調整 */
-            font-size: 1.2rem !important; /* ×マークのサイズ */
-            border-radius: 50% !important; /* 丸く */
+            flex-basis: auto; flex-grow: 0;
+            padding: 0.5rem !important; height: 36px !important; line-height: 24px !important;
+            font-size: 1.2rem !important; border-radius: 50% !important;
         }
         .form-group.special-event-toggle {
-            display: none; /* 最初は非表示 */
-            background-color: #fff8e1; /* 少し目立つ背景色 (例) */
-            padding: 1rem;
-            border: 1px solid #ffe082; /* 少し目立つボーダー (例) */
-            border-radius: var(--border-radius-sm);
-            margin-top: 1rem;
-            margin-bottom: 1rem;
+            display: none; background-color: #fff8e1; padding: 1rem;
+            border: 1px solid #ffe082; border-radius: var(--border-radius-sm);
+            margin-top: 1rem; margin-bottom: 1rem;
         }
-        .form-group.special-event-toggle label {
-            font-weight: 600;
-            color: #c55a11; /* 少し目立つ文字色 (例) */
-        }
-        .form-group.special-event-toggle input[type="checkbox"] {
-            margin-right: 0.5rem;
-            transform: scale(1.2); /* 少し大きく */
-        }
+        .form-group.special-event-toggle label { font-weight: 600; color: #c55a11; }
+        .form-group.special-event-toggle input[type="checkbox"] { margin-right: 0.5rem; transform: scale(1.2); }
     </style>
 </head>
 <body>
 <header class="site-header">
-        <div class="container">
-            <h1><a href="index.html">Business HUB『Deal Den』</a></h1>
-            
-            <button class="hamburger-menu" aria-label="ナビゲーションを開く" aria-expanded="false" aria-controls="nav">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </header>
-    <nav class="site-nav">
-        <div class="container">
-            <nav id="nav">
-                </nav>
-        </div>
-    </nav>
+    <div class="container">
+        <h1><a href="index.html">Business HUB『Deal Den』</a></h1>
+        <button class="hamburger-menu" aria-label="ナビゲーションを開く" aria-expanded="false" aria-controls="nav">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+<nav class="site-nav">
+    <div class="container"><nav id="nav"></nav></div>
+</nav>
 
-    <main class="main-content-wrapper">
-        <div class="main-container">
-            <div class="content-section">
-                <div class="page-header">
-                    <h2>イベントを編集</h2>
-                    <p class="subtitle" id="editingEventNameSubtitle">イベント情報を更新します。</p>
-                </div>
-                <div id="passwordDisplayArea" class="message-area"></div>
-                <div id="messageArea" class="message-area"></div>
-                <div id="formLoadingMessage" class="loading-message">イベント情報を読み込み中...</div>
-
-                <form id="editEventForm" style="display:none;">
-                    <input type="hidden" id="eventId">
-                    <div class="form-grid">
-                        <div class="form-group"><label for="eventName">イベント名 (必須):</label><input type="text" id="eventName" name="eventName" required></div>
-                        <div class="form-group"><label for="eventLocation">場所:</label><input type="text" id="eventLocation" name="eventLocation"></div>
-
-                        <div class="form-group">
-                            <label for="eventArea">エリア(必須):</label>
-                            <select id="eventArea" name="eventArea" required>
-                                <option value="">エリアを選択してください</option>
-                                <option value="tokyo">東京エリア</option>
-                                <option value="osaka">大阪エリア</option>
-                                <option value="online">オンライン</option>
-                                <option value="other">その他</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group"><label for="eventDate">開始日時:</label><input type="datetime-local" id="eventDate" name="eventDate"></div>
-                        <div class="form-group"><label for="eventEndDate">終了予定日時:</label><input type="datetime-local" id="eventEndDate" name="eventEndDate"></div>
-                        <div class="form-group"><label for="participationFee">参加費用:</label><input type="text" id="participationFee" name="participationFee" placeholder="例: 1000円 または 無料"></div>
-                        <div class="form-group"><label for="maxParticipants">最大参加人数 (任意):</label><input type="number" id="maxParticipants" name="maxParticipants" min="1" placeholder="例: 50"></div>
-                    </div>
-
-                    <div class="form-group full-width special-event-toggle" id="jointEventToggleContainer">
-                        <input type="checkbox" id="isJointEvent" name="isJointEvent">
-                        <label for="isJointEvent">このイベントを上位表示させますか？</label>
-                        <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.3rem;">
-                            このオプションにチェックを入れると、イベントは常に上位表示されます。
-                        </p>
-                    </div>
-
-                    <div id="eventTypeContainer" class="form-group full-width" style="display: none;">
-                        <label style="margin-bottom: 0.5rem;">イベント種別 (会員が月一回無料で参加できます)</label>
-                        <div style="padding: 0.5rem; background-color: #f7f7f7; border-radius: 5px;">
-                            <div style="margin-bottom: 0.5rem;">
-                                <input type="checkbox" id="eventTypeLunch" value="Lunchtime meeting" style="width: auto; margin-right: 5px;">
-                                <label for="eventTypeLunch" style="display: inline; font-weight: normal;">昼の定例会</label>
-                            </div>
-                            <div>
-                                <input type="checkbox" id="eventTypeEvening" value="Evening meeting" style="width: auto; margin-right: 5px;">
-                                <label for="eventTypeEvening" style="display: inline; font-weight: normal;">夜のコミュニティ合同交流会</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label for="eventDescriptionEditor">説明:</label>
-                        <div id="eventDescriptionEditorContainer" style="margin-bottom: 1rem;">
-                            <div id="eventDescriptionEditor" style="height: 250px;"></div>
-                        </div>
-                        <input type="hidden" id="eventDescription" name="eventDescription">
-                    </div>
-                    <div class="current-media-section full-width">
-                        <h4>現在のイベント画像</h4>
-                        <div id="currentImagesContainer" class="preview-container"></div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="eventNewImages">新しい画像を追加 (既存画像と合わせて最大10枚):</label>
-                        <input type="file" id="eventNewImages" name="eventNewImages" accept="image/*" multiple>
-                        <div class="file-count-info" id="newImageCountInfo"></div>
-                        <div class="preview-container" id="newImagePreviewContainer"></div>
-                    </div>
-
-                    <div class="current-media-section full-width">
-                        <h4>現在のイベント動画</h4>
-                        <div id="currentVideosContainer" class="preview-container"></div>
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="eventNewVideos">新しい動画を追加 (既存動画と合わせて最大10枚):</label>
-                        <input type="file" id="eventNewVideos" name="eventNewVideos" accept="video/*" multiple>
-                        <div class="file-count-info" id="newVideoCountInfo"></div>
-                        <div class="preview-container" id="newVideoPreviewContainer"></div>
-                    </div>
-
-                    <fieldset id="formSchemaBuilder" class="full-width">
-                        <legend>参加登録フォームの追加項目</legend>
-                        <div id="formFieldsContainer"></div>
-                        <button type="button" id="addFormField" class="btn btn-secondary" style="margin-top: 1rem;">フォーム項目を追加</button>
-                    </fieldset>
-
-                    <div id="loadingIndicator" class="loading-message" style="display: none;">処理中...</div>
-                    <div class="submit-button-container">
-                        <a href="dashboard.html" class="btn btn-secondary">キャンセル</a>
-                        <button type="submit" class="btn">イベントを更新</button>
-                    </div>
-                </form>
+<main class="main-content-wrapper">
+    <div class="main-container">
+        <div class="content-section">
+            <div class="page-header">
+                <h2>イベントを編集</h2>
+                <p class="subtitle" id="editingEventNameSubtitle">イベント情報を更新します。</p>
             </div>
+            <div id="passwordDisplayArea" class="message-area"></div>
+            <div id="messageArea" class="message-area"></div>
+            <div id="formLoadingMessage" class="loading-message">イベント情報を読み込み中...</div>
+
+            <form id="editEventForm" style="display:none;">
+                <input type="hidden" id="eventId">
+
+                <!-- ▼▼▼ ここから追加 ▼▼▼ -->
+                <div class="form-group full-width" id="userSelectionContainer" style="display: none; background-color: #eef7ff; padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1.5rem;">
+                    <label for="eventOwner" style="font-weight: bold; color: var(--primary-color);">イベントの主催者を変更 (管理者用):</label>
+                    <select id="eventOwner" name="eventOwner"></select>
+                    <small>このイベントの所有者を指定したユーザーに変更します。</small>
+                </div>
+                <!-- ▲▲▲ ここまで追加 ▲▲▲ -->
+
+                <div class="form-grid">
+                    <div class="form-group"><label for="eventName">イベント名 (必須):</label><input type="text" id="eventName" name="eventName" required></div>
+                    <div class="form-group"><label for="eventLocation">場所:</label><input type="text" id="eventLocation" name="eventLocation"></div>
+                    <div class="form-group">
+                        <label for="eventArea">エリア(必須):</label>
+                        <select id="eventArea" name="eventArea" required>
+                            <option value="">エリアを選択してください</option>
+                            <option value="tokyo">東京エリア</option>
+                            <option value="osaka">大阪エリア</option>
+                            <option value="online">オンライン</option>
+                            <option value="other">その他</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label for="eventDate">開始日時:</label><input type="datetime-local" id="eventDate" name="eventDate"></div>
+                    <div class="form-group"><label for="eventEndDate">終了予定日時:</label><input type="datetime-local" id="eventEndDate" name="eventEndDate"></div>
+                    <div class="form-group"><label for="participationFee">参加費用:</label><input type="text" id="participationFee" name="participationFee" placeholder="例: 1000円 または 無料"></div>
+                    <div class="form-group"><label for="maxParticipants">最大参加人数 (任意):</label><input type="number" id="maxParticipants" name="maxParticipants" min="1" placeholder="例: 50"></div>
+                </div>
+
+                <div class="form-group full-width special-event-toggle" id="jointEventToggleContainer">
+                    <input type="checkbox" id="isJointEvent" name="isJointEvent">
+                    <label for="isJointEvent">このイベントを上位表示させますか？</label>
+                    <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 0.3rem;">
+                        このオプションにチェックを入れると、イベントは常に上位表示されます。
+                    </p>
+                </div>
+                <div id="eventTypeContainer" class="form-group full-width" style="display: none;">
+                    <label style="margin-bottom: 0.5rem;">イベント種別 (会員が月一回無料で参加できます)</label>
+                    <div style="padding: 0.5rem; background-color: #f7f7f7; border-radius: 5px;">
+                        <div style="margin-bottom: 0.5rem;">
+                            <input type="checkbox" id="eventTypeLunch" value="Lunchtime meeting" style="width: auto; margin-right: 5px;">
+                            <label for="eventTypeLunch" style="display: inline; font-weight: normal;">昼の定例会</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="eventTypeEvening" value="Evening meeting" style="width: auto; margin-right: 5px;">
+                            <label for="eventTypeEvening" style="display: inline; font-weight: normal;">夜のコミュニティ合同交流会</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="eventDescriptionEditor">説明:</label>
+                    <div id="eventDescriptionEditorContainer" style="margin-bottom: 1rem;"><div id="eventDescriptionEditor" style="height: 250px;"></div></div>
+                    <input type="hidden" id="eventDescription" name="eventDescription">
+                </div>
+                <div class="current-media-section full-width">
+                    <h4>現在のイベント画像</h4>
+                    <div id="currentImagesContainer" class="preview-container"></div>
+                </div>
+                <div class="form-group full-width">
+                    <label for="eventNewImages">新しい画像を追加 (既存画像と合わせて最大10枚):</label>
+                    <input type="file" id="eventNewImages" name="eventNewImages" accept="image/*" multiple>
+                    <div class="file-count-info" id="newImageCountInfo"></div>
+                    <div class="preview-container" id="newImagePreviewContainer"></div>
+                </div>
+                <div class="current-media-section full-width">
+                    <h4>現在のイベント動画</h4>
+                    <div id="currentVideosContainer" class="preview-container"></div>
+                </div>
+                <div class="form-group full-width">
+                    <label for="eventNewVideos">新しい動画を追加 (既存動画と合わせて最大10枚):</label>
+                    <input type="file" id="eventNewVideos" name="eventNewVideos" accept="video/*" multiple>
+                    <div class="file-count-info" id="newVideoCountInfo"></div>
+                    <div class="preview-container" id="newVideoPreviewContainer"></div>
+                </div>
+
+                <fieldset id="formSchemaBuilder" class="full-width">
+                    <legend>参加登録フォームの追加項目</legend>
+                    <div id="formFieldsContainer"></div>
+                    <button type="button" id="addFormField" class="btn btn-secondary" style="margin-top: 1rem;">フォーム項目を追加</button>
+                </fieldset>
+
+                <div id="loadingIndicator" class="loading-message" style="display: none;">処理中...</div>
+                <div class="submit-button-container">
+                    <a href="dashboard.html" class="btn btn-secondary">キャンセル</a>
+                    <button type="submit" class="btn">イベントを更新</button>
+                </div>
+            </form>
         </div>
-    </main>
+    </div>
+</main>
 
-    <footer class="site-footer">
-        <p>© 2025 Business HUB『Deal Den』. All Rights Reserved.</p>
-    </footer>
+<footer class="site-footer">
+    <p>© 2025 Business HUB『Deal Den』. All Rights Reserved.</p>
+</footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabaseClient.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/script.js"></script>
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <script src="js/edit_event.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/script.js"></script>
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script src="js/edit_event.js"></script>
 </body>
 </html>

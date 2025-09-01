@@ -9,16 +9,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 特別な権限を持つユーザーのIDリスト (実際のユーザーIDに置き換えてください)
     const SPECIAL_USER_IDS = [
-        '5982b68e-6b89-48ce-a4ad-25dfb71cfa94', // 例: MT
+        '5982b68e-6b8e-48ce-a4ad-25dfb71cfa94', // 例: MT
         '093e65ae-9f9e-4220-b805-e9b90ae979a8', // 例: dealden
         // 必要に応じて他の特別なユーザーIDを追加
     ];
-
 
     const contentSection = document.querySelector('.content-section');
 
     // 会員種別をチェック
     const membershipType = await checkUserMembership(user);
+    const isAdminUser = membershipType === 'admin';
 
     if (membershipType == 'free') {
         // 無料会員またはエラーの場合、contentSectionの中身をすべてメッセージに入れ替える
@@ -62,6 +62,42 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const createEventForm = document.getElementById('createEventForm');
     const messageArea = document.getElementById('messageArea');
+    const userSelectionContainer = document.getElementById('userSelectionContainer');
+    const eventOwnerSelect = document.getElementById('eventOwner');
+
+    // 管理者の場合、ユーザー選択UIを表示してデータを読み込む
+    if (isAdminUser) {
+        userSelectionContainer.style.display = 'block';
+
+        try {
+            // ★★★ 修正箇所: 取得条件を変更 ★★★
+            const { data: users, error } = await supabase
+                .from('profiles')
+                .select('id, username')
+                .in('membership_type', ['premium', 'owner']) // premium と owner のみ取得
+                .order('username', { ascending: true });
+
+            if (error) throw error;
+            
+            // 自分自身（管理者）をリストの先頭に追加
+            const selfOption = document.createElement('option');
+            selfOption.value = user.id;
+            selfOption.textContent = `自分自身 (管理者)`;
+            eventOwnerSelect.appendChild(selfOption);
+
+            // 取得したユーザーをリストに追加
+            users.forEach(u => {
+                const option = document.createElement('option');
+                option.value = u.id;
+                option.textContent = u.username || `(名前未設定: ${u.id.substring(0, 6)})`;
+                eventOwnerSelect.appendChild(option);
+            });
+
+        } catch (error) {
+            messageArea.innerHTML = `<p class="error-message">ユーザーリストの読み込みに失敗しました: ${error.message}</p>`;
+        }
+    }
+
     const formFieldsContainer = document.getElementById('formFieldsContainer');
     const addFormFieldButton = document.getElementById('addFormField');
     const eventImagesInput = document.getElementById('eventImages');
@@ -383,6 +419,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const generatedPassword = Math.floor(1000 + Math.random() * 9000).toString();
 
         const eventData = {
+            user_id: isAdminUser ? eventOwnerSelect.value : authUser.id,
             name: eventName,
             description: eventDescriptionContent,
             event_date: document.getElementById('eventDate').value || null,

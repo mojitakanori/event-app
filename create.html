@@ -158,6 +158,12 @@
                 <div id="messageArea" class="message-area"></div>
 
                 <form id="createEventForm">
+                    <div class="form-group full-width" id="userSelectionContainer" style="display: none; background-color: #eef7ff; padding: 1rem; border-radius: var(--border-radius);">
+                        <label for="eventOwner" style="font-weight: bold; color: var(--primary-color);">代理作成するユーザーを選択 (管理者用):</label>
+                        <select id="eventOwner" name="eventOwner">
+                            </select>
+                        <small>ここに表示されているユーザーの代理としてイベントを作成します。</small>
+                    </div>
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="eventName">イベント名 (必須):</label>
@@ -176,8 +182,7 @@
                                 <option value="osaka">大阪エリア</option>
                                 <option value="online">オンライン</option>
                                 <option value="other">その他</option>
-                                <!-- 必要に応じて他のエリアを追加 -->
-                            </select>
+                                </select>
                         </div>
 
                         <div class="form-group">
