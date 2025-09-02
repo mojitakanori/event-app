@@ -64,23 +64,54 @@
         .admin-description li {
             margin-bottom: 0.5rem;
         }
-        /* ★★★ 追加: 更新ボタンのスタイル ★★★ */
         .update-btn {
-            padding: 0.5rem 1rem !important;
-            font-size: 0.85rem !important;
-            background-color: var(--accent-color) !important;
-            border-color: var(--accent-color) !important;
-            color: white !important;
+            padding: 0.5rem 1rem; /* !important は不要 */
+            font-size: 0.85rem;   /* !important は不要 */
+            background-color: var(--accent-color); /* 緑色系 */
+            border-color: var(--accent-color);
+            color: white;
             cursor: pointer;
+            border-radius: 4px; /* 角丸を追加 */
+            border-width: 1px; /* 枠線の太さ */
+            border-style: solid; /* 枠線のスタイル */
+            transition: background-color 0.2s, border-color 0.2s; /* ホバー時のアニメーション */
+            white-space: nowrap; /* ボタン内のテキストが改行されないように */
         }
         .update-btn:hover {
-            background-color: #218838 !important;
-            border-color: #1e7e34 !important;
+            background-color: #218838; /* ホバーで少し暗い緑色 */
+            border-color: #1e7e34;
         }
         .update-btn:disabled {
-            background-color: var(--secondary-color) !important;
-            border-color: var(--secondary-color) !important;
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
             cursor: not-allowed;
+        }
+
+        .edit-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            background-color: var(--primary-color); /* プライマリカラー（青色系） */
+            border-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            text-decoration: none; /* aタグの下線を消す */
+            display: inline-block; /* aタグをボタンのように見せる */
+            border-radius: 4px; /* 角丸を追加 */
+            border-width: 1px;
+            border-style: solid;
+            transition: background-color 0.2s, border-color 0.2s;
+            white-space: nowrap;
+        }
+        .edit-btn:hover {
+            background-color: #0056b3; /* ホバーで少し暗い青色 */
+            border-color: #0056b3;
+        }
+
+        .user-table td:last-child { /* 操作列のtd */
+            display: flex; /* Flexboxを使って子要素を横並びに */
+            gap: 5px;      /* ボタン間の隙間 */
+            align-items: center; /* 垂直方向中央揃え */
+            justify-content: flex-start; /* 左寄せ */
         }
     </style>
 </head>

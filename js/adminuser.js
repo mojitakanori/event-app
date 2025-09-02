@@ -51,7 +51,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td><input type="number" class="lunch-credit-input" min="0"></td>
                 <td><input type="number" class="evening-credit-input" min="0"></td>
                 <td><input type="number" class="score-input" min="0"></td>
-                <td><button class="update-btn">更新</button></td>
+                <td>
+                    <button class="update-btn">更新</button>
+                    <a href="profile.html?id=${u.id}" target="_blank" class="edit-btn">編集</a>
+                </td>
             `;
 
             const membershipSelect = row.querySelector('.membership-select');

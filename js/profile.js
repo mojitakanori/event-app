@@ -1,19 +1,46 @@
 // js/profile.js
+
 document.addEventListener('DOMContentLoaded', async () => {
-    const user = await redirectToLoginIfNotAuthenticated();
-    if (!user) return;
+    // --- 1. ログインユーザーと編集対象ユーザーのIDを特定 ---
+    const loggedInUser = await redirectToLoginIfNotAuthenticated();
+    if (!loggedInUser) return;
 
-    const profileForm = document.getElementById('profileForm');
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUserIdFromUrl = urlParams.get('id');
+    const targetUserId = targetUserIdFromUrl || loggedInUser.id; // URLにIDがなければ自分自身
+
     const messageArea = document.getElementById('messageArea');
+    const profileForm = document.getElementById('profileForm');
 
-    // 基本プロフィール要素
+    // --- 2. 権限チェック ---
+    const { data: loggedInProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('membership_type')
+        .eq('id', loggedInUser.id)
+        .single();
+
+    const isAdmin = loggedInProfile && loggedInProfile.membership_type === 'admin';
+
+    // 管理者でなく、かつ他人のプロフィールを編集しようとした場合はエラー
+    if (!isAdmin && targetUserId !== loggedInUser.id) {
+        messageArea.innerHTML = `<p class="error-message">他人のプロフィールを編集する権限がありません。</p>`;
+        profileForm.style.display = 'none';
+        return;
+    }
+    
+    // --- 3. ページタイトルの動的変更 ---
+    if (isAdmin && targetUserId !== loggedInUser.id) {
+        document.title = '管理者用 プロフィール編集 - Deal Den';
+        const h2 = profileForm.querySelector('h2');
+        if(h2) h2.textContent = 'ユーザープロフィール編集 (管理者用)';
+    }
+
+    // --- 4. HTML要素の取得 ---
     const usernameInput = document.getElementById('username');
     const bioTextarea = document.getElementById('bio');
     const businessDescriptionTextarea = document.getElementById('business_description');
     const avatarInput = document.getElementById('avatar');
     const avatarPreview = document.getElementById('avatarPreview');
-
-    // コミュニティプロフィール要素
     const communityProfileSection = document.getElementById('communityProfileSection');
     const communityNameInput = document.getElementById('community_name');
     const communityBannerInput = document.getElementById('communityBanner');
@@ -23,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let avatarUrl = null;
     let communityBannerUrl = null;
 
-    // Quillエディタの初期化
+    // --- 5. Quillエディタの初期化 ---
     const initQuillEditors = () => {
         const toolbarOptions = [
             [{ 'header': [1, 2, 3, false] }],
@@ -34,27 +61,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             ['link'],
             ['clean']
         ];
-
         descriptionQuill = new Quill('#communityDescriptionEditor', {
             theme: 'snow',
             placeholder: 'コミュニティの活動内容や理念などを記述します。',
             modules: { toolbar: toolbarOptions }
         });
-
         projectsQuill = new Quill('#communityProjectsEditor', {
             theme: 'snow',
             placeholder: '現在進行中のプロジェクトや過去の実績などを記述します。',
             modules: { toolbar: toolbarOptions }
         });
     };
-    
-    // プロフィール情報を読み込み
+
+    // --- 6. プロフィール読み込み関数 ---
     async function loadProfile() {
         try {
             const { data, error } = await supabase
                 .from('profiles')
                 .select('membership_type, username, community_name, bio, business_description, avatar_url, community_banner_url, community_description, community_projects')
-                .eq('id', user.id)
+                .eq('id', targetUserId)
                 .single();
 
             if (error && error.code !== 'PGRST116') throw error;
@@ -68,7 +93,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(avatarUrl);
                     avatarPreview.src = publicUrlData.publicUrl;
                 }
-
                 if (data.membership_type === 'owner' || data.membership_type === 'admin') {
                     communityProfileSection.style.display = 'block';
                     initQuillEditors();
@@ -88,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // ファイル選択時のプレビュー処理
+    // --- 7. ファイル選択時のプレビュー処理 ---
     const setupPreview = (input, preview) => {
         input.addEventListener('change', (event) => {
             const file = event.target.files[0];
@@ -100,62 +124,66 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupPreview(avatarInput, avatarPreview);
     setupPreview(communityBannerInput, communityBannerPreview);
 
-    /**
-     * 画像ファイルをWebP形式に変換・圧縮する関数
-     */
+    // --- 8. 画像圧縮・アップロード関数 ---
     async function convertToWebP(imageFile) {
-        const options = {
-            maxSizeMB: 1,
-            maxWidthOrHeight: 1920,
-            useWebWorker: true,
-            fileType: 'image/webp'
-        };
+        const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: 'image/webp' };
         try {
-            console.log(`変換前: ${imageFile.name}, サイズ: ${(imageFile.size / 1024 / 1024).toFixed(2)} MB`);
-            const compressedFile = await imageCompression(imageFile, options);
-            console.log(`変換後: ${compressedFile.name}, サイズ: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`);
-            return compressedFile;
+            return await imageCompression(imageFile, options);
         } catch (error) {
             console.error('画像のWebP変換に失敗しました:', error);
             return imageFile;
         }
     }
-
-    // 画像アップロードの共通関数
-    async function uploadImage(file, currentUrl, userId) {
+    
+    async function uploadImage(file, currentUrl, userIdForPath) {
         if (!file) return currentUrl;
-        
+
         const fileToUpload = await convertToWebP(file);
 
+        // 既存ファイル削除（キーはそのまま使う）
         if (currentUrl) {
             await supabase.storage.from('avatars').remove([currentUrl]);
         }
-        
-        // ★★★ 修正点1: ファイル名を.webpに変更 ★★★
-        const originalName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-        const filePath = `${userId}/${Date.now()}_${originalName}.webp`;
-        // ★★★★★★★★★★★★★★★★★★★★★★★★★★
 
-        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, fileToUpload);
+        const originalStem =
+            file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : file.name;
+
+        const safeStem = makeSafeKey(originalStem);
+        const filePath = `${userIdForPath}/${Date.now()}_${safeStem}.webp`;  // 先頭に「/」は付けない
+
+        const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(filePath, fileToUpload, { contentType: 'image/webp', upsert: false });
+
         if (uploadError) throw new Error(`画像アップロード失敗: ${uploadError.message}`);
         return filePath;
     }
 
-    // フォーム送信処理
+    function makeSafeKey(stem) {
+        // 日本語などを落として ASCII 安全文字に
+        return (stem || 'image')
+            .normalize('NFKC')
+            .replace(/[^\w.-]+/g, '-')   // 英数・_・.・- 以外を置換
+            .replace(/^-+|-+$/g, '')     // 先頭末尾の - を除去
+            .slice(0, 120) || 'image';
+    }
+
+
+
+    // --- 9. フォーム送信処理 ---
     profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitButton = profileForm.querySelector('button[type="submit"]'); // ボタン要素を取得
+        const submitButton = profileForm.querySelector('button[type="submit"]');
 
-        // ▼▼▼ 処理開始時にローディング状態にする ▼▼▼
         submitButton.classList.add('btn--loading');
         submitButton.disabled = true;
-        messageArea.innerHTML = ''; // メッセージを一旦クリア
+        messageArea.innerHTML = '';
 
         try {
-            const newAvatarPath = await uploadImage(avatarInput.files[0], avatarUrl, user.id);
+            const newAvatarPath = await uploadImage(avatarInput.files[0], avatarUrl, targetUserId);
             
             const updates = {
-                id: user.id,
+                id: targetUserId,
                 updated_at: new Date(),
                 username: usernameInput.value.trim(),
                 bio: bioTextarea.value.trim(),
@@ -164,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
 
             if (communityProfileSection.style.display === 'block') {
-                const newBannerPath = await uploadImage(communityBannerInput.files[0], communityBannerUrl, user.id);
+                const newBannerPath = await uploadImage(communityBannerInput.files[0], communityBannerUrl, targetUserId);
                 updates.community_name = communityNameInput.value.trim();
                 updates.community_banner_url = newBannerPath;
                 updates.community_description = descriptionQuill.root.innerHTML;
@@ -172,25 +200,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                 communityBannerUrl = newBannerPath;
             }
 
-            const { error } = await supabase.from('profiles').upsert(updates);
-            if (error) throw error;
+            // ▼▼▼ ここが重要！ 更新が成功したかを確認する修正 ▼▼▼
+            const { data, error } = await supabase
+                .from('profiles')
+                .update(updates)
+                .eq('id', targetUserId)
+                .select();
+
+            if (error) {
+                throw error; // 通常のエラー
+            }
+            if (!data || data.length === 0) {
+                // データが返ってこない場合は「サイレントフェイル」
+                throw new Error("データベースの更新が拒否されました。RLSポリシーの設定を確認してください。");
+            }
+            // ▲▲▲ 修正ここまで ▲▲▲
             
             avatarUrl = newAvatarPath;
+            messageArea.innerHTML = '<p class="success-message">プロフィールが正常に更新されました。</p>';
             
-            messageArea.innerHTML = '<p class="success-message">プロフィールが正常に更新されました。詳細ページへ移動します...</p>';
-            setTimeout(() => {
-                window.location.href = `user_profile.html?id=${user.id}`;
-            }, 1500);
+            if (isAdmin && targetUserId !== loggedInUser.id) {
+                 setTimeout(() => { window.close(); }, 2000);
+            } else {
+                setTimeout(() => {
+                    window.location.href = `user_profile.html?id=${targetUserId}`;
+                }, 1500);
+            }
 
         } catch (error) {
             console.error('Error updating profile:', error);
             messageArea.innerHTML = `<p class="error-message">更新に失敗しました: ${error.message}</p>`;
         } finally {
-            // ▼▼▼ 処理終了時にローディング状態を解除 ▼▼▼
             submitButton.classList.remove('btn--loading');
             submitButton.disabled = false;
         }
     });
 
+    // --- 10. 初期読み込みの実行 ---
     loadProfile();
 });
