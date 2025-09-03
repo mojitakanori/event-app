@@ -76,6 +76,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- 6. プロフィール読み込み関数 ---
     async function loadProfile() {
         try {
+            // ▼▼▼ ここから修正 ▼▼▼
+            const emailInput = document.getElementById('email');
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user && emailInput) {
+                emailInput.value = user.email || '';
+            }
+            // ▲▲▲ 修正ここまで ▲▲▲
+
             const { data, error } = await supabase
                 .from('profiles')
                 .select('membership_type, username, community_name, bio, business_description, avatar_url, community_banner_url, community_description, community_projects')
@@ -140,7 +148,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const fileToUpload = await convertToWebP(file);
 
-        // 既存ファイル削除（キーはそのまま使う）
         if (currentUrl) {
             await supabase.storage.from('avatars').remove([currentUrl]);
         }
@@ -149,7 +156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : file.name;
 
         const safeStem = makeSafeKey(originalStem);
-        const filePath = `${userIdForPath}/${Date.now()}_${safeStem}.webp`;  // 先頭に「/」は付けない
+        const filePath = `${userIdForPath}/${Date.now()}_${safeStem}.webp`;
 
         const { error: uploadError } = await supabase.storage
             .from('avatars')
@@ -160,15 +167,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function makeSafeKey(stem) {
-        // 日本語などを落として ASCII 安全文字に
         return (stem || 'image')
             .normalize('NFKC')
-            .replace(/[^\w.-]+/g, '-')   // 英数・_・.・- 以外を置換
-            .replace(/^-+|-+$/g, '')     // 先頭末尾の - を除去
+            .replace(/[^\w.-]+/g, '-')
+            .replace(/^-+|-+$/g, '')
             .slice(0, 120) || 'image';
     }
-
-
 
     // --- 9. フォーム送信処理 ---
     profileForm.addEventListener('submit', async (e) => {
@@ -180,6 +184,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         messageArea.innerHTML = '';
 
         try {
+            // ▼▼▼ ここから修正 ▼▼▼
+            const newEmail = document.getElementById('email').value.trim();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            let emailChanged = false;
+            if (newEmail && newEmail !== user.email) {
+                const { data, error: updateUserError } = await supabase.auth.updateUser({ email: newEmail });
+                if (updateUserError) {
+                    throw new Error(`メールアドレスの更新に失敗しました: ${updateUserError.message}`);
+                }
+                emailChanged = true;
+            }
+            // ▲▲▲ 修正ここまで ▲▲▲
+
             const newAvatarPath = await uploadImage(avatarInput.files[0], avatarUrl, targetUserId);
             
             const updates = {
@@ -200,7 +218,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 communityBannerUrl = newBannerPath;
             }
 
-            // ▼▼▼ ここが重要！ 更新が成功したかを確認する修正 ▼▼▼
             const { data, error } = await supabase
                 .from('profiles')
                 .update(updates)
@@ -208,16 +225,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .select();
 
             if (error) {
-                throw error; // 通常のエラー
+                throw error;
             }
             if (!data || data.length === 0) {
-                // データが返ってこない場合は「サイレントフェイル」
                 throw new Error("データベースの更新が拒否されました。RLSポリシーの設定を確認してください。");
             }
-            // ▲▲▲ 修正ここまで ▲▲▲
             
             avatarUrl = newAvatarPath;
-            messageArea.innerHTML = '<p class="success-message">プロフィールが正常に更新されました。</p>';
+
+            // ▼▼▼ 成功メッセージを修正 ▼▼▼
+            let successMessage = '<p class="success-message">プロフィールが正常に更新されました。</p>';
+            if (emailChanged) {
+                successMessage += '<p class="warning-message">新しいメールアドレスに確認メールを送信しました。メール内のリンクをクリックして変更を完了してください。</p>';
+            }
+            messageArea.innerHTML = successMessage;
+            // ▲▲▲ 修正ここまで ▲▲▲
             
             if (isAdmin && targetUserId !== loggedInUser.id) {
                  setTimeout(() => { window.close(); }, 2000);
